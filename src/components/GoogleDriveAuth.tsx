@@ -1,32 +1,89 @@
-import { AlertCircle, CheckCircle, Cloud, CloudOff, Download, RefreshCw, Upload, X } from 'lucide-react';
-import { useState } from 'react';
+import { useSyncContext } from '@/contexts/SyncContext';
+import { AlertCircle, CheckCircle, Cloud, CloudOff, Download, Info, RefreshCw, Upload, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
-import { useGoogleDriveSync } from '../hooks/useGoogleDriveSync';
-import { useTripData } from '../hooks/useTripData';
 import { ConfirmationModal } from './ConfirmationModal';
 import { Button } from './ui/button';
+import { Switch } from './ui/switch';
+
+// Info Modal Component
+const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">How Sync Works</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-3 text-sm text-gray-700">
+          <div>
+            <strong className="text-gray-900">Sync Now:</strong> Downloads remote data, merges with local changes, and
+            uploads the result. Your work is preserved.
+          </div>
+          <div>
+            <strong className="text-gray-900">Force Upload:</strong> Uploads your current data regardless of remote
+            changes.
+          </div>
+          <div>
+            <strong className="text-gray-900">Force Download:</strong> Downloads remote data and replaces your local
+            data.
+          </div>
+          <div>
+            <strong className="text-gray-900">Force Re-upload:</strong> Deletes the remote file and creates a fresh
+            copy.
+          </div>
+          <div>
+            <strong className="text-gray-900">Auto-sync:</strong> Runs every 5 minutes when enabled. Click the settings
+            icon to toggle.
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <Button onClick={onClose} size="sm">
+            Got it
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const GoogleDriveAuth = () => {
   const { isAuthenticated, isLoading, error, login, logout, clearError } = useGoogleAuth();
-  const { tripData, setFullTripData } = useTripData();
 
   const {
+    tripData,
+    hasLocalChanges,
     isSyncing,
     lastSyncTime,
     error: syncError,
-    hasLocalChanges,
-    hasRemoteChanges,
+    autoSyncEnabled,
+    countdownSeconds,
     syncNow,
-    clearError: clearSyncError,
     forceUpload,
     forceDownload,
-  } = useGoogleDriveSync(isAuthenticated, tripData, setFullTripData);
+    forceReupload,
+    clearError: clearSyncError,
+    toggleAutoSync,
+    setAuthenticated,
+  } = useSyncContext();
+
+  // Sync authentication state with context
+  useEffect(() => {
+    setAuthenticated(isAuthenticated);
+  }, [isAuthenticated, setAuthenticated]);
 
   // Modal states
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showReuploadModal, setShowReuploadModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const handleLogin = () => {
     clearError();
@@ -53,27 +110,50 @@ export const GoogleDriveAuth = () => {
   };
 
   const handleForceReupload = async () => {
-    if (!isAuthenticated || !tripData) return;
+    clearSyncError();
+    await forceReupload();
+  };
 
-    try {
-      clearSyncError();
-      const { getGoogleDriveService } = await import('../hooks/useGoogleAuth');
-      const service = getGoogleDriveService();
+  // Helper function to get sync status message
+  const getSyncStatusMessage = () => {
+    if (isSyncing) {
+      return 'Syncing...';
+    }
 
-      // Delete existing file if it exists
-      const existingFile = await service.findTripPlannerFile();
-      if (existingFile) {
-        await service.deleteFile(existingFile.id);
+    if (syncError) {
+      return 'Sync failed';
+    }
+
+    if (hasLocalChanges) {
+      return 'Local changes pending';
+    }
+
+    if (lastSyncTime) {
+      const timeDiff = Date.now() - lastSyncTime.getTime();
+      const minutes = Math.floor(timeDiff / 60000);
+      if (minutes < 1) {
+        return 'Just synced';
+      } else if (minutes < 60) {
+        return `Synced ${minutes}m ago`;
+      } else {
+        return `Synced ${Math.floor(minutes / 60)}h ago`;
       }
+    }
 
-      // Create fresh file with current data
-      await service.uploadFile('trip-planner-data.json', JSON.stringify(tripData, null, 2));
+    return 'Never synced';
+  };
 
-      // Update sync state
-      const now = new Date();
-      localStorage.setItem('lastSyncTime', now.toISOString());
-    } catch (error) {
-      // Error is already handled by the sync hooks
+  // Helper function to format countdown
+  const formatCountdown = (seconds: number) => {
+    if (seconds <= 0) return 'Syncing soon...';
+
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    if (mins > 0) {
+      return `Next sync in ${mins}m ${secs}s`;
+    } else {
+      return `Next sync in ${secs}s`;
     }
   };
 
@@ -123,22 +203,49 @@ export const GoogleDriveAuth = () => {
             <Cloud className="h-5 w-5 text-green-600" />
             <span className="text-sm text-green-600 font-medium">Connected to Google Drive</span>
           </div>
-          <Button onClick={handleLogout} variant="outline" size="sm">
-            Disconnect
-          </Button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="p-1 rounded text-gray-500 hover:text-gray-700"
+              title="How sync works"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+            <Button onClick={handleLogout} variant="outline" size="sm">
+              Disconnect
+            </Button>
+          </div>
         </div>
 
         {/* Sync Status */}
         <div className="bg-gray-50 rounded-lg p-3 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">Sync Status</span>
-            {isSyncing && <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />}
+            <div className="flex items-center space-x-2">
+              {isSyncing && <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />}
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-600">Auto-sync</span>
+                <Switch checked={autoSyncEnabled} onCheckedChange={() => toggleAutoSync()} disabled={isSyncing} />
+              </div>
+            </div>
           </div>
 
-          {lastSyncTime && (
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            {syncError ? (
+              <AlertCircle className="h-4 w-4 text-red-600" />
+            ) : lastSyncTime ? (
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-xs text-gray-600">Last synced: {lastSyncTime.toLocaleString()}</span>
+            ) : (
+              <AlertCircle className="h-4 w-4 text-gray-400" />
+            )}
+            <span className="text-xs text-gray-600">{getSyncStatusMessage()}</span>
+          </div>
+
+          {/* Auto-sync status */}
+          {autoSyncEnabled && countdownSeconds > 0 && (
+            <div className="flex items-center space-x-2">
+              <RefreshCw className="h-4 w-4 text-blue-600" />
+              <span className="text-xs text-blue-600">{formatCountdown(countdownSeconds)}</span>
             </div>
           )}
 
@@ -146,13 +253,6 @@ export const GoogleDriveAuth = () => {
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-4 w-4 text-orange-600" />
               <span className="text-xs text-orange-600">Local changes not synced</span>
-            </div>
-          )}
-
-          {hasRemoteChanges && (
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-              <span className="text-xs text-blue-600">Remote changes available</span>
             </div>
           )}
         </div>
@@ -171,12 +271,12 @@ export const GoogleDriveAuth = () => {
             variant="outline"
           >
             <Upload className="h-4 w-4 mr-1" />
-            Upload
+            Force Upload
           </Button>
 
           <Button onClick={() => setShowDownloadModal(true)} disabled={isSyncing} size="sm" variant="outline">
             <Download className="h-4 w-4 mr-1" />
-            Download
+            Force Download
           </Button>
         </div>
 
@@ -214,13 +314,14 @@ export const GoogleDriveAuth = () => {
           </div>
         )}
       </div>
+
       {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={showSyncModal}
         onClose={() => setShowSyncModal(false)}
         onConfirm={handleSync}
         title="Sync Now"
-        message="This will synchronize your trip data with Google Drive. Local and remote changes will be merged intelligently."
+        message="This will download data from Google Drive, merge it with your local changes, and upload the result. Your work will be preserved."
         confirmText="Sync Now"
       />
 
@@ -228,18 +329,18 @@ export const GoogleDriveAuth = () => {
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         onConfirm={handleForceUpload}
-        title="Upload to Google Drive"
-        message="This will upload your current trip data to Google Drive, overwriting any existing file."
-        confirmText="Upload"
+        title="Force Upload"
+        message="This will upload your current trip data to Google Drive, overwriting any existing remote data."
+        confirmText="Force Upload"
       />
 
       <ConfirmationModal
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onConfirm={handleForceDownload}
-        title="Download from Google Drive"
-        message="This will download trip data from Google Drive, overwriting your current local data."
-        confirmText="Download"
+        title="Force Download"
+        message="This will download trip data from Google Drive and replace your current local data. Any unsaved local changes will be lost."
+        confirmText="Force Download"
         isDestructive={true}
       />
 
@@ -248,10 +349,13 @@ export const GoogleDriveAuth = () => {
         onClose={() => setShowReuploadModal(false)}
         onConfirm={handleForceReupload}
         title="Force Re-upload"
-        message="This will delete the existing file in Google Drive and create a fresh copy with your current data. Use this if your file is corrupted or empty."
-        confirmText="Re-upload"
+        message="This will delete the existing file in Google Drive and create a fresh copy with your current data. Use this if the remote file is corrupted."
+        confirmText="Force Re-upload"
         isDestructive={true}
       />
+
+      {/* Info Modal */}
+      <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
     </>
   );
 };

@@ -5,8 +5,8 @@ import { cn, decimalHoursToHoursMinutes } from '@/lib/utils';
 import { Car, Edit2, MapPin, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { Fragment } from 'react/jsx-runtime';
+import { useSyncContext } from '../contexts/SyncContext';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
-import { useGoogleDriveSync } from '../hooks/useGoogleDriveSync';
 import { useModalState } from '../hooks/useModalState';
 import { TripInfo, useTripData } from '../hooks/useTripData';
 import AccommodationCard from './AccommodationCard';
@@ -23,34 +23,42 @@ import PlacesCard from './PlacesCard';
 import { TripHeader } from './TripHeader';
 
 const TripPlanner = () => {
+  // Get all data and actions from the centralized sync context
   const {
     tripData,
+    hasLocalChanges,
+    setAuthenticated,
+    // Basic operations from context
     updateTripInfo,
     addDay,
-    addDayAndLinkAccommodation,
     updateDay,
-    updateDayNotes,
     deleteDay,
     addPlace,
     updatePlace,
     deletePlace,
+    // Additional operations that may still need the hook
+    updateDayNotes,
+  } = useSyncContext();
+
+  // Only use useTripData for complex operations that aren't in context yet
+  const {
+    addDayAndLinkAccommodation,
     updateAccommodation,
     updateLinkedAccommodation,
     findLinkedAccommodationDays,
     addPlaceImage,
-
     exportData,
     importData,
     resetData,
-
     checkUnusedNights,
     adjustPreviousAccommodationNights,
-    setFullTripData,
   } = useTripData();
 
-  // Google Drive sync functionality
+  // Sync the auth state with the context
   const { isAuthenticated } = useGoogleAuth();
-  const { hasLocalChanges } = useGoogleDriveSync(isAuthenticated, tripData, setFullTripData);
+  useEffect(() => {
+    setAuthenticated(isAuthenticated);
+  }, [isAuthenticated, setAuthenticated]);
 
   // Prevent page refresh when there are unsaved changes
   useEffect(() => {
