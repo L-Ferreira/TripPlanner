@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSyncContext } from '../contexts/SyncContext';
 import defaultTripData from '../data/tripData.json';
 import { AmenitiesData } from '../lib/amenities';
+import { cleanupAllDuplicates } from '../utils/cleanupDuplicates';
 
 export interface TripInfo {
   name: string;
@@ -65,8 +66,10 @@ export const useTripData = () => {
 
   // Helper function to update both local state and context
   const updateTripData = (newData: TripData) => {
-    setTripData(newData);
-    updateContextTripData(newData);
+    // Clean up any duplicate places or days before updating
+    const cleanedData = cleanupAllDuplicates(newData);
+    setTripData(cleanedData);
+    updateContextTripData(cleanedData);
   };
 
   // Trip Info CRUD

@@ -346,16 +346,26 @@ const detectPlaceConflictsIntelligent = (localDay: TripDay, remoteDay: TripDay):
     }
   });
 
-  // Check for place field changes (same place ID but different content)
+  // Check for place additions (remote has places that local doesn't)
   remotePlaceMap.forEach((remotePlace, placeId) => {
     const localPlace = localPlaceMap.get(placeId);
     if (localPlace) {
       // Place exists in both, check for field conflicts
       const placeFieldConflicts = detectPlaceFieldConflicts(localDay, localPlace, remotePlace);
       conflicts.push(...placeFieldConflicts);
+    } else {
+      // Place exists in remote but not in local - could be a local deletion
+      // This should be treated as a conflict to let the user decide
+      conflicts.push({
+        id: `place-deleted-local-${localDay.id}-${placeId}`,
+        type: 'placeDeleted',
+        path: `Day ${localDay.dayNumber} - ${remotePlace.name}`,
+        field: 'existence',
+        localValue: null,
+        remoteValue: remotePlace,
+        context: { dayId: localDay.id, dayNumber: localDay.dayNumber, placeId },
+      });
     }
-    // Note: We don't add conflicts for place additions (remote has new places)
-    // This is intentional - adding places is not a conflict
   });
 
   return conflicts;

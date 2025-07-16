@@ -300,10 +300,10 @@ const AddDayModal = ({
                 <Button
                   variant="outline"
                   onClick={() => handleAccommodationChoice(true)}
-                  className="p-6 h-auto flex flex-col items-center justify-center text-center"
+                  className="p-6 h-auto flex flex-col items-center justify-start text-center min-h-[120px] w-full"
                 >
                   <div className="text-lg font-semibold mb-2">Stay at Same Place</div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-600 break-words whitespace-normal leading-relaxed max-w-full">
                     Continue staying at {previousDay?.accommodation?.name || 'previous accommodation'}
                   </div>
                 </Button>
@@ -311,10 +311,12 @@ const AddDayModal = ({
                 <Button
                   variant="outline"
                   onClick={() => handleAccommodationChoice(false)}
-                  className="p-6 h-auto flex flex-col items-center justify-center text-center"
+                  className="p-6 h-auto flex flex-col items-center justify-start text-center min-h-[120px] w-full"
                 >
                   <div className="text-lg font-semibold mb-2">Book New Accommodation</div>
-                  <div className="text-sm text-gray-600">Find a new place to stay for Day {newDayNumber}</div>
+                  <div className="text-sm text-gray-600 break-words whitespace-normal leading-relaxed max-w-full">
+                    Find a new place to stay for Day {newDayNumber}
+                  </div>
                 </Button>
               </div>
             </div>

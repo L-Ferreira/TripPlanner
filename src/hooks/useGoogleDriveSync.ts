@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cleanupAllDuplicates } from '../utils/cleanupDuplicates';
 import { ConflictSummary, detectConflicts } from '../utils/conflictDetection';
 import { getGoogleDriveService } from './useGoogleAuth';
 import { TripData } from './useTripData';
@@ -233,13 +234,6 @@ export const mergeData = (localData: TripData, remoteData: TripData): TripData =
     days: mergedDays,
   };
 
-  console.log('✅ Deep merge completed:', {
-    tripName: mergedData.tripInfo.name,
-    dayCount: mergedData.days.length,
-    firstDayRegion: mergedData.days[0]?.region,
-    totalPlaces: mergedData.days.reduce((sum, day) => sum + day.places.length, 0),
-  });
-
   return mergedData;
 };
 
@@ -278,23 +272,37 @@ const mergeNonConflictingData = (localData: TripData, remoteData: TripData): Tri
         mergedData.days[dayIndex].accommodation.images = localImages;
       }
 
-      // Merge places (add any new places from remote)
-      const localPlaceIds = new Set(localDay.places.map((p) => p.id));
-      const newRemotePlaces = remoteDay.places.filter((p) => !localPlaceIds.has(p.id));
-      mergedData.days[dayIndex].places = [...localDay.places, ...newRemotePlaces];
+      // Merge places (start with remote as base, add new local items)
+      const remotePlacesById = new Map(remoteDay.places.map((p) => [p.id, p]));
+      const localPlacesById = new Map(localDay.places.map((p) => [p.id, p]));
 
-      // For existing places, simple merge for images
+      // Start with remote places (latest synced state)
+      const mergedPlaces = [...remoteDay.places];
+
+      // Add any new local places that aren't in remote
+      localDay.places.forEach((localPlace) => {
+        if (!remotePlacesById.has(localPlace.id)) {
+          mergedPlaces.push(localPlace);
+        }
+      });
+
+      mergedData.days[dayIndex].places = mergedPlaces;
+
+      // For places that exist in both local and remote, merge images
       mergedData.days[dayIndex].places.forEach((place) => {
-        const remotePlace = remoteDay.places.find((p) => p.id === place.id);
-        if (remotePlace) {
-          const localPlaceImages = place.images || [];
+        const localPlace = localPlacesById.get(place.id);
+        const remotePlace = remotePlacesById.get(place.id);
+
+        if (localPlace && remotePlace) {
+          // Both exist, merge images
+          const localPlaceImages = localPlace.images || [];
           const remotePlaceImages = remotePlace.images || [];
 
           if (JSON.stringify(localPlaceImages) === JSON.stringify(remotePlaceImages)) {
-            // Images are identical, keep as is
-            place.images = localPlaceImages;
+            // Images are identical, keep remote (since we started with remote)
+            place.images = remotePlaceImages;
           } else {
-            // Images differ but no conflict - preserve local
+            // Images differ but no conflict - preserve local changes
             place.images = localPlaceImages;
           }
         }
@@ -506,13 +514,13 @@ export const useGoogleDriveSync = (
       // Data is different, check for conflicts
 
       if (!localTripData) {
-        // No local data, just use remote data
-
-        setLocalTripData(remoteData);
+        // No local data, just use remote data (after cleanup)
+        const cleanedRemoteData = cleanupAllDuplicates(remoteData);
+        setLocalTripData(cleanedRemoteData);
 
         const now = new Date();
         localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
-        localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(remoteData));
+        localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(cleanedRemoteData));
 
         setState((prev) => ({
           ...prev,
@@ -538,22 +546,14 @@ export const useGoogleDriveSync = (
       }
 
       // No conflicts, data is different but compatible - merge remote additions
-
       const mergedData = mergeNonConflictingData(localTripData, remoteData);
 
-      console.log('📊 Sync results:', {
-        localTripDataExists: !!localTripData,
-        localDayCount: localTripData?.days?.length || 0,
-        remoteDayCount: remoteData.days.length,
-        mergedDayCount: mergedData.days.length,
-        localTrip: localTripData?.tripInfo?.name || 'Unknown',
-        remoteTrip: remoteData.tripInfo.name,
-        mergedTrip: mergedData.tripInfo.name,
-      });
+      // Clean up any duplicates in the merged data
+      const cleanedMergedData = cleanupAllDuplicates(mergedData);
 
       // Update local data if it changed
-      if (JSON.stringify(localTripData) !== JSON.stringify(mergedData)) {
-        setLocalTripData(mergedData);
+      if (JSON.stringify(localTripData) !== JSON.stringify(cleanedMergedData)) {
+        setLocalTripData(cleanedMergedData);
 
         // Force a brief delay to ensure state updates are processed
         setTimeout(() => {
@@ -562,13 +562,12 @@ export const useGoogleDriveSync = (
       }
 
       // Upload merged data
-
-      await service.uploadFile(FILE_NAME, JSON.stringify(mergedData, null, 2), remoteFile.id);
+      await service.uploadFile(FILE_NAME, JSON.stringify(cleanedMergedData, null, 2), remoteFile.id);
 
       // Update sync state
       const now = new Date();
       localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
-      localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(mergedData));
+      localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(cleanedMergedData));
 
       setState((prev) => {
         return {
@@ -674,12 +673,13 @@ export const useGoogleDriveSync = (
         );
       }
 
-      // Update local data
-      setLocalTripData(remoteData);
+      // Update local data (after cleanup)
+      const cleanedRemoteData = cleanupAllDuplicates(remoteData);
+      setLocalTripData(cleanedRemoteData);
 
       const now = new Date();
       localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
-      localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(remoteData));
+      localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(cleanedRemoteData));
 
       setState((prev) => ({
         ...prev,

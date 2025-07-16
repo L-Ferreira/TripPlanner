@@ -216,39 +216,79 @@ export const ConflictResolutionModal = ({
         break;
       }
 
-      case 'dayAdded':
-        // Remove the locally added day if choosing remote (which means don't add it)
+      case 'dayAdded': {
+        // Handle day addition/removal
+        const existingDayIndex = data.days.findIndex((d) => d.id === conflict.context.dayId);
+
         if (value === null) {
+          // Remove the locally added day if choosing remote (which means don't add it)
+          if (existingDayIndex !== -1) {
+            data.days.splice(existingDayIndex, 1);
+          }
+        } else {
+          // Keep the locally added day - add it only if it doesn't already exist
+          if (existingDayIndex === -1) {
+            data.days.push(value);
+          }
+        }
+        break;
+      }
+
+      case 'dayDeleted':
+        // Handle day deletion/restoration
+        if (value !== null) {
+          // Restore the day - add it only if it doesn't already exist
+          const existingDayIndex = data.days.findIndex((d) => d.id === conflict.context.dayId);
+          if (existingDayIndex === -1) {
+            data.days.push(value);
+          }
+        } else {
+          // Keep the deletion - remove the day if it exists
           data.days = data.days.filter((d) => d.id !== conflict.context.dayId);
         }
         break;
 
-      case 'dayDeleted':
-        // Add the remotely existing day if choosing remote
-        if (value !== null) {
-          data.days.push(value);
-        }
-        break;
+      case 'placeAdded': {
+        // Handle place addition/removal
+        const addPlaceDay = data.days.find((d) => d.id === conflict.context.dayId);
+        if (addPlaceDay) {
+          const existingPlaceIndex = addPlaceDay.places.findIndex((p) => p.id === conflict.context.placeId);
 
-      case 'placeAdded':
-        // Remove the locally added place if choosing remote (which means don't add it)
-        if (value === null) {
-          const placeDay = data.days.find((d) => d.id === conflict.context.dayId);
-          if (placeDay) {
-            placeDay.places = placeDay.places.filter((p) => p.id !== conflict.context.placeId);
+          if (value === null) {
+            // Remove the locally added place if choosing remote (which means don't add it)
+            if (existingPlaceIndex !== -1) {
+              addPlaceDay.places.splice(existingPlaceIndex, 1);
+            }
+          } else {
+            // Keep the locally added place - add it only if it doesn't already exist
+            if (existingPlaceIndex === -1) {
+              addPlaceDay.places.push(value);
+            }
           }
         }
         break;
+      }
 
-      case 'placeDeleted':
-        // Add the remotely existing place if choosing remote
-        if (value !== null) {
-          const placeDay = data.days.find((d) => d.id === conflict.context.dayId);
-          if (placeDay) {
-            placeDay.places.push(value);
+      case 'placeDeleted': {
+        // Handle place deletion/restoration
+        const placeDay = data.days.find((d) => d.id === conflict.context.dayId);
+        if (placeDay) {
+          const existingPlaceIndex = placeDay.places.findIndex((p) => p.id === conflict.context.placeId);
+
+          if (value !== null) {
+            // Restore the place - add it only if it doesn't already exist
+            if (existingPlaceIndex === -1) {
+              placeDay.places.push(value);
+            }
+          } else {
+            // Keep the deletion - remove the place if it exists
+            if (existingPlaceIndex !== -1) {
+              placeDay.places.splice(existingPlaceIndex, 1);
+            }
           }
         }
         break;
+      }
     }
   };
 

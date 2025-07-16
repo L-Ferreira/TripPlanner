@@ -17,7 +17,7 @@ export interface AuthActions {
 const GOOGLE_DRIVE_CONFIG: GoogleDriveConfig = {
   clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
   redirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI || window.location.origin,
-  scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+  scope: 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email',
 };
 
 let googleDriveService: GoogleDriveService | null = null;
