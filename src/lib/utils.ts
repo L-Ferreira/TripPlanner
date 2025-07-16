@@ -55,12 +55,13 @@ export const getDefaultAccommodationFormData = () => ({
   accommodationName: '',
   accommodationWebsite: '',
   accommodationMapsUrl: '',
-  accommodationEmbedUrl: '',
+  accommodationMapsEmbedUrl: '',
   accommodationDescription: '',
   accommodationNights: 1,
   accommodationRoomType: '',
   accommodationImages: [] as string[],
-  accommodationAmenities: getDefaultAmenities()
+  accommodationAmenities: getDefaultAmenities(),
+  images: [] as string[]
 });
 
 // Generate Google Maps URL for a location

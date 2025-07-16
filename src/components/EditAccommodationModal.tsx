@@ -179,17 +179,46 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
               </div>
             </div>
 
-            {/* Location */}
+            {/* Room Type */}
             <div>
-              <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
+              <Label htmlFor="roomType">Room Type (optional)</Label>
               <Input
-                id="googleMapsUrl"
-                name="googleMapsUrl"
-                type="url"
-                value={formData.googleMapsUrl}
+                id="roomType"
+                name="roomType"
+                value={formData.roomType}
                 onChange={handleChange}
-                placeholder="https://maps.google.com/..."
+                placeholder="e.g., Deluxe Room, Suite, Standard Room"
               />
+            </div>
+
+            {/* Location */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
+                <Input
+                  id="googleMapsUrl"
+                  name="googleMapsUrl"
+                  type="url"
+                  value={formData.googleMapsUrl}
+                  onChange={handleChange}
+                  placeholder="https://maps.google.com/..."
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                <Input
+                  id="googleMapsEmbedUrl"
+                  name="googleMapsEmbedUrl"
+                  type="url"
+                  value={formData.googleMapsEmbedUrl}
+                  onChange={handleChange}
+                  placeholder="https://www.google.com/maps/embed?..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Go to Google Maps → Share → Embed a map → Copy the iframe src URL
+                </p>
+              </div>
             </div>
 
             {/* Images */}

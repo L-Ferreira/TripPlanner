@@ -109,7 +109,12 @@ const AmenitiesChecklist: React.FC<AmenitiesChecklistProps> = ({ amenities, onCh
               placeholder="Add custom amenity"
               value={newAmenity}
               onChange={(e) => setNewAmenity(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddOtherAmenity()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddOtherAmenity();
+                }
+              }}
               className="flex-1"
             />
             <Button

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bed, Edit2, ExternalLink } from 'lucide-react';
+import { Bed, Edit2, ExternalLink, MapPin } from 'lucide-react';
 import { TripDay } from '../hooks/useTripData';
 import ImageCarousel from './ImageCarousel';
 
@@ -16,19 +16,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Bed size={20} />
-            <div className="flex items-center gap-3">
-              <span>{day.accommodation.name}</span>
-              {day.accommodation.websiteUrl && (
-                <a
-                  href={day.accommodation.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  <ExternalLink size={16} />
-                </a>
-              )}
-            </div>
+            <span>{day.accommodation.name}</span>
             <div className="text-sm text-gray-600 font-normal">
               Night {day.nightNumber || 1} of {day.accommodation.numberOfNights || 1}
             </div>
@@ -112,6 +100,35 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
                 </div>
               </div>
             )}
+            
+            {/* Links - conditional spacing based on content below */}
+            <div className={`flex gap-3 mt-3 ${
+                 ((day.accommodation.images && day.accommodation.images.length > 0) || day.accommodation.googleMapsEmbedUrl) 
+                  && 'mb-4' 
+            }`}>
+              {day.accommodation.websiteUrl && (
+                <a
+                  href={day.accommodation.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm transition-colors"
+                >
+                  <ExternalLink size={14} />
+                  Website
+                </a>
+              )}
+              {day.accommodation.googleMapsUrl && (
+                <a
+                  href={day.accommodation.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
+                >
+                  <MapPin size={14} />
+                  Maps
+                </a>
+              )}
+            </div>
           </div>
         </div>
 

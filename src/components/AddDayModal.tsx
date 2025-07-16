@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { extractEmbedUrl, generateGoogleMapsUrl, getDefaultAccommodationFormData } from '@/lib/utils';
 import { AlertTriangle, Plus, Trash2, X } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import { TripData, TripDay } from '../hooks/useTripData';
 import AmenitiesChecklist from './AmenitiesChecklist';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 interface AddDayModalProps {
   isOpen: boolean;
@@ -71,7 +71,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
         accommodationName: previousDay.accommodation.name,
         accommodationWebsite: previousDay.accommodation.websiteUrl || '',
         accommodationMapsUrl: previousDay.accommodation.googleMapsUrl,
-        accommodationEmbedUrl: previousDay.accommodation.googleMapsEmbedUrl || '',
+        accommodationMapsEmbedUrl: previousDay.accommodation.googleMapsEmbedUrl || '',
         accommodationDescription: previousDay.accommodation.description || '',
         accommodationNights: previousDay.accommodation.numberOfNights || 1,
         accommodationRoomType: previousDay.accommodation.roomType || '',
@@ -105,18 +105,15 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
         notes: undefined,
         accommodation: {
-          name: formData.accommodationName.trim(),
+          name: formData.accommodationName,
           websiteUrl: formData.accommodationWebsite.trim() || undefined,
           googleMapsUrl: formData.accommodationMapsUrl.trim() || generateGoogleMapsUrl(formData.accommodationName),
-          googleMapsEmbedUrl: extractEmbedUrl(formData.accommodationEmbedUrl) || undefined,
+          googleMapsEmbedUrl: extractEmbedUrl(formData.accommodationMapsEmbedUrl) || undefined,
           description: formData.accommodationDescription.trim() || undefined,
           numberOfNights: formData.accommodationNights,
           roomType: formData.accommodationRoomType.trim() || undefined,
           images: formData.accommodationImages,
-          amenities: {
-            ...formData.accommodationAmenities,
-            other: formData.accommodationAmenities.other.filter(amenity => amenity.trim() !== '')
-          }
+          amenities: formData.accommodationAmenities
         },
         places: [],
         images: []
@@ -171,13 +168,6 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
     setFormData(prev => ({
       ...prev,
       accommodationImages: prev.accommodationImages.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAmenitiesChange = (amenities: typeof formData.accommodationAmenities) => {
-    setFormData(prev => ({
-      ...prev,
-      accommodationAmenities: amenities
     }));
   };
 
@@ -407,16 +397,54 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Location */}
+                    {/* Room Type */}
                     <div>
-                      <Label htmlFor="accommodationMapsUrl">Google Maps URL (optional)</Label>
+                      <Label htmlFor="accommodationRoomType">Room Type (optional)</Label>
                       <Input
-                        id="accommodationMapsUrl"
-                        name="accommodationMapsUrl"
-                        type="url"
-                        value={formData.accommodationMapsUrl}
+                        id="accommodationRoomType"
+                        name="accommodationRoomType"
+                        value={formData.accommodationRoomType}
                         onChange={handleChange}
-                        placeholder="https://maps.google.com/..."
+                        placeholder="e.g., Deluxe Room, Suite, Standard Room"
+                      />
+                    </div>
+
+                    {/* Location */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="accommodationMapsUrl">Google Maps URL (optional)</Label>
+                        <Input
+                          id="accommodationMapsUrl"
+                          name="accommodationMapsUrl"
+                          type="url"
+                          value={formData.accommodationMapsUrl}
+                          onChange={handleChange}
+                          placeholder="https://maps.google.com/..."
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="accommodationMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                        <Input
+                          id="accommodationMapsEmbedUrl"
+                          name="accommodationMapsEmbedUrl"
+                          type="url"
+                          value={formData.accommodationMapsEmbedUrl}
+                          onChange={handleChange}
+                          placeholder="https://www.google.com/maps/embed?..."
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Go to Google Maps → Share → Embed a map → Copy the iframe src URL
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Amenities */}
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">Amenities</Label>
+                      <AmenitiesChecklist
+                        amenities={formData.accommodationAmenities}
+                        onChange={(amenities) => setFormData(prev => ({ ...prev, accommodationAmenities: amenities }))}
                       />
                     </div>
 
@@ -476,12 +504,6 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                             {formData.accommodationImages.length} image(s) added
                           </p>
                         </div>
-
-                        {/* Amenities */}
-                        <AmenitiesChecklist
-                          amenities={formData.accommodationAmenities}
-                          onChange={handleAmenitiesChange}
-                        />
                       </div>
                     </div>
                   </div>
