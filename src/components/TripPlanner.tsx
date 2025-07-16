@@ -289,7 +289,9 @@ const TripPlanner = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">
-                        <div className={cn('bg-gray-100 rounded-lg overflow-hidden', 'h-64 lg:h-80 max-h-[400px]')}>
+                        <div
+                          className={cn('bg-gray-100 rounded-lg overflow-hidden', 'h-[500px] md:h-80 max-h-[500px]')}
+                        >
                           <iframe
                             src={day.googleMapsEmbedUrl}
                             width="100%"
