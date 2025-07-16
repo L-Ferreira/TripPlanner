@@ -87,10 +87,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
     }
   };
 
-  const handleProceedDespiteWarning = () => {
-    setShowUnusedNightsWarning(false);
-    setStep('main-form');
-  };
+
 
   const handleAdjustPreviousNights = (adjust: boolean) => {
     setAdjustPreviousNights(adjust);

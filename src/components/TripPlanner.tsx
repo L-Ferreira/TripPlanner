@@ -38,11 +38,11 @@ const TripPlanner: React.FC = () => {
     updateLinkedAccommodation,
     findLinkedAccommodationDays,
     addPlaceImage,
-    removePlaceImage,
+
     exportData,
     importData,
     resetData,
-    getAccommodationInfo,
+
     checkUnusedNights,
     adjustPreviousAccommodationNights,
     setFullTripData
@@ -143,13 +143,7 @@ const TripPlanner: React.FC = () => {
     );
   };
 
-  const handleRemovePlaceImage = (dayId: string, placeId: string, imageUrl: string) => {
-    openDeleteModal(
-      'Remove Image',
-      'Are you sure you want to remove this image? This action cannot be undone.',
-      () => removePlaceImage(dayId, placeId, imageUrl)
-    );
-  };
+
 
   const handleShowResetModal = () => {
     openDeleteModal(

@@ -18,7 +18,6 @@ export interface SyncActions {
   forceDownload: () => Promise<void>;
 }
 
-const TRIP_DATA_KEY = 'tripData';
 const LAST_SYNC_KEY = 'lastSyncTime';
 const LAST_SYNCED_DATA_KEY = 'lastSyncedData';
 const FILE_NAME = 'trip-planner-data.json';
