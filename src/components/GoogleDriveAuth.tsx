@@ -256,12 +256,7 @@ export const GoogleDriveAuth = () => {
               {isSyncing && <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />}
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-gray-600">Auto-sync</span>
-                <Switch
-                  className="bg-blue-600"
-                  checked={autoSyncEnabled}
-                  onCheckedChange={() => toggleAutoSync()}
-                  disabled={isSyncing}
-                />
+                <Switch checked={autoSyncEnabled} onCheckedChange={() => toggleAutoSync()} disabled={isSyncing} />
               </div>
             </div>
           </div>

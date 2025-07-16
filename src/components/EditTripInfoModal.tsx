@@ -19,6 +19,9 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
     startDate: tripInfo.startDate,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -26,15 +29,52 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
         description: tripInfo.description,
         startDate: tripInfo.startDate,
       });
+      setErrors({});
     }
   }, [isOpen, tripInfo]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Trip name is required';
+    }
+
+    if (!formData.startDate) {
+      newErrors.startDate = 'Start date is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+
+    if (isSubmitting) return;
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      onSave(formData);
+    } catch (error) {
+      console.error('Error saving trip info:', error);
+      // You could set a general error message here
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: keyof typeof formData, value: string) => {
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -50,14 +90,15 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
         <div className="flex-1 overflow-y-auto px-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="tripName">Trip Name</Label>
+              <Label htmlFor="tripName">Trip Name *</Label>
               <Input
                 id="tripName"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 placeholder="Enter trip name"
-                required
+                className={errors.name ? 'border-red-500' : ''}
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -72,14 +113,15 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
             </div>
 
             <div>
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate">Start Date *</Label>
               <Input
                 id="startDate"
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => handleChange('startDate', e.target.value)}
-                required
+                className={errors.startDate ? 'border-red-500' : ''}
               />
+              {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
               <p className="text-sm text-gray-500 mt-1">
                 End date will be automatically calculated based on your trip days
               </p>
@@ -89,10 +131,12 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
 
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>Save Changes</Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         </div>
       </div>

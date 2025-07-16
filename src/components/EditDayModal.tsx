@@ -23,6 +23,9 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
     googleMapsEmbedUrl: '',
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (day) {
       setFormData({
@@ -32,12 +35,33 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         googleMapsUrl: day.googleMapsUrl || '',
         googleMapsEmbedUrl: day.googleMapsEmbedUrl || '',
       });
+      setErrors({});
     }
   }, [day]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.region.trim()) {
+      newErrors.region = 'Region/Location is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (formData.region.trim()) {
+
+    if (isSubmitting) return;
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const decimalHours = timeStringToDecimalHours(formData.driveTime);
       onSave({
         region: formData.region.trim(),
@@ -47,11 +71,22 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
       });
       onClose();
+    } catch (error) {
+      console.error('Error saving day:', error);
+      // You could set a general error message here
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -80,9 +115,10 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
                 name="region"
                 value={formData.region}
                 onChange={handleChange}
-                required
                 placeholder="e.g., Porto, Lisbon, Aveiro"
+                className={errors.region ? 'border-red-500' : ''}
               />
+              {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -142,10 +178,10 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         </CardContent>
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
-            <Button onClick={handleSubmit} className="flex-1">
-              Save Changes
+            <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
           </div>

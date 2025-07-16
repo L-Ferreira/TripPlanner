@@ -48,6 +48,8 @@ const AddDayModal = ({
   const [unusedNightsWarning, setUnusedNightsWarning] = useState<any>(null);
   const [showUnusedNightsWarning, setShowUnusedNightsWarning] = useState(false);
   const [adjustPreviousNights, setAdjustPreviousNights] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const newDayNumber = tripData.days.length + 1;
   const previousDay = tripData.days.find((d: TripDay) => d.dayNumber === newDayNumber - 1);
@@ -56,6 +58,8 @@ const AddDayModal = ({
   const [formData, setFormData] = useState({
     ...getDefaultAccommodationFormData(),
     driveTime: '',
+    driveDistanceKm: '',
+    accommodationNights: '1',
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -73,14 +77,40 @@ const AddDayModal = ({
 
       setUsingSameAccommodation(false);
       setShowUnusedNightsWarning(false);
+      setErrors({});
+      setIsSubmitting(false);
 
       // Reset form
       setFormData({
         ...getDefaultAccommodationFormData(),
         driveTime: '',
+        driveDistanceKm: '',
+        accommodationNights: '1',
       });
     }
   }, [isOpen, hasPreviousDay, newDayNumber, checkUnusedNights]);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.region.trim()) {
+      newErrors.region = 'Region is required';
+    }
+
+    if (!usingSameAccommodation && !formData.accommodationName.trim()) {
+      newErrors.accommodationName = 'Accommodation name is required';
+    }
+
+    if (!usingSameAccommodation) {
+      const nights = parseInt(formData.accommodationNights, 10);
+      if (isNaN(nights) || nights < 1) {
+        newErrors.accommodationNights = 'Number of nights must be at least 1';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleAccommodationChoice = (sameAccommodation: boolean) => {
     setUsingSameAccommodation(sameAccommodation);
@@ -97,7 +127,7 @@ const AddDayModal = ({
         accommodationMapsUrl: previousDay.accommodation.googleMapsUrl,
         accommodationMapsEmbedUrl: previousDay.accommodation.googleMapsEmbedUrl || '',
         accommodationDescription: previousDay.accommodation.description || '',
-        accommodationNights: previousDay.accommodation.numberOfNights || 1,
+        accommodationNights: (previousDay.accommodation.numberOfNights || 1).toString(),
         accommodationRoomType: previousDay.accommodation.roomType || '',
         accommodationImages: previousDay.accommodation.images,
         accommodationAmenities: previousDay.accommodation.amenities,
@@ -117,9 +147,18 @@ const AddDayModal = ({
     setStep('main-form');
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (formData.region.trim() && formData.accommodationName.trim()) {
+
+    if (isSubmitting) return;
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const decimalHours = timeStringToDecimalHours(formData.driveTime);
       const dayData: Omit<TripDay, 'id' | 'dayNumber'> = {
         region: formData.region.trim(),
@@ -134,7 +173,7 @@ const AddDayModal = ({
           googleMapsUrl: formData.accommodationMapsUrl.trim() || generateGoogleMapsUrl(formData.accommodationName),
           googleMapsEmbedUrl: extractEmbedUrl(formData.accommodationMapsEmbedUrl) || undefined,
           description: formData.accommodationDescription.trim() || undefined,
-          numberOfNights: formData.accommodationNights,
+          numberOfNights: parseInt(formData.accommodationNights, 10),
           roomType: formData.accommodationRoomType.trim() || undefined,
           images: formData.accommodationImages,
           amenities: formData.accommodationAmenities,
@@ -170,17 +209,32 @@ const AddDayModal = ({
       setFormData({
         ...getDefaultAccommodationFormData(),
         driveTime: '',
+        driveDistanceKm: '',
+        accommodationNights: '1',
       });
       setNewImageUrl('');
+      setErrors({});
       onClose();
+    } catch (error) {
+      console.error('Error adding day:', error);
+      // You could set a general error message here
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
+
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+
+    // Handle the change without immediate parsing for number inputs
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value, 10) || (name === 'accommodationNights' ? 1 : 0) : value,
+      [name]: value,
     }));
   };
 
@@ -325,9 +379,10 @@ const AddDayModal = ({
                     name="region"
                     value={formData.region}
                     onChange={handleChange}
-                    required
                     placeholder="e.g., Porto, Lisbon, Aveiro"
+                    className={errors.region ? 'border-red-500' : ''}
                   />
+                  {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
                 </div>
 
                 <div>
@@ -413,9 +468,12 @@ const AddDayModal = ({
                         name="accommodationName"
                         value={formData.accommodationName}
                         onChange={handleChange}
-                        required
                         placeholder="Hotel Name"
+                        className={errors.accommodationName ? 'border-red-500' : ''}
                       />
+                      {errors.accommodationName && (
+                        <p className="text-red-500 text-sm mt-1">{errors.accommodationName}</p>
+                      )}
                     </div>
 
                     <div>
@@ -453,9 +511,12 @@ const AddDayModal = ({
                         min="1"
                         value={formData.accommodationNights}
                         onChange={handleChange}
-                        required
                         placeholder="1"
+                        className={errors.accommodationNights ? 'border-red-500' : ''}
                       />
+                      {errors.accommodationNights && (
+                        <p className="text-red-500 text-sm mt-1">{errors.accommodationNights}</p>
+                      )}
                     </div>
                   </div>
 
@@ -576,11 +637,11 @@ const AddDayModal = ({
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
             {step === 'main-form' && (
-              <Button onClick={handleSubmit} className="flex-1">
-                Add Day
+              <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
+                {isSubmitting ? 'Adding...' : 'Add Day'}
               </Button>
             )}
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
           </div>

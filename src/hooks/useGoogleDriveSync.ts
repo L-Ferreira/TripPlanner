@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ConflictSummary, detectConflicts } from '../utils/conflictDetection';
 import { getGoogleDriveService } from './useGoogleAuth';
 import { TripData } from './useTripData';
 
@@ -11,6 +12,10 @@ export interface SyncState {
   autoSyncEnabled: boolean;
   nextAutoSyncTime: Date | null;
   countdownSeconds: number;
+  // Add conflict-related state
+  conflictSummary: ConflictSummary | null;
+  showConflictModal: boolean;
+  pendingRemoteData: TripData | null;
 }
 
 export interface SyncActions {
@@ -21,6 +26,9 @@ export interface SyncActions {
   clearError: () => void;
   toggleAutoSync: () => void;
   refreshKey: number;
+  // Add conflict resolution actions
+  resolveConflicts: (resolvedData: TripData) => Promise<void>;
+  cancelConflictResolution: () => void;
 }
 
 const LAST_SYNC_KEY = 'lastSyncTime';
@@ -38,62 +46,277 @@ const isValidTripData = (data: any): data is TripData => {
   return true;
 };
 
-// Improved data merging logic - prioritize local changes during sync
-const mergeData = (localData: TripData, remoteData: TripData): TripData => {
-  console.log('Merging data - local vs remote');
-  console.log('Local data preview:', {
-    tripName: localData.tripInfo.name,
-    dayCount: localData.days.length,
-    firstDayPlaces: localData.days[0]?.places?.length || 0,
-  });
-  console.log('Remote data preview:', {
-    tripName: remoteData.tripInfo.name,
-    dayCount: remoteData.days.length,
-    firstDayPlaces: remoteData.days[0]?.places?.length || 0,
-  });
-
-  // During sync operations, we generally want to preserve local changes
-  // since the user is actively working on the trip
-
-  // Compare data deeply to decide merge strategy
-  const localDayCount = localData.days.length;
-  const remoteDayCount = remoteData.days.length;
-
-  // If local has more days, definitely use local (user added days)
-  if (localDayCount > remoteDayCount) {
-    console.log('Local has more days, using local data');
-    return localData;
-  }
-
-  // If remote has more days, but local has recent changes, prefer local
-  // This handles the case where user is actively editing
-  if (remoteDayCount > localDayCount) {
-    console.log('Remote has more days, but checking for local changes...');
-
-    // Check if local data has substantive changes compared to what we last synced
-    try {
-      const lastSyncedData = localStorage.getItem(LAST_SYNCED_DATA_KEY);
-      if (lastSyncedData) {
-        const lastSynced = JSON.parse(lastSyncedData);
-        const localHasChanges = JSON.stringify(localData) !== JSON.stringify(lastSynced);
-
-        if (localHasChanges) {
-          console.log('Local has active changes, preserving local data');
-          return localData;
-        }
-      }
-    } catch (e) {
-      console.log('Could not check last synced data, using local');
-      return localData;
+// Import the improved merge function from SyncContext
+// Note: This will be defined in SyncContext.tsx and exported
+export const mergeData = (localData: TripData, remoteData: TripData): TripData => {
+  // Helper function to merge two objects field by field
+  const mergeFields = (local: any, remote: any, fieldName: string): any => {
+    if (JSON.stringify(local) === JSON.stringify(remote)) {
+      return local; // No difference, return either
     }
 
-    console.log('No local changes detected, using remote data');
-    return remoteData;
-  }
+    // For simple fields, we need to decide which one to use
+    // Since we don't have timestamps, we'll use a heuristic:
+    // - If local is default/empty and remote has content, use remote
+    // - If remote is default/empty and local has content, use local
+    // - Otherwise, prefer local (user's current session)
 
-  // Same number of days - prefer local (user's current work)
-  console.log('Same number of days, preferring local data');
-  return localData;
+    if (typeof local === 'string' && typeof remote === 'string') {
+      // For strings, prefer non-empty values
+      if (!local || local.trim() === '') return remote;
+      if (!remote || remote.trim() === '') return local;
+      // Both have content, prefer local
+      return local;
+    }
+
+    if (typeof local === 'number' && typeof remote === 'number') {
+      // For numbers, prefer non-zero values
+      if (local === 0 && remote !== 0) return remote;
+      if (remote === 0 && local !== 0) return local;
+      // Both have values, prefer local
+      return local;
+    }
+
+    // For objects and arrays, do a deeper merge
+    if (typeof local === 'object' && typeof remote === 'object') {
+      if (Array.isArray(local) && Array.isArray(remote)) {
+        // Merge arrays by combining unique items
+        const merged = [...local];
+        remote.forEach((item: any) => {
+          if (!merged.some((existing: any) => JSON.stringify(existing) === JSON.stringify(item))) {
+            merged.push(item);
+          }
+        });
+        return merged;
+      } else if (local && remote) {
+        // Merge objects field by field
+        const merged = { ...local };
+        Object.keys(remote).forEach((key) => {
+          if (key in merged) {
+            merged[key] = mergeFields(merged[key], remote[key], `${fieldName}.${key}`);
+          } else {
+            merged[key] = remote[key];
+          }
+        });
+        return merged;
+      }
+    }
+
+    // Default: prefer local
+    return local;
+  };
+
+  // Merge trip info
+  const mergedTripInfo = {
+    name: mergeFields(localData.tripInfo.name, remoteData.tripInfo.name, 'tripInfo.name'),
+    startDate: mergeFields(localData.tripInfo.startDate, remoteData.tripInfo.startDate, 'tripInfo.startDate'),
+    endDate: mergeFields(localData.tripInfo.endDate, remoteData.tripInfo.endDate, 'tripInfo.endDate'),
+    description: mergeFields(localData.tripInfo.description, remoteData.tripInfo.description, 'tripInfo.description'),
+  };
+
+  // Create maps for easier lookup
+  const localDaysByNumber = new Map<number, any>();
+  localData.days.forEach((day: any) => {
+    localDaysByNumber.set(day.dayNumber, day);
+  });
+
+  const remoteDaysByNumber = new Map<number, any>();
+  remoteData.days.forEach((day: any) => {
+    remoteDaysByNumber.set(day.dayNumber, day);
+  });
+
+  // Get all day numbers from both local and remote
+  const allDayNumbers = new Set([...localDaysByNumber.keys(), ...remoteDaysByNumber.keys()]);
+
+  // Merge each day
+  const mergedDays = Array.from(allDayNumbers)
+    .sort((a, b) => a - b)
+    .map((dayNumber) => {
+      const localDay = localDaysByNumber.get(dayNumber);
+      const remoteDay = remoteDaysByNumber.get(dayNumber);
+
+      // If only one version exists, use it
+      if (!localDay) return remoteDay!;
+      if (!remoteDay) return localDay;
+
+      // Both versions exist, merge them field by field
+      const mergedDay: any = {
+        id: localDay.id, // IDs should be the same
+        dayNumber: dayNumber,
+        region: mergeFields(localDay.region, remoteDay.region, `day${dayNumber}.region`),
+        driveTimeHours: mergeFields(
+          localDay.driveTimeHours,
+          remoteDay.driveTimeHours,
+          `day${dayNumber}.driveTimeHours`
+        ),
+        driveDistanceKm: mergeFields(
+          localDay.driveDistanceKm,
+          remoteDay.driveDistanceKm,
+          `day${dayNumber}.driveDistanceKm`
+        ),
+        googleMapsUrl: mergeFields(localDay.googleMapsUrl, remoteDay.googleMapsUrl, `day${dayNumber}.googleMapsUrl`),
+        googleMapsEmbedUrl: mergeFields(
+          localDay.googleMapsEmbedUrl,
+          remoteDay.googleMapsEmbedUrl,
+          `day${dayNumber}.googleMapsEmbedUrl`
+        ),
+        accommodationId: mergeFields(
+          localDay.accommodationId,
+          remoteDay.accommodationId,
+          `day${dayNumber}.accommodationId`
+        ),
+        nightNumber: mergeFields(localDay.nightNumber, remoteDay.nightNumber, `day${dayNumber}.nightNumber`),
+        notes: mergeFields(localDay.notes, remoteDay.notes, `day${dayNumber}.notes`),
+        accommodation: mergeFields(localDay.accommodation, remoteDay.accommodation, `day${dayNumber}.accommodation`),
+        images: mergeFields(localDay.images, remoteDay.images, `day${dayNumber}.images`),
+        places: [],
+      };
+
+      // Merge places
+      const localPlacesById = new Map<string, any>();
+      localDay.places.forEach((place: any) => {
+        localPlacesById.set(place.id, place);
+      });
+
+      const remotePlacesById = new Map<string, any>();
+      remoteDay.places.forEach((place: any) => {
+        remotePlacesById.set(place.id, place);
+      });
+
+      // Get all place IDs from both versions
+      const allPlaceIds = new Set([...localPlacesById.keys(), ...remotePlacesById.keys()]);
+
+      // Merge places
+      const mergedPlaces = Array.from(allPlaceIds).map((placeId) => {
+        const localPlace = localPlacesById.get(placeId);
+        const remotePlace = remotePlacesById.get(placeId);
+
+        if (!localPlace) return remotePlace!;
+        if (!remotePlace) return localPlace;
+
+        // Both exist, merge them
+        const mergedPlace: any = {
+          id: placeId,
+          name: mergeFields(localPlace.name, remotePlace.name, `day${dayNumber}.place${placeId}.name`),
+          description: mergeFields(
+            localPlace.description,
+            remotePlace.description,
+            `day${dayNumber}.place${placeId}.description`
+          ),
+          websiteUrl: mergeFields(
+            localPlace.websiteUrl,
+            remotePlace.websiteUrl,
+            `day${dayNumber}.place${placeId}.websiteUrl`
+          ),
+          googleMapsUrl: mergeFields(
+            localPlace.googleMapsUrl,
+            remotePlace.googleMapsUrl,
+            `day${dayNumber}.place${placeId}.googleMapsUrl`
+          ),
+          googleMapsEmbedUrl: mergeFields(
+            localPlace.googleMapsEmbedUrl,
+            remotePlace.googleMapsEmbedUrl,
+            `day${dayNumber}.place${placeId}.googleMapsEmbedUrl`
+          ),
+          images: mergeFields(localPlace.images, remotePlace.images, `day${dayNumber}.place${placeId}.images`),
+        };
+
+        return mergedPlace;
+      });
+
+      mergedDay.places = mergedPlaces;
+      return mergedDay;
+    });
+
+  const mergedData = {
+    tripInfo: mergedTripInfo,
+    days: mergedDays,
+  };
+
+  console.log('✅ Deep merge completed:', {
+    tripName: mergedData.tripInfo.name,
+    dayCount: mergedData.days.length,
+    firstDayRegion: mergedData.days[0]?.region,
+    totalPlaces: mergedData.days.reduce((sum, day) => sum + day.places.length, 0),
+  });
+
+  return mergedData;
+};
+
+// Helper function to merge non-conflicting data when no conflicts are detected
+const mergeNonConflictingData = (localData: TripData, remoteData: TripData): TripData => {
+  // Start with local data as the base
+  const mergedData: TripData = JSON.parse(JSON.stringify(localData));
+
+  // Merge trip info (prefer local, but fill in missing fields from remote)
+  Object.keys(remoteData.tripInfo).forEach((key) => {
+    const localValue = (localData.tripInfo as any)[key];
+    const remoteValue = (remoteData.tripInfo as any)[key];
+
+    if (!localValue && remoteValue) {
+      (mergedData.tripInfo as any)[key] = remoteValue;
+    }
+  });
+
+  // Merge days
+  const remoteDayMap = new Map(remoteData.days.map((day) => [day.id, day]));
+
+  mergedData.days.forEach((localDay, dayIndex) => {
+    const remoteDay = remoteDayMap.get(localDay.id);
+    if (remoteDay) {
+      // Simple merge for images - if they're different, it should have been a conflict
+      // This function should only run when there are no conflicts, so images should be identical
+      const localImages = localDay.accommodation.images || [];
+      const remoteImages = remoteDay.accommodation.images || [];
+
+      if (JSON.stringify(localImages) === JSON.stringify(remoteImages)) {
+        // Images are identical, keep as is
+        mergedData.days[dayIndex].accommodation.images = localImages;
+      } else {
+        // Images differ but no conflict was detected - this shouldn't happen with new logic
+        // But just in case, preserve local
+        mergedData.days[dayIndex].accommodation.images = localImages;
+      }
+
+      // Merge places (add any new places from remote)
+      const localPlaceIds = new Set(localDay.places.map((p) => p.id));
+      const newRemotePlaces = remoteDay.places.filter((p) => !localPlaceIds.has(p.id));
+      mergedData.days[dayIndex].places = [...localDay.places, ...newRemotePlaces];
+
+      // For existing places, simple merge for images
+      mergedData.days[dayIndex].places.forEach((place) => {
+        const remotePlace = remoteDay.places.find((p) => p.id === place.id);
+        if (remotePlace) {
+          const localPlaceImages = place.images || [];
+          const remotePlaceImages = remotePlace.images || [];
+
+          if (JSON.stringify(localPlaceImages) === JSON.stringify(remotePlaceImages)) {
+            // Images are identical, keep as is
+            place.images = localPlaceImages;
+          } else {
+            // Images differ but no conflict - preserve local
+            place.images = localPlaceImages;
+          }
+        }
+      });
+
+      // Merge amenities "other" array
+      const localOther = localDay.accommodation.amenities.other || [];
+      const remoteOther = remoteDay.accommodation.amenities.other || [];
+      const combinedOther = [...new Set([...localOther, ...remoteOther])];
+      mergedData.days[dayIndex].accommodation.amenities.other = combinedOther;
+    }
+  });
+
+  // Add any completely new days from remote
+  const localDayIds = new Set(localData.days.map((d) => d.id));
+  const newRemoteDays = remoteData.days.filter((d) => !localDayIds.has(d.id));
+  mergedData.days = [...mergedData.days, ...newRemoteDays];
+
+  // Re-sort days by dayNumber
+  mergedData.days.sort((a, b) => a.dayNumber - b.dayNumber);
+
+  return mergedData;
 };
 
 export const useGoogleDriveSync = (
@@ -111,7 +334,6 @@ export const useGoogleDriveSync = (
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [state, setState] = useState<SyncState>(() => {
-    console.log('🔧 Initializing sync state');
     return {
       isLoading: false,
       isSyncing: false,
@@ -121,6 +343,10 @@ export const useGoogleDriveSync = (
       autoSyncEnabled,
       nextAutoSyncTime: null,
       countdownSeconds: 0,
+      // Initialize conflict-related state
+      conflictSummary: null,
+      showConflictModal: false,
+      pendingRemoteData: null,
     };
   });
 
@@ -158,41 +384,23 @@ export const useGoogleDriveSync = (
 
   // Direct change detection effect - runs immediately when localTripData changes
   useEffect(() => {
-    console.log('🔍 Checking for local changes...', { localTripData: !!localTripData });
-
     if (!localTripData) {
-      console.log('❌ No local trip data, setting hasLocalChanges to false');
-      setState((prev) => {
-        console.log('🔄 State update: hasLocalChanges false');
-        return { ...prev, hasLocalChanges: false };
-      });
+      setState((prev) => ({ ...prev, hasLocalChanges: false }));
       return;
     }
 
     const lastSyncedData = localStorage.getItem(LAST_SYNCED_DATA_KEY);
     if (!lastSyncedData) {
-      console.log('✅ No last synced data found, setting hasLocalChanges to true');
-      setState((prev) => {
-        console.log('🔄 State update: hasLocalChanges true (no last synced data)');
-        return { ...prev, hasLocalChanges: true };
-      });
+      setState((prev) => ({ ...prev, hasLocalChanges: true }));
       return;
     }
 
     try {
       const parsedLastSynced = JSON.parse(lastSyncedData);
       const hasChanges = JSON.stringify(localTripData) !== JSON.stringify(parsedLastSynced);
-      console.log('🔍 Comparison result:', { hasChanges });
-      setState((prev) => {
-        console.log('🔄 State update: hasLocalChanges', hasChanges);
-        return { ...prev, hasLocalChanges: hasChanges };
-      });
+      setState((prev) => ({ ...prev, hasLocalChanges: hasChanges }));
     } catch {
-      console.log('❌ Error parsing last synced data, setting hasLocalChanges to true');
-      setState((prev) => {
-        console.log('🔄 State update: hasLocalChanges true (parse error)');
-        return { ...prev, hasLocalChanges: true };
-      });
+      setState((prev) => ({ ...prev, hasLocalChanges: true }));
     }
   }, [localTripData]);
 
@@ -206,7 +414,6 @@ export const useGoogleDriveSync = (
     const newValue = !autoSyncEnabled;
     setAutoSyncEnabledState(newValue);
     localStorage.setItem(AUTO_SYNC_ENABLED_KEY, JSON.stringify(newValue));
-    console.log(`Auto-sync ${newValue ? 'enabled' : 'disabled'}`);
   }, [autoSyncEnabled]);
 
   // Main sync function - downloads remote, merges, uploads result
@@ -220,7 +427,6 @@ export const useGoogleDriveSync = (
 
     try {
       const service = getGoogleDriveService();
-      console.log('Starting sync operation');
 
       // Find the trip planner file
       const remoteFile = await service.findTripPlannerFile();
@@ -228,7 +434,6 @@ export const useGoogleDriveSync = (
       if (!remoteFile) {
         // No remote file, upload local data if available
         if (localTripData) {
-          console.log('No remote file found, uploading local data');
           await service.uploadFile(FILE_NAME, JSON.stringify(localTripData, null, 2));
 
           // Update sync state
@@ -246,13 +451,12 @@ export const useGoogleDriveSync = (
       }
 
       // Download remote data
-      console.log('Downloading remote data for sync');
+
       const remoteContent = await service.downloadFile(remoteFile.id);
 
       if (!remoteContent || remoteContent.trim() === '') {
         // Remote file is empty, upload local data
         if (localTripData) {
-          console.log('Remote file is empty, uploading local data');
           await service.uploadFile(FILE_NAME, JSON.stringify(localTripData, null, 2), remoteFile.id);
 
           const now = new Date();
@@ -287,7 +491,6 @@ export const useGoogleDriveSync = (
       const remoteDataString = JSON.stringify(remoteData);
 
       if (localDataString === remoteDataString) {
-        console.log('Data is identical, updating sync time');
         const now = new Date();
         localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
         localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(remoteData));
@@ -300,10 +503,45 @@ export const useGoogleDriveSync = (
         return;
       }
 
-      // Data is different, merge it
-      const mergedData = localTripData ? mergeData(localTripData, remoteData) : remoteData;
+      // Data is different, check for conflicts
 
-      console.log('📊 Sync merge results:', {
+      if (!localTripData) {
+        // No local data, just use remote data
+
+        setLocalTripData(remoteData);
+
+        const now = new Date();
+        localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
+        localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(remoteData));
+
+        setState((prev) => ({
+          ...prev,
+          lastSyncTime: now,
+          hasLocalChanges: false,
+        }));
+        return;
+      }
+
+      const conflictSummary = detectConflicts(localTripData, remoteData);
+
+      if (conflictSummary.hasConflicts) {
+        // Show conflict resolution modal
+        setState((prev) => ({
+          ...prev,
+          isSyncing: false,
+          conflictSummary,
+          showConflictModal: true,
+          pendingRemoteData: remoteData,
+        }));
+
+        return;
+      }
+
+      // No conflicts, data is different but compatible - merge remote additions
+
+      const mergedData = mergeNonConflictingData(localTripData, remoteData);
+
+      console.log('📊 Sync results:', {
         localTripDataExists: !!localTripData,
         localDayCount: localTripData?.days?.length || 0,
         remoteDayCount: remoteData.days.length,
@@ -315,25 +553,16 @@ export const useGoogleDriveSync = (
 
       // Update local data if it changed
       if (JSON.stringify(localTripData) !== JSON.stringify(mergedData)) {
-        console.log('🔄 Updating local data with merged result');
         setLocalTripData(mergedData);
 
         // Force a brief delay to ensure state updates are processed
         setTimeout(() => {
-          console.log('🔄 Forcing state refresh after local data update');
           setState((prev) => ({ ...prev }));
         }, 100);
       } else {
-        console.log('✅ Local data unchanged after merge');
       }
 
       // Upload merged data
-      console.log('📤 Uploading merged data to Google Drive');
-      console.log('📋 Data being uploaded:', {
-        tripName: mergedData.tripInfo.name,
-        dayCount: mergedData.days.length,
-        firstDayPlaces: mergedData.days[0]?.places?.length || 0,
-      });
 
       await service.uploadFile(FILE_NAME, JSON.stringify(mergedData, null, 2), remoteFile.id);
 
@@ -343,7 +572,6 @@ export const useGoogleDriveSync = (
       localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(mergedData));
 
       setState((prev) => {
-        console.log('✅ Sync completed - updating state: hasLocalChanges false');
         return {
           ...prev,
           lastSyncTime: now,
@@ -353,8 +581,6 @@ export const useGoogleDriveSync = (
 
       // Force a refresh to ensure UI updates
       setRefreshKey((prev) => prev + 1);
-
-      console.log('Sync completed successfully');
     } catch (error) {
       console.error('Sync failed:', error);
       setState((prev) => ({
@@ -381,7 +607,6 @@ export const useGoogleDriveSync = (
 
     try {
       const service = getGoogleDriveService();
-      console.log('Force uploading local data');
 
       const remoteFile = await service.findTripPlannerFile();
 
@@ -403,8 +628,6 @@ export const useGoogleDriveSync = (
 
       // Force a refresh to ensure UI updates
       setRefreshKey((prev) => prev + 1);
-
-      console.log('Force upload completed successfully');
     } catch (error) {
       console.error('Force upload failed:', error);
       setState((prev) => ({
@@ -426,7 +649,6 @@ export const useGoogleDriveSync = (
 
     try {
       const service = getGoogleDriveService();
-      console.log('Force downloading remote data');
 
       const remoteFile = await service.findTripPlannerFile();
 
@@ -468,8 +690,6 @@ export const useGoogleDriveSync = (
 
       // Force a refresh to ensure UI updates
       setRefreshKey((prev) => prev + 1);
-
-      console.log('Force download completed successfully');
     } catch (error) {
       console.error('Force download failed:', error);
       setState((prev) => ({
@@ -491,7 +711,6 @@ export const useGoogleDriveSync = (
 
     try {
       const service = getGoogleDriveService();
-      console.log('Force re-upload: deleting existing file and creating new one');
 
       // Delete existing file if it exists
       const existingFile = await service.findTripPlannerFile();
@@ -514,8 +733,6 @@ export const useGoogleDriveSync = (
 
       // Force a refresh to ensure UI updates
       setRefreshKey((prev) => prev + 1);
-
-      console.log('Force re-upload completed successfully');
     } catch (error) {
       console.error('Force re-upload failed:', error);
       setState((prev) => ({
@@ -531,7 +748,6 @@ export const useGoogleDriveSync = (
   useEffect(() => {
     if (isAuthenticated && autoSyncEnabled && !state.isSyncing) {
       const runAutoSync = () => {
-        console.log('Running auto-sync');
         if (syncNowRef.current) {
           syncNowRef.current();
         }
@@ -600,6 +816,65 @@ export const useGoogleDriveSync = (
     updateSyncState();
   }, [updateSyncState]);
 
+  // Add conflict resolution methods
+  const resolveConflicts = useCallback(
+    async (resolvedData: TripData) => {
+      if (!state.pendingRemoteData) return;
+
+      setState((prev) => ({
+        ...prev,
+        showConflictModal: false,
+        conflictSummary: null,
+        pendingRemoteData: null,
+      }));
+
+      try {
+        const service = getGoogleDriveService();
+        const remoteFile = await service.findTripPlannerFile();
+
+        if (remoteFile) {
+          // Update local data
+          setLocalTripData(resolvedData);
+
+          // Upload resolved data
+          await service.uploadFile(FILE_NAME, JSON.stringify(resolvedData, null, 2), remoteFile.id);
+
+          // Update sync state
+          const now = new Date();
+          localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
+          localStorage.setItem(LAST_SYNCED_DATA_KEY, JSON.stringify(resolvedData));
+
+          setState((prev) => ({
+            ...prev,
+            lastSyncTime: now,
+            hasLocalChanges: false,
+            isSyncing: false,
+          }));
+
+          setRefreshKey((prev) => prev + 1);
+        }
+      } catch (error) {
+        console.error('Error resolving conflicts:', error);
+        setState((prev) => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Failed to resolve conflicts',
+          isSyncing: false,
+        }));
+      }
+    },
+    [state.pendingRemoteData, setLocalTripData]
+  );
+
+  const cancelConflictResolution = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      showConflictModal: false,
+      conflictSummary: null,
+      pendingRemoteData: null,
+      isSyncing: false,
+    }));
+  }, []);
+
   return {
     ...state,
     syncNow,
@@ -609,5 +884,7 @@ export const useGoogleDriveSync = (
     clearError,
     toggleAutoSync,
     refreshKey,
+    resolveConflicts,
+    cancelConflictResolution,
   };
 };

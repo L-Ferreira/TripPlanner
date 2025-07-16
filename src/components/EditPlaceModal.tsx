@@ -25,6 +25,8 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (place) {
@@ -36,12 +38,33 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         googleMapsEmbedUrl: place.googleMapsEmbedUrl || '',
         images: place.images || [],
       });
+      setErrors({});
     }
   }, [place]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Place name is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (formData.name.trim()) {
+
+    if (isSubmitting) return;
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       onSave({
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -51,13 +74,25 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         images: formData.images,
       });
       onClose();
+    } catch (error) {
+      console.error('Error saving place:', error);
+      // You could set a general error message here
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -107,9 +142,10 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                required
                 placeholder="Enter place name"
+                className={errors.name ? 'border-red-500' : ''}
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -217,10 +253,10 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         </CardContent>
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
-            <Button onClick={handleSubmit} className="flex-1">
-              Save Changes
+            <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
           </div>

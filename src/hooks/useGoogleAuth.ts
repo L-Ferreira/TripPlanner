@@ -47,16 +47,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
       isLoading: false,
     }));
 
-    // Log authentication status and token info
-    if (isAuthenticated) {
-      const tokenInfo = service.getTokenExpirationInfo();
-      console.log('Authentication status:', {
-        isAuthenticated: true,
-        hasRefreshToken: service.hasRefreshToken(),
-        tokenExpiry: tokenInfo ? new Date(tokenInfo.expires_at).toISOString() : 'unknown',
-        tokenExpired: tokenInfo?.is_expired || false,
-      });
-    }
+    // Authentication status check completed
   }, []);
 
   const login = useCallback(async () => {
@@ -103,7 +94,6 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
 
             if (hashParams.has('access_token')) {
               // Handle successful authorization
-              console.log('Access token received, processing...');
 
               try {
                 service.handleAuthCallback(hashParams);
@@ -113,7 +103,6 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
                   isLoading: false,
                   user: { email: 'user@example.com' }, // TODO: Get actual user info
                 }));
-                console.log('Authentication successful');
               } catch (error) {
                 setState((prev) => ({
                   ...prev,

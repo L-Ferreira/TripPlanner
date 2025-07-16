@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { ChangeEvent, CSSProperties, TouchEvent, useRef, useState } from 'react';
+import { ChangeEvent, CSSProperties, TouchEvent, useEffect, useRef, useState } from 'react';
 
 interface ImageCarouselProps {
   images: string[];
@@ -19,6 +19,16 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const minSwipeDistance = 50;
+
+  // Handle image array changes (additions/deletions)
+  useEffect(() => {
+    if (images.length === 0) {
+      setCurrentImageIndex(0);
+    } else if (currentImageIndex >= images.length) {
+      // If current index is out of bounds, set to last image
+      setCurrentImageIndex(images.length - 1);
+    }
+  }, [images.length, currentImageIndex]);
 
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));

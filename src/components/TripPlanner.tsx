@@ -56,6 +56,7 @@ const TripPlanner = () => {
 
   // Sync the auth state with the context
   const { isAuthenticated } = useGoogleAuth();
+
   useEffect(() => {
     setAuthenticated(isAuthenticated);
   }, [isAuthenticated, setAuthenticated]);

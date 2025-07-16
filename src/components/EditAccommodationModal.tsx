@@ -24,13 +24,15 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
     googleMapsUrl: accommodation?.googleMapsUrl || '',
     googleMapsEmbedUrl: accommodation?.googleMapsEmbedUrl || '',
     description: accommodation?.description || '',
-    numberOfNights: accommodation?.numberOfNights || 1,
+    numberOfNights: (accommodation?.numberOfNights || 1).toString(),
     roomType: accommodation?.roomType || '',
     images: accommodation?.images || [],
     amenities: accommodation?.amenities || getDefaultAmenities(),
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (accommodation) {
@@ -40,17 +42,43 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
         googleMapsUrl: accommodation.googleMapsUrl,
         googleMapsEmbedUrl: accommodation.googleMapsEmbedUrl || '',
         description: accommodation.description || '',
-        numberOfNights: accommodation.numberOfNights || 1,
+        numberOfNights: (accommodation.numberOfNights || 1).toString(),
         roomType: accommodation.roomType || '',
         images: accommodation.images || [],
         amenities: accommodation.amenities || getDefaultAmenities(),
       });
+      setErrors({});
     }
   }, [accommodation]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Accommodation name is required';
+    }
+
+    const nights = parseInt(formData.numberOfNights, 10);
+    if (isNaN(nights) || nights < 1) {
+      newErrors.numberOfNights = 'Number of nights must be at least 1';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (formData.name.trim() && formData.numberOfNights > 0) {
+
+    if (isSubmitting) return;
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       // Filter out empty amenities from the 'other' array
       const filteredAmenities = {
         ...formData.amenities,
@@ -63,20 +91,32 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
         googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.name),
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl) || undefined,
         description: formData.description.trim() || undefined,
-        numberOfNights: formData.numberOfNights,
+        numberOfNights: parseInt(formData.numberOfNights, 10),
         roomType: formData.roomType.trim() || undefined,
         images: formData.images,
         amenities: filteredAmenities,
       });
       onClose();
+    } catch (error) {
+      console.error('Error saving accommodation:', error);
+      // You could set a general error message here
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
+
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+
+    // Handle the change without immediate parsing for number inputs
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value, 10) || 1 : value,
+      [name]: value,
     }));
   };
 
@@ -104,11 +144,11 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
     }));
   };
 
-  if (!isOpen || !accommodation) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+      <Card className="w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle>Edit Accommodation - Day {dayNumber}</CardTitle>
@@ -122,15 +162,16 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Hotel/Accommodation Name *</Label>
+                <Label htmlFor="name">Accommodation Name *</Label>
                 <Input
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  required
                   placeholder="Hotel Name"
+                  className={errors.name ? 'border-red-500' : ''}
                 />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
 
               <div>
@@ -149,7 +190,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
             {/* Description and Stay Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Description (optional)</Label>
                 <Input
                   id="description"
                   name="description"
@@ -168,9 +209,10 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   min="1"
                   value={formData.numberOfNights}
                   onChange={handleChange}
-                  required
                   placeholder="1"
+                  className={errors.numberOfNights ? 'border-red-500' : ''}
                 />
+                {errors.numberOfNights && <p className="text-red-500 text-sm mt-1">{errors.numberOfNights}</p>}
               </div>
             </div>
 
@@ -266,20 +308,21 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   </div>
                   <p className="text-sm text-gray-500 mt-1">{formData.images.length} image(s) added</p>
                 </div>
-
-                {/* Amenities */}
-                <AmenitiesChecklist amenities={formData.amenities} onChange={handleAmenitiesChange} />
               </div>
             </div>
+
+            {/* Amenities */}
+            <AmenitiesChecklist amenities={formData.amenities} onChange={handleAmenitiesChange} />
           </form>
         </CardContent>
+
         <div className="flex-shrink-0 p-6 pt-4">
-          <div className="flex gap-2">
-            <Button onClick={handleSubmit} className="flex-1">
-              Save Changes
-            </Button>
-            <Button variant="outline" onClick={onClose}>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </div>
