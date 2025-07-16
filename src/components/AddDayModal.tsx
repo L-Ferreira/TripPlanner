@@ -1,4 +1,4 @@
-import { extractEmbedUrl, generateGoogleMapsUrl, getDefaultAccommodationFormData } from '@/lib/utils';
+import { decimalHoursToTimeString, extractEmbedUrl, generateGoogleMapsUrl, getDefaultAccommodationFormData, timeStringToDecimalHours } from '@/lib/utils';
 import { AlertTriangle, Plus, Trash2, X } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import { TripData, TripDay } from '../hooks/useTripData';
@@ -37,7 +37,10 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
   const previousDay = tripData.days.find((d: TripDay) => d.dayNumber === newDayNumber - 1);
   const hasPreviousDay = !!previousDay;
 
-  const [formData, setFormData] = useState(getDefaultAccommodationFormData());
+  const [formData, setFormData] = useState({
+    ...getDefaultAccommodationFormData(),
+    driveTime: ''
+  });
 
   const [newImageUrl, setNewImageUrl] = useState('');
 
@@ -56,7 +59,10 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
       setShowUnusedNightsWarning(false);
       
       // Reset form
-      setFormData(getDefaultAccommodationFormData());
+      setFormData({
+        ...getDefaultAccommodationFormData(),
+        driveTime: ''
+      });
     }
   }, [isOpen, hasPreviousDay, newDayNumber, checkUnusedNights]);
 
@@ -68,6 +74,8 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
       setFormData(prev => ({
         ...prev,
         region: previousDay.region, // Auto-fill region too!
+        driveTime: decimalHoursToTimeString(previousDay.driveTimeHours),
+        driveDistanceKm: previousDay.driveDistanceKm.toString(),
         accommodationName: previousDay.accommodation.name,
         accommodationWebsite: previousDay.accommodation.websiteUrl || '',
         accommodationMapsUrl: previousDay.accommodation.googleMapsUrl,
@@ -87,8 +95,6 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
     }
   };
 
-
-
   const handleAdjustPreviousNights = (adjust: boolean) => {
     setAdjustPreviousNights(adjust);
     setShowUnusedNightsWarning(false);
@@ -98,10 +104,11 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (formData.region.trim() && formData.accommodationName.trim()) {
+      const decimalHours = timeStringToDecimalHours(formData.driveTime);
       const dayData: Omit<TripDay, 'id' | 'dayNumber'> = {
         region: formData.region.trim(),
-        driveTimeHours: Number(formData.driveTimeHours),
-        driveDistanceKm: Number(formData.driveDistanceKm),
+        driveTimeHours: decimalHours,
+        driveDistanceKm: Number(formData.driveDistanceKm) || 0,
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
         notes: undefined,
         accommodation: {
@@ -140,7 +147,10 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
       }
       
       // Reset form and close modal
-      setFormData(getDefaultAccommodationFormData());
+      setFormData({
+        ...getDefaultAccommodationFormData(),
+        driveTime: ''
+      });
       setNewImageUrl('');
       onClose();
     }
@@ -171,17 +181,24 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
     }));
   };
 
-  const calculateDayDate = (dayNumber: number): string => {
-    if (!tripData.tripInfo.startDate) return `Day ${dayNumber}`;
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddImage();
+    }
+  };
+
+  const calculateDayDate = (dayNumber: number) => {
+    if (!tripData.tripInfo.startDate) return '';
     
     const startDate = new Date(tripData.tripInfo.startDate);
     const targetDate = new Date(startDate);
-    targetDate.setDate(startDate.getDate() + (dayNumber - 1));
+    targetDate.setDate(startDate.getDate() + dayNumber - 1);
     
     return targetDate.toLocaleDateString('en-US', { 
+      weekday: 'short', 
       month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
+      day: 'numeric' 
     });
   };
 
@@ -199,324 +216,339 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {step === 'accommodation-choice' && (
-              <div className="space-y-4">
-                <h3 className="font-medium text-lg">Accommodation Continuity</h3>
-                <p className="text-sm text-gray-700">
-                  Would you like to continue with the same accommodation as Day {newDayNumber - 1}?
+          {/* Accommodation Choice Step */}
+          {step === 'accommodation-choice' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-2">Accommodation for Day {newDayNumber}</h3>
+                <p className="text-gray-600 mb-4">
+                  {previousDay?.accommodation?.name || 'Previous accommodation'} has {unusedNightsWarning?.unusedNights || 0} unused night{(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''}. 
+                  Would you like to stay there or book a new accommodation?
                 </p>
-                <div className="flex gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleAccommodationChoice(true)}
-                    className="flex-1"
-                  >
-                    Yes, continue with the same accommodation
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleAccommodationChoice(false)}
-                    className="flex-1"
-                  >
-                    No, choose a new accommodation
-                  </Button>
-                </div>
-                                 {showUnusedNightsWarning && (
-                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-4">
-                     <div className="flex items-start">
-                       <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2 mt-0.5" />
-                       <div className="flex-1">
-                         <h4 className="font-medium text-yellow-800">Unused Nights Detected</h4>
-                         <p className="text-sm text-yellow-700 mt-1">
-                           You had <span className="font-semibold">{unusedNightsWarning.totalBookedNights} nights</span> booked at{' '}
-                           <span className="font-semibold">{unusedNightsWarning.accommodationName}</span>, but only{' '}
-                           <span className="font-semibold">{unusedNightsWarning.usedNights} night(s)</span> were used.
-                         </p>
-                       </div>
-                     </div>
-                     <div className="space-y-2">
-                       <p className="text-sm text-yellow-700 font-medium">What would you like to do?</p>
-                       <div className="flex gap-2">
-                         <Button
-                           type="button"
-                           variant="outline"
-                           size="sm"
-                           onClick={() => handleAdjustPreviousNights(true)}
-                           className="flex-1 text-yellow-800 border-yellow-300 hover:bg-yellow-100"
-                         >
-                           Update previous accommodation to {unusedNightsWarning.usedNights} night(s)
-                         </Button>
-                         <Button
-                           type="button"
-                           variant="outline"
-                           size="sm"
-                           onClick={() => handleAdjustPreviousNights(false)}
-                           className="flex-1 text-yellow-800 border-yellow-300 hover:bg-yellow-100"
-                         >
-                           Keep as {unusedNightsWarning.totalBookedNights} nights
-                         </Button>
-                       </div>
-                     </div>
-                   </div>
-                 )}
               </div>
-            )}
-
-            {step === 'main-form' && (
-              <>
-                {/* Basic Day Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="region">Region/Location *</Label>
-                    <Input
-                      id="region"
-                      name="region"
-                      value={formData.region}
-                      onChange={handleChange}
-                      required
-                      placeholder="e.g., Porto, Lisbon, Aveiro"
-                    />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => handleAccommodationChoice(true)}
+                  className="p-6 h-auto flex flex-col items-center justify-center text-center"
+                >
+                  <div className="text-lg font-semibold mb-2">Stay at Same Place</div>
+                  <div className="text-sm text-gray-600">
+                    Continue staying at {previousDay?.accommodation?.name || 'previous accommodation'}
                   </div>
-                  
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => handleAccommodationChoice(false)}
+                  className="p-6 h-auto flex flex-col items-center justify-center text-center"
+                >
+                  <div className="text-lg font-semibold mb-2">Book New Accommodation</div>
+                  <div className="text-sm text-gray-600">
+                    Find a new place to stay for Day {newDayNumber}
+                  </div>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Unused Nights Warning */}
+          {showUnusedNightsWarning && (
+            <div className="space-y-6">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3" />
                   <div>
-                    <Label htmlFor="dateLabel">Date</Label>
-                    <Input
-                      id="dateLabel"
-                      value={calculateDayDate(newDayNumber)}
-                      disabled
-                      className="bg-gray-50 text-gray-600"
-                    />
+                    <h4 className="font-semibold text-yellow-800">Unused Accommodation Nights</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      {unusedNightsWarning?.accommodationName} has {unusedNightsWarning?.unusedNights} unused night{unusedNightsWarning?.unusedNights !== 1 ? 's' : ''}. 
+                      You booked {unusedNightsWarning?.totalBookedNights} night{unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''} but only used {unusedNightsWarning?.usedNights}.
+                    </p>
                   </div>
                 </div>
-
-                {/* Travel Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="driveTimeHours">Drive Time (hours)</Label>
-                    <Input
-                      id="driveTimeHours"
-                      name="driveTimeHours"
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={formData.driveTimeHours}
-                      onChange={handleChange}
-                      placeholder="2.5"
-                    />
-                  </div>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-gray-600 mb-4">
+                  Would you like to adjust the previous accommodation's night count to match actual usage?
+                </p>
+                
+                <div className="flex gap-4 justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAdjustPreviousNights(true)}
+                    className="flex-1 max-w-xs"
+                  >
+                    Yes, Adjust to {unusedNightsWarning?.usedNights} Night{unusedNightsWarning?.usedNights !== 1 ? 's' : ''}
+                  </Button>
                   
-                  <div>
-                    <Label htmlFor="driveDistanceKm">Distance (km)</Label>
-                    <Input
-                      id="driveDistanceKm"
-                      name="driveDistanceKm"
-                      type="number"
-                      min="0"
-                      value={formData.driveDistanceKm}
-                      onChange={handleChange}
-                      placeholder="150"
-                    />
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAdjustPreviousNights(false)}
+                    className="flex-1 max-w-xs"
+                  >
+                    No, Keep as {unusedNightsWarning?.totalBookedNights} Night{unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''}
+                  </Button>
                 </div>
+              </div>
+            </div>
+          )}
 
-                {/* Google Maps */}
+          {/* Main Form Step */}
+          {step === 'main-form' && (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Basic Day Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                  <Label htmlFor="region">Region/Location *</Label>
                   <Input
-                    id="googleMapsEmbedUrl"
-                    name="googleMapsEmbedUrl"
-                    value={formData.googleMapsEmbedUrl}
+                    id="region"
+                    name="region"
+                    value={formData.region}
                     onChange={handleChange}
-                    placeholder="Paste iframe HTML or embed URL here"
+                    required
+                    placeholder="e.g., Porto, Lisbon, Aveiro"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Paste the full iframe HTML from Google Maps → Share → Embed a map
+                </div>
+                
+                <div>
+                  <Label htmlFor="dateLabel">Date</Label>
+                  <Input
+                    id="dateLabel"
+                    value={calculateDayDate(newDayNumber)}
+                    disabled
+                    className="bg-gray-50 text-gray-600"
+                  />
+                </div>
+              </div>
+
+              {/* Travel Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="driveTime">Drive Time</Label>
+                  <Input
+                    id="driveTime"
+                    name="driveTime"
+                    type="time"
+                    value={formData.driveTime}
+                    onChange={handleChange}
+                    placeholder="03:35"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave empty if no driving
                   </p>
                 </div>
+                
+                <div>
+                  <Label htmlFor="driveDistanceKm">Distance (km)</Label>
+                  <Input
+                    id="driveDistanceKm"
+                    name="driveDistanceKm"
+                    type="number"
+                    min="0"
+                    value={formData.driveDistanceKm}
+                    onChange={handleChange}
+                    placeholder="150"
+                  />
+                </div>
+              </div>
 
-                {/* Only show accommodation section if creating new accommodation */}
-                {!usingSameAccommodation && (
-                  <div className="space-y-4">
-                    <h3 className="font-medium text-lg">Accommodation Details</h3>
-                    
-                    {/* Basic accommodation info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="accommodationName">Hotel/Accommodation Name *</Label>
-                        <Input
-                          id="accommodationName"
-                          name="accommodationName"
-                          value={formData.accommodationName}
-                          onChange={handleChange}
-                          required={!usingSameAccommodation}
-                          placeholder="Hotel Name"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="accommodationWebsite">Website URL (optional)</Label>
-                        <Input
-                          id="accommodationWebsite"
-                          name="accommodationWebsite"
-                          type="url"
-                          value={formData.accommodationWebsite}
-                          onChange={handleChange}
-                          placeholder="https://hotel-website.com"
-                        />
-                      </div>
-                    </div>
+              {/* Google Maps */}
+              <div>
+                <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                <Input
+                  id="googleMapsEmbedUrl"
+                  name="googleMapsEmbedUrl"
+                  value={formData.googleMapsEmbedUrl}
+                  onChange={handleChange}
+                  placeholder="Paste iframe HTML or embed URL here"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Paste the full iframe HTML from Google Maps → Share → Embed a map
+                </p>
+              </div>
 
-                    {/* Description and nights */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="accommodationDescription">Description</Label>
-                        <Input
-                          id="accommodationDescription"
-                          name="accommodationDescription"
-                          value={formData.accommodationDescription}
-                          onChange={handleChange}
-                          placeholder="Brief description of the accommodation"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="accommodationNights">Number of Nights *</Label>
-                        <Input
-                          id="accommodationNights"
-                          name="accommodationNights"
-                          type="number"
-                          min="1"
-                          value={formData.accommodationNights}
-                          onChange={handleChange}
-                          required={!usingSameAccommodation}
-                          placeholder="1"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Room Type */}
+              {/* Only show accommodation section if creating new accommodation */}
+              {!usingSameAccommodation && (
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold mb-4">Accommodation Information</h3>
+                  
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationRoomType">Room Type (optional)</Label>
+                      <Label htmlFor="accommodationName">Hotel/Accommodation Name *</Label>
                       <Input
-                        id="accommodationRoomType"
-                        name="accommodationRoomType"
-                        value={formData.accommodationRoomType}
+                        id="accommodationName"
+                        name="accommodationName"
+                        value={formData.accommodationName}
                         onChange={handleChange}
-                        placeholder="e.g., Deluxe Room, Suite, Standard Room"
+                        required
+                        placeholder="Hotel Name"
                       />
                     </div>
+                    
+                    <div>
+                      <Label htmlFor="accommodationWebsite">Website URL (optional)</Label>
+                      <Input
+                        id="accommodationWebsite"
+                        name="accommodationWebsite"
+                        type="url"
+                        value={formData.accommodationWebsite}
+                        onChange={handleChange}
+                        placeholder="https://hotel-website.com"
+                      />
+                    </div>
+                  </div>
 
-                    {/* Location */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="accommodationMapsUrl">Google Maps URL (optional)</Label>
-                        <Input
-                          id="accommodationMapsUrl"
-                          name="accommodationMapsUrl"
-                          type="url"
-                          value={formData.accommodationMapsUrl}
-                          onChange={handleChange}
-                          placeholder="https://maps.google.com/..."
-                        />
-                      </div>
+                  {/* Description and Stay Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <Label htmlFor="accommodationDescription">Description</Label>
+                      <Input
+                        id="accommodationDescription"
+                        name="accommodationDescription"
+                        value={formData.accommodationDescription}
+                        onChange={handleChange}
+                        placeholder="Brief description of the accommodation"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="accommodationNights">Number of Nights *</Label>
+                      <Input
+                        id="accommodationNights"
+                        name="accommodationNights"
+                        type="number"
+                        min="1"
+                        value={formData.accommodationNights}
+                        onChange={handleChange}
+                        required
+                        placeholder="1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Room Type */}
+                  <div className="mb-6">
+                    <Label htmlFor="accommodationRoomType">Room Type (optional)</Label>
+                    <Input
+                      id="accommodationRoomType"
+                      name="accommodationRoomType"
+                      value={formData.accommodationRoomType}
+                      onChange={handleChange}
+                      placeholder="e.g., Deluxe Room, Suite, Standard Room"
+                    />
+                  </div>
+
+                  {/* Location */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <Label htmlFor="accommodationMapsUrl">Google Maps URL (optional)</Label>
+                      <Input
+                        id="accommodationMapsUrl"
+                        name="accommodationMapsUrl"
+                        type="url"
+                        value={formData.accommodationMapsUrl}
+                        onChange={handleChange}
+                        placeholder="https://maps.google.com/..."
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="accommodationMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                      <Input
+                        id="accommodationMapsEmbedUrl"
+                        name="accommodationMapsEmbedUrl"
+                        type="url"
+                        value={formData.accommodationMapsEmbedUrl}
+                        onChange={handleChange}
+                        placeholder="https://www.google.com/maps/embed?..."
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Go to Google Maps → Share → Embed a map → Copy the iframe src URL
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Images */}
+                  <div className="mb-6">
+                    <Label className="text-sm font-medium">Images ({formData.accommodationImages.length})</Label>
+                    <div className="mt-2 space-y-3">
+                      {/* Current Images */}
+                      {formData.accommodationImages.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {formData.accommodationImages.map((imageUrl, index) => (
+                            <div key={index} className="relative group">
+                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Image ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveImage(index)}
+                                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 size={12} />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       
-                      <div>
-                        <Label htmlFor="accommodationMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
-                        <Input
-                          id="accommodationMapsEmbedUrl"
-                          name="accommodationMapsEmbedUrl"
-                          type="url"
-                          value={formData.accommodationMapsEmbedUrl}
-                          onChange={handleChange}
-                          placeholder="https://www.google.com/maps/embed?..."
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Go to Google Maps → Share → Embed a map → Copy the iframe src URL
+                      {/* Add New Image */}
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                        <div className="flex gap-2">
+                          <Input
+                            type="url"
+                            placeholder="Enter image URL"
+                            value={newImageUrl}
+                            onChange={(e) => setNewImageUrl(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleAddImage}
+                            disabled={!newImageUrl.trim()}
+                            className="flex items-center gap-1"
+                          >
+                            <Plus size={14} />
+                            Add
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {formData.accommodationImages.length} image(s) added
                         </p>
                       </div>
                     </div>
-
-                    {/* Amenities */}
-                    <div>
-                      <Label className="text-sm font-medium mb-3 block">Amenities</Label>
-                      <AmenitiesChecklist
-                        amenities={formData.accommodationAmenities}
-                        onChange={(amenities) => setFormData(prev => ({ ...prev, accommodationAmenities: amenities }))}
-                      />
-                    </div>
-
-                    {/* Images */}
-                    <div>
-                      <Label className="text-sm font-medium">Images ({formData.accommodationImages.length})</Label>
-                      <div className="mt-2 space-y-3">
-                        {/* Current Images */}
-                        {formData.accommodationImages.length > 0 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {formData.accommodationImages.map((imageUrl, index) => (
-                              <div key={index} className="relative group">
-                                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                                  <img
-                                    src={imageUrl}
-                                    alt={`Image ${index + 1}`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleRemoveImage(index)}
-                                  className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <Trash2 size={12} />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {/* Add New Image */}
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                          <div className="flex gap-2">
-                            <Input
-                              type="url"
-                              placeholder="Enter image URL"
-                              value={newImageUrl}
-                              onChange={(e) => setNewImageUrl(e.target.value)}
-                              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
-                              className="flex-1"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={handleAddImage}
-                              disabled={!newImageUrl.trim()}
-                              className="flex items-center gap-1"
-                            >
-                              <Plus size={14} />
-                              Add
-                            </Button>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {formData.accommodationImages.length} image(s) added
-                          </p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </form>
+
+                  {/* Amenities */}
+                  <AmenitiesChecklist
+                    amenities={formData.accommodationAmenities}
+                    onChange={(amenities) => setFormData(prev => ({ ...prev, accommodationAmenities: amenities }))}
+                  />
+                </div>
+              )}
+            </form>
+          )}
         </CardContent>
+        
+        {/* Footer */}
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
-            <Button onClick={handleSubmit} className="flex-1">
-              Add Day
-            </Button>
+            {step === 'main-form' && (
+              <Button onClick={handleSubmit} className="flex-1">
+                Add Day
+              </Button>
+            )}
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>

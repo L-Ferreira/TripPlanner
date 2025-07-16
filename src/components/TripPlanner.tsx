@@ -1,7 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, decimalHoursToHoursMinutes } from '@/lib/utils';
 import { Car, Edit2, MapPin, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { Fragment } from 'react/jsx-runtime';
@@ -158,6 +158,18 @@ const TripPlanner: React.FC = () => {
     closeAllModals();
   };
 
+  // Helper function to format drive time display
+  const formatDriveTime = (decimalHours: number): string => {
+    const { hours, minutes } = decimalHoursToHoursMinutes(decimalHours);
+    if (hours === 0) {
+      return `${minutes}min`;
+    } else if (minutes === 0) {
+      return `${hours}h`;
+    } else {
+      return `${hours}h ${minutes}min`;
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-100 min-h-screen">
       <TripHeader
@@ -189,7 +201,7 @@ const TripPlanner: React.FC = () => {
                     {day.driveTimeHours > 0 && (
                       <div className="flex items-center gap-2 text-sm text-gray-700">
                         <Car size={16} />
-                        <span>{day.driveTimeHours}h • {day.driveDistanceKm}km</span>
+                        <span>{formatDriveTime(day.driveTimeHours)} • {day.driveDistanceKm}km</span>
                       </div>
                     )}
                   </div>
@@ -208,7 +220,7 @@ const TripPlanner: React.FC = () => {
                           openEditDayModal(day);
                         }
                       }}
-                      className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
+                      className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                     >
                       <Edit2 size={14} />
                     </div>
@@ -226,13 +238,14 @@ const TripPlanner: React.FC = () => {
                           handleDeleteDay(day.id);
                         }
                       }}
-                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md cursor-pointer transition-colors"
+                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
                     >
                       <Trash2 size={14} />
                     </div>
                   </div>
                 </div>
               </AccordionTrigger>
+
               <AccordionContent className="px-6 pb-6">
                 <div className="space-y-6">
                   {/* Google Maps Embed */}
@@ -343,21 +356,21 @@ const TripPlanner: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={closeDeleteModal}
-        onConfirm={deleteModal.onConfirm}
         title={deleteModal.title}
         message={deleteModal.message}
+        onConfirm={deleteModal.onConfirm}
+        onClose={closeDeleteModal}
       />
 
       {/* Accommodation Update Confirmation Modal */}
       <AccommodationUpdateConfirmationModal
         isOpen={accommodationUpdateModal.isOpen}
-        onClose={closeAccommodationUpdateModal}
-        onConfirm={handleConfirmAccommodationUpdate}
-        affectedDays={accommodationUpdateModal.affectedDays}
-        currentDay={accommodationUpdateModal.currentDay}
         oldAccommodation={accommodationUpdateModal.oldAccommodation}
         newAccommodation={accommodationUpdateModal.newAccommodation}
+        affectedDays={accommodationUpdateModal.affectedDays}
+        currentDay={accommodationUpdateModal.currentDay}
+        onConfirm={handleConfirmAccommodationUpdate}
+        onClose={closeAccommodationUpdateModal}
       />
     </div>
   );

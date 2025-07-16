@@ -34,11 +34,39 @@ export const generateGoogleMapsUrl = (locationName: string): string => {
   return `https://www.google.com/maps/search/${encodedName}`;
 };
 
+// Convert decimal hours to time format (HH:MM)
+export const decimalHoursToTimeString = (decimalHours: number): string => {
+  if (decimalHours === 0) return '';
+  const hours = Math.floor(decimalHours);
+  const minutes = Math.round((decimalHours - hours) * 60);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
+// Convert time format (HH:MM) to decimal hours
+export const timeStringToDecimalHours = (timeString: string): number => {
+  if (!timeString.trim()) return 0;
+  const [hours, minutes] = timeString.split(':').map(Number);
+  return hours + (minutes / 60);
+};
+
+// Convert decimal hours to hours and minutes (for display)
+export const decimalHoursToHoursMinutes = (decimalHours: number): { hours: number; minutes: number } => {
+  const hours = Math.floor(decimalHours);
+  const minutes = Math.round((decimalHours - hours) * 60);
+  return { hours, minutes };
+};
+
+// Convert hours and minutes to decimal hours
+export const hoursMinutesToDecimalHours = (hours: number, minutes: number): number => {
+  return hours + (minutes / 60);
+};
+
 // Default form data for accommodation
 export const getDefaultAccommodationFormData = () => ({
   region: '',
   driveTimeHours: 0,
-  driveDistanceKm: 0,
+  driveTimeMinutes: 0,
+  driveDistanceKm: '',
   googleMapsEmbedUrl: '',
   accommodationName: '',
   accommodationWebsite: '',

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { extractEmbedUrl } from '@/lib/utils';
+import { decimalHoursToTimeString, extractEmbedUrl, timeStringToDecimalHours } from '@/lib/utils';
 import { X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { TripDay } from '../hooks/useTripData';
@@ -17,8 +17,8 @@ interface EditDayModalProps {
 const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, day }) => {
   const [formData, setFormData] = useState({
     region: '',
-    driveTimeHours: 0,
-    driveDistanceKm: 0,
+    driveTime: '',
+    driveDistanceKm: '',
     googleMapsEmbedUrl: ''
   });
 
@@ -26,8 +26,8 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
     if (day) {
       setFormData({
         region: day.region,
-        driveTimeHours: day.driveTimeHours,
-        driveDistanceKm: day.driveDistanceKm,
+        driveTime: decimalHoursToTimeString(day.driveTimeHours),
+        driveDistanceKm: day.driveDistanceKm.toString(),
         googleMapsEmbedUrl: day.googleMapsEmbedUrl || ''
       });
     }
@@ -36,10 +36,11 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (formData.region.trim()) {
+      const decimalHours = timeStringToDecimalHours(formData.driveTime);
       onSave({
         region: formData.region.trim(),
-        driveTimeHours: Number(formData.driveTimeHours),
-        driveDistanceKm: Number(formData.driveDistanceKm),
+        driveTimeHours: decimalHours,
+        driveDistanceKm: Number(formData.driveDistanceKm) || 0,
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl)
       });
       onClose();
@@ -47,10 +48,10 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value, 10) || 0 : value
+      [name]: value
     }));
   };
 
@@ -83,17 +84,18 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="driveTimeHours">Drive Time (hours)</Label>
+                <Label htmlFor="driveTime">Drive Time</Label>
                 <Input
-                  id="driveTimeHours"
-                  name="driveTimeHours"
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={formData.driveTimeHours}
+                  id="driveTime"
+                  name="driveTime"
+                  type="time"
+                  value={formData.driveTime}
                   onChange={handleChange}
-                  placeholder="2.5"
+                  placeholder="03:35"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave empty if no driving
+                </p>
               </div>
               
               <div>
@@ -117,10 +119,10 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
                 name="googleMapsEmbedUrl"
                 value={formData.googleMapsEmbedUrl}
                 onChange={handleChange}
-                placeholder="https://www.google.com/maps/embed?pb=..."
+                placeholder="Paste iframe HTML or embed URL here"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Get embed URL from Google Maps → Share → Embed a map
+                Paste the full iframe HTML from Google Maps → Share → Embed a map
               </p>
             </div>
           </form>
