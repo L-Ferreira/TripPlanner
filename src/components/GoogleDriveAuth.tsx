@@ -23,7 +23,7 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
         <div className="space-y-3 text-sm text-gray-700">
           <div>
             <strong className="text-gray-900">Session-Based Authentication:</strong> Your Google Drive connection will
-            stay active for about 1 hour. You'll need to reconnect when the session expires.
+            stay active for about 1 hour. You&apos;ll need to reconnect when the session expires.
           </div>
           <div>
             <strong className="text-gray-900">Sync Now:</strong> Downloads remote data, merges with local changes, and
