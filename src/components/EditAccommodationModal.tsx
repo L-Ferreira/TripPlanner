@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { extractEmbedUrl, generateGoogleMapsUrl, getDefaultAmenities } from '@/lib/utils';
+import { extractEmbedUrl, generateGoogleMapsUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { TripDay } from '../hooks/useTripData';
+import { AmenitiesData, getDefaultAmenities } from '../lib/amenities';
 import AmenitiesChecklist from './AmenitiesChecklist';
 
 interface EditAccommodationModalProps {
@@ -102,7 +103,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
     }));
   };
 
-  const handleAmenitiesChange = (amenities: typeof formData.amenities) => {
+  const handleAmenitiesChange = (amenities: AmenitiesData) => {
     setFormData(prev => ({
       ...prev,
       amenities

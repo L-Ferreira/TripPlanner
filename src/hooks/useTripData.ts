@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import defaultTripData from '../data/tripData.json';
+import { AmenitiesData } from '../lib/amenities';
 
 export interface TripInfo {
   name: string;
@@ -37,26 +38,7 @@ export interface TripDay {
     numberOfNights?: number;
     roomType?: string;
     images: string[];
-    amenities: {
-      breakfast: boolean;
-      kitchen: boolean;
-      wifi: boolean;
-      airConditioning: boolean;
-      heating: boolean;
-      washer: boolean;
-      dryer: boolean;
-      parking: boolean;
-      pool: boolean;
-      gym: boolean;
-      spa: boolean;
-      petFriendly: boolean;
-      smokingAllowed: boolean;
-      balcony: boolean;
-      oceanView: boolean;
-      mountainView: boolean;
-      cityView: boolean;
-      other: string[];
-    };
+    amenities: AmenitiesData;
   };
   places: Place[];
   images: string[];

@@ -41,7 +41,7 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
         <CardContent className="p-6">
           <div className="space-y-6">
             {day.places.map((place) => (
-              <div key={place.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
+              <div key={place.id} className="border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="flex-1 min-w-0">
                     <h4 className="text-lg font-semibold text-gray-900 break-words">{place.name}</h4>
@@ -65,15 +65,14 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
                     </Button>
                   </div>
                 </div>
+        <div className={`${((place.images && place.images.length > 0) || place.googleMapsEmbedUrl) ? 'border-b border-gray-50 pb-3 mb-3' : ''}`}>
+
                 {place.description && (
                   <p className="text-gray-600 text-sm mb-4 text-left">{place.description}</p>
                 )}
                 
                 {/* Links - conditional spacing based on content above */}
-                <div className={`flex gap-3 ${
-                     ((place.images && place.images.length > 0) || place.googleMapsEmbedUrl) 
-                      && 'mb-4' 
-                }`}>
+                {(place.websiteUrl || place.googleMapsUrl) && <div className={`flex gap-3`}>
                   {place.websiteUrl && (
                     <a
                       href={place.websiteUrl}
@@ -85,20 +84,24 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
                       Website
                     </a>
                   )}
-                  <a
-                    href={place.googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
-                  >
-                    <MapPin size={14} />
-                    Maps
-                  </a>
+                  {place.googleMapsUrl && (
+                    <a
+                      href={place.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
+                    >
+                      <MapPin size={14} />
+                      Maps
+                    </a>
+                  )}
+                </div>}
                 </div>
 
                 {/* Carousel and Map Section */}
                 {((place.images && place.images.length > 0) || place.googleMapsEmbedUrl) && (
                   <div className="flex flex-col lg:flex-row gap-4 max-h-[700px]">
+
                     {/* Image Carousel Section */}
                     {place.images && place.images.length > 0 && (
                       <div className={`${place.googleMapsEmbedUrl ? 'lg:w-[60%]' : 'w-full'} relative`}>

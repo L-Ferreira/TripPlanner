@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bed, Edit2, ExternalLink, MapPin } from 'lucide-react';
 import { TripDay } from '../hooks/useTripData';
+import { amenityLabels } from '../lib/amenities';
 import ImageCarousel from './ImageCarousel';
 
 interface AccommodationCardProps {
@@ -10,6 +11,22 @@ interface AccommodationCardProps {
 }
 
 const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccommodation }) => {
+  // Helper function to check if there are any amenities to display
+  const hasAmenities = () => {
+    if (!day.accommodation.amenities) return false;
+    
+    // Check if any boolean amenities are true
+    const booleanAmenities = Object.entries(day.accommodation.amenities).filter(([key, value]) => 
+      key !== 'other' && value === true
+    );
+    
+    // Check if there are any "other" amenities
+    const otherAmenities = day.accommodation.amenities.other || [];
+    const hasOtherAmenities = otherAmenities.length > 0;
+    
+    return booleanAmenities.length > 0 || hasOtherAmenities;
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-0">
@@ -33,7 +50,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
       </CardHeader>
       <CardContent className="p-6">
         {/* Accommodation Details */}
-        <div className={`${(day.accommodation.images && day.accommodation.images.length > 0) || day.accommodation.googleMapsEmbedUrl ? 'border-b border-gray-100 pb-6 mb-6' : ''}`}>
+        <div className={`${((day.accommodation.images && day.accommodation.images.length > 0) || day.accommodation.googleMapsEmbedUrl) ? 'border-b border-gray-50 pb-3 mb-3' : ''}`}>
           <div className="space-y-1 text-left">
             {day.accommodation.numberOfNights && (
               <p className="text-sm text-gray-700">
@@ -53,8 +70,8 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
               </p>
             )}
             
-            {/* Amenities Section */}
-            {day.accommodation.amenities && (
+            {/* Amenities Section - Only show if there are amenities to display */}
+            {hasAmenities() && (
               <div className="mt-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-sm text-gray-700">Amenities:</span>
@@ -68,29 +85,9 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
                     }
                     
                     if (value === true) {
-                      const labels: { [key: string]: string } = {
-                        breakfast: 'Breakfast',
-                        kitchen: 'Kitchen',
-                        wifi: 'WiFi',
-                        airConditioning: 'A/C',
-                        heating: 'Heating',
-                        washer: 'Washer',
-                        dryer: 'Dryer',
-                        parking: 'Parking',
-                        pool: 'Pool',
-                        gym: 'Gym',
-                        spa: 'Spa',
-                        petFriendly: 'Pet Friendly',
-                        smokingAllowed: 'Smoking',
-                        balcony: 'Balcony',
-                        oceanView: 'Ocean View',
-                        mountainView: 'Mountain View',
-                        cityView: 'City View'
-                      };
-                      
                       return (
                         <span key={key} className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          {labels[key] || key}
+                          {amenityLabels[key] || key}
                         </span>
                       );
                     }
@@ -102,7 +99,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
             )}
             
             {/* Links - conditional spacing based on content below */}
-            <div className={`flex gap-3 mt-3 ${
+            {(day.accommodation.websiteUrl || day.accommodation.googleMapsUrl) && <div className={`flex gap-3 pt-3 ${
                  ((day.accommodation.images && day.accommodation.images.length > 0) || day.accommodation.googleMapsEmbedUrl) 
                   && 'mb-4' 
             }`}>
@@ -128,7 +125,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({ day, onEditAccomm
                   Maps
                 </a>
               )}
-            </div>
+            </div>}
           </div>
         </div>
 

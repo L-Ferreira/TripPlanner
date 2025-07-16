@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, X } from 'lucide-react';
 import { TripDay } from '../hooks/useTripData';
+import { extendedAmenityLabels } from '../lib/amenities';
 
 interface AccommodationUpdateConfirmationModalProps {
   isOpen: boolean;
@@ -70,28 +70,9 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
     
     const getAmenityChanges = () => {
       const changedAmenities = [];
-      const amenityLabels = {
-        breakfast: 'Breakfast',
-        kitchen: 'Kitchen',
-        wifi: 'WiFi',
-        airConditioning: 'Air Conditioning',
-        heating: 'Heating',
-        washer: 'Washer',
-        dryer: 'Dryer',
-        parking: 'Parking',
-        pool: 'Pool',
-        gym: 'Gym',
-        spa: 'Spa',
-        petFriendly: 'Pet Friendly',
-        smokingAllowed: 'Smoking Allowed',
-        balcony: 'Balcony',
-        oceanView: 'Ocean View',
-        mountainView: 'Mountain View',
-        cityView: 'City View'
-      };
 
       // Check boolean amenities
-      Object.entries(amenityLabels).forEach(([key, label]) => {
+      Object.entries(extendedAmenityLabels).forEach(([key, label]) => {
         const oldValue = oldAmenities[key as keyof typeof oldAmenities];
         const newValue = newAmenities[key as keyof typeof newAmenities];
         if (oldValue !== newValue) {
@@ -127,99 +108,61 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
   
   // Sort affected days by day number
   const sortedAffectedDays = allAffectedDays.sort((a, b) => a.dayNumber - b.dayNumber);
-
+  
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="text-amber-500" size={24} />
-              Accommodation Update Confirmation
-            </CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X size={16} />
-            </Button>
-          </div>
+          <CardTitle className="text-xl">Update Accommodation</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Warning Message */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="text-amber-600 mt-0.5 flex-shrink-0" size={20} />
-              <div className="flex-1 text-center">
-                <h3 className="font-semibold text-amber-800 mb-1">
-                  This accommodation is used in multiple days
-                </h3>
-                <p className="text-amber-700 text-sm">
-                  The changes you're making will affect all days that use this accommodation.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Affected Days */}
-          <div>
-            <h4 className="font-medium mb-3">Affected Days ({sortedAffectedDays.length})</h4>
-            <div className="flex flex-wrap gap-2">
-              {sortedAffectedDays.map(day => (
-                <div key={day.id} className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                  <span className="font-medium text-blue-700">Day #{day.dayNumber}</span>
-                  <span className="text-blue-600 text-sm">({day.region})</span>
-                  {day.nightNumber && (
-                    <span className="text-blue-500 text-xs">
-                      Night {day.nightNumber}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Changes Preview */}
-          <div>
-            <h4 className="font-medium mb-3">Changes Being Made</h4>
-            {changedFields.length > 0 ? (
-              <div className="space-y-3">
-                {changedFields.map((change, index) => (
-                  <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                    <div className="font-medium text-gray-700 mb-2">{change.label}</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-red-600 font-medium">Before:</span>
-                        <div className="bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 whitespace-pre-wrap">
-                          {typeof change.oldValue === 'string' ? change.oldValue : JSON.stringify(change.oldValue)}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-green-600 font-medium">After:</span>
-                        <div className="bg-green-50 border border-green-200 rounded px-2 py-1 mt-1 whitespace-pre-wrap">
-                          {change.field === 'amenities' && change.newValue !== 'See detailed changes below' 
-                            ? change.newValue 
-                            : typeof change.newValue === 'string' ? change.newValue : JSON.stringify(change.newValue)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+        <CardContent className="overflow-y-auto">
+          <div className="space-y-6">
+            {/* Affected Days */}
+            <div>
+              <h3 className="font-semibold mb-2">This change will affect the following days:</h3>
+              <div className="flex flex-wrap gap-2 text-sm">
+                {sortedAffectedDays.map(day => (
+                  <span key={day.id} className="bg-gray-100 px-2 py-1 rounded">
+                    Day {day.dayNumber}: {day.region}
+                  </span>
                 ))}
               </div>
-            ) : (
-              <div className="text-gray-500 text-sm bg-gray-50 border border-gray-200 rounded-lg p-3">
-                No changes detected
+            </div>
+
+            {/* Changed Fields */}
+            {changedFields.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">Changes to be made:</h3>
+                <div className="space-y-3">
+                  {changedFields.map((change, index) => (
+                    <div key={index} className="border rounded p-3 bg-gray-50">
+                      <div className="font-medium text-sm">{change.label}:</div>
+                      <div className="text-sm mt-1 space-y-1">
+                        <div className="text-red-600">Old: {change.oldValue}</div>
+                        <div className="text-green-600">New: {change.newValue}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t">
-            <Button onClick={onConfirm} className="flex-1">
-              Yes, Update All Days
-            </Button>
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
+            <div className="bg-blue-50 p-4 rounded">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> This will update the accommodation details for all linked days. 
+                If you only want to update the current day, you'll need to create a separate accommodation entry.
+              </p>
+            </div>
           </div>
         </CardContent>
+        <div className="flex gap-2 p-6 pt-4 border-t">
+          <Button onClick={onConfirm} className="flex-1">
+            Confirm Update
+          </Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
       </Card>
     </div>
   );

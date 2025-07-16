@@ -158,10 +158,10 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                 type="url"
                 value={formData.googleMapsEmbedUrl}
                 onChange={handleChange}
-                placeholder="https://www.google.com/maps/embed?pb=..."
+                placeholder="Paste iframe HTML or embed URL here"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Get embed URL from Google Maps → Share → Embed a map
+                Paste the full iframe HTML from Google Maps → Share → Embed a map
               </p>
             </div>
             
