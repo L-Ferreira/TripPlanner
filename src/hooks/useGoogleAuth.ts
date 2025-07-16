@@ -46,9 +46,20 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
       isAuthenticated,
       isLoading: false,
     }));
+
+    // Log authentication status and token info
+    if (isAuthenticated) {
+      const tokenInfo = service.getTokenExpirationInfo();
+      console.log('Authentication status:', {
+        isAuthenticated: true,
+        hasRefreshToken: service.hasRefreshToken(),
+        tokenExpiry: tokenInfo ? new Date(tokenInfo.expires_at).toISOString() : 'unknown',
+        tokenExpired: tokenInfo?.is_expired || false,
+      });
+    }
   }, []);
 
-  const login = useCallback(() => {
+  const login = useCallback(async () => {
     try {
       if (!GOOGLE_DRIVE_CONFIG.clientId) {
         setState((prev) => ({
@@ -59,7 +70,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
       }
 
       const service = getGoogleDriveService();
-      const authUrl = service.getAuthUrl();
+      const authUrl = await service.getAuthUrl();
 
       // Open popup window for authentication
       const popup = window.open(authUrl, 'google-auth', 'width=500,height=600,scrollbars=yes,resizable=yes');
@@ -86,20 +97,35 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
           // Check if popup has navigated to redirect URI
           const popupUrl = popup.location.href;
           if (popupUrl && popupUrl.includes(GOOGLE_DRIVE_CONFIG.redirectUri)) {
+            // Look for tokens in hash parameters (implicit flow)
             const hashParams = new URLSearchParams(popup.location.hash.substring(1));
+            const error = hashParams.get('error');
 
             if (hashParams.has('access_token')) {
-              service.handleAuthCallback(hashParams);
+              // Handle successful authorization
+              console.log('Access token received, processing...');
+
+              try {
+                service.handleAuthCallback(hashParams);
+                setState((prev) => ({
+                  ...prev,
+                  isAuthenticated: true,
+                  isLoading: false,
+                  user: { email: 'user@example.com' }, // TODO: Get actual user info
+                }));
+                console.log('Authentication successful');
+              } catch (error) {
+                setState((prev) => ({
+                  ...prev,
+                  error: error instanceof Error ? error.message : 'Authentication failed',
+                  isLoading: false,
+                }));
+              }
+            } else if (error) {
+              const errorDescription = hashParams.get('error_description') || 'Authentication failed';
               setState((prev) => ({
                 ...prev,
-                isAuthenticated: true,
-                isLoading: false,
-                user: { email: 'user@example.com' }, // TODO: Get actual user info
-              }));
-            } else if (hashParams.has('error')) {
-              setState((prev) => ({
-                ...prev,
-                error: hashParams.get('error_description') || 'Authentication failed',
+                error: errorDescription,
                 isLoading: false,
               }));
             }

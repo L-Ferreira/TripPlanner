@@ -21,74 +21,207 @@ export interface AuthToken {
   token_type: string;
 }
 
+export interface StoredTokens {
+  access_token: string;
+  refresh_token?: string;
+  expires_at: number;
+  scope: string;
+  token_type: string;
+}
+
 export class GoogleDriveService {
   private config: GoogleDriveConfig;
-  private accessToken: string | null = null;
-  private tokenExpiry: number | null = null;
+  private tokens: StoredTokens | null = null;
+  private refreshPromise: Promise<void> | null = null;
 
   constructor(config: GoogleDriveConfig) {
     this.config = config;
-    this.loadTokenFromStorage();
+    this.loadTokensFromStorage();
   }
 
-  private loadTokenFromStorage(): void {
-    const token = localStorage.getItem('google_drive_token');
-    const expiry = localStorage.getItem('google_drive_token_expiry');
-
-    if (token && expiry) {
-      this.accessToken = token;
-      this.tokenExpiry = parseInt(expiry, 10);
+  private loadTokensFromStorage(): void {
+    try {
+      const tokensJson = localStorage.getItem('google_drive_tokens');
+      if (tokensJson) {
+        this.tokens = JSON.parse(tokensJson);
+        console.log('Loaded tokens from storage:', {
+          hasAccessToken: !!this.tokens?.access_token,
+          hasRefreshToken: !!this.tokens?.refresh_token,
+          expiresAt: this.tokens?.expires_at ? new Date(this.tokens.expires_at).toISOString() : null,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load tokens from storage:', error);
+      this.clearTokensFromStorage();
     }
   }
 
-  private saveTokenToStorage(token: string, expiresIn: number): void {
-    const expiry = Date.now() + expiresIn * 1000;
-    localStorage.setItem('google_drive_token', token);
-    localStorage.setItem('google_drive_token_expiry', expiry.toString());
-    this.accessToken = token;
-    this.tokenExpiry = expiry;
+  private saveTokensToStorage(tokens: StoredTokens): void {
+    try {
+      localStorage.setItem('google_drive_tokens', JSON.stringify(tokens));
+      this.tokens = tokens;
+      console.log('Saved tokens to storage:', {
+        hasAccessToken: !!tokens.access_token,
+        hasRefreshToken: !!tokens.refresh_token,
+        expiresAt: new Date(tokens.expires_at).toISOString(),
+      });
+    } catch (error) {
+      console.error('Failed to save tokens to storage:', error);
+    }
   }
 
-  private clearTokenFromStorage(): void {
+  private clearTokensFromStorage(): void {
+    localStorage.removeItem('google_drive_tokens');
+    // Also clean up old token storage format
     localStorage.removeItem('google_drive_token');
     localStorage.removeItem('google_drive_token_expiry');
-    this.accessToken = null;
-    this.tokenExpiry = null;
+    // Clean up session storage
+    sessionStorage.removeItem('google_drive_code_verifier');
+
+    this.tokens = null;
+    this.refreshPromise = null;
+    console.log('Cleared tokens from storage');
   }
 
   public isAuthenticated(): boolean {
-    return !!(this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry);
+    if (!this.tokens) return false;
+
+    // Check if we have a valid access token or a refresh token to get a new one
+    const hasValidAccessToken = this.tokens.access_token && Date.now() < this.tokens.expires_at;
+    const hasRefreshToken = !!this.tokens.refresh_token;
+
+    return hasValidAccessToken || hasRefreshToken;
   }
 
-  public getAuthUrl(): string {
+  private isAccessTokenExpired(): boolean {
+    if (!this.tokens) return true;
+    return Date.now() >= this.tokens.expires_at;
+  }
+
+  public async getAuthUrl(): Promise<string> {
+    // For Web application OAuth2 clients using implicit flow
+    // We cannot use access_type=offline with response_type=token
     const params = new URLSearchParams({
       client_id: this.config.clientId,
       redirect_uri: this.config.redirectUri,
-      response_type: 'token', // Use implicit flow for frontend
+      response_type: 'token', // Use implicit flow
       scope: this.config.scope,
+      prompt: 'consent', // Force consent for better user experience
     });
 
     return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   }
 
-  public handleAuthCallback(hashParams: URLSearchParams): void {
+  public async handleAuthCallback(hashParams: URLSearchParams): Promise<void> {
     const accessToken = hashParams.get('access_token');
     const expiresIn = hashParams.get('expires_in');
+    // Note: refresh_token is not available with implicit flow
 
     if (!accessToken || !expiresIn) {
       throw new Error('Invalid authentication response');
     }
 
-    this.saveTokenToStorage(accessToken, parseInt(expiresIn, 10));
+    const tokens: StoredTokens = {
+      access_token: accessToken,
+      refresh_token: undefined, // Not available with implicit flow
+      expires_at: Date.now() + parseInt(expiresIn, 10) * 1000,
+      scope: hashParams.get('scope') || this.config.scope,
+      token_type: hashParams.get('token_type') || 'Bearer',
+    };
+
+    this.saveTokensToStorage(tokens);
+    console.log('Authentication successful, tokens saved:', {
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: false, // Never available with implicit flow
+      expiresAt: new Date(tokens.expires_at).toISOString(),
+    });
+  }
+
+  private async refreshAccessToken(): Promise<void> {
+    if (!this.tokens?.refresh_token) {
+      console.log('No refresh token available, need to re-authenticate');
+      throw new Error('No refresh token available, please reconnect');
+    }
+
+    console.log('Refreshing access token...');
+
+    const params = new URLSearchParams({
+      client_id: this.config.clientId,
+      refresh_token: this.tokens.refresh_token,
+      grant_type: 'refresh_token',
+    });
+
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Token refresh failed:', errorText);
+
+      // If refresh fails, clear tokens and force re-authentication
+      this.clearTokensFromStorage();
+      throw new Error('Authentication expired, please reconnect');
+    }
+
+    const tokenData = await response.json();
+
+    // Update tokens (refresh token might not be included in response)
+    const newTokens: StoredTokens = {
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token || this.tokens.refresh_token, // Keep old refresh token if new one not provided
+      expires_at: Date.now() + tokenData.expires_in * 1000,
+      scope: tokenData.scope || this.tokens.scope,
+      token_type: tokenData.token_type || this.tokens.token_type,
+    };
+
+    this.saveTokensToStorage(newTokens);
+    console.log('Access token refreshed successfully');
+  }
+
+  private async ensureValidAccessToken(): Promise<void> {
+    if (!this.tokens) {
+      throw new Error('Not authenticated');
+    }
+
+    // If access token is still valid, nothing to do
+    if (!this.isAccessTokenExpired()) {
+      return;
+    }
+
+    // If refresh is already in progress, wait for it
+    if (this.refreshPromise) {
+      await this.refreshPromise;
+      return;
+    }
+
+    // Start refresh process
+    this.refreshPromise = this.refreshAccessToken();
+    try {
+      await this.refreshPromise;
+    } finally {
+      this.refreshPromise = null;
+    }
   }
 
   public logout(): void {
-    this.clearTokenFromStorage();
+    this.clearTokensFromStorage();
   }
 
   private async makeApiRequest(endpoint: string, options: any = {}): Promise<Response> {
     if (!this.isAuthenticated()) {
       throw new Error('Not authenticated');
+    }
+
+    // Ensure we have a valid access token
+    await this.ensureValidAccessToken();
+
+    if (!this.tokens) {
+      throw new Error('Authentication lost during token refresh');
     }
 
     console.log(`Making API request to: ${endpoint}`);
@@ -97,7 +230,7 @@ export class GoogleDriveService {
       ...options,
       headers: {
         ...options.headers,
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.tokens.access_token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -105,8 +238,24 @@ export class GoogleDriveService {
     console.log(`API response status: ${response.status} for ${endpoint}`);
 
     if (response.status === 401) {
-      this.clearTokenFromStorage();
-      throw new Error('Authentication expired');
+      // Access token might be invalid, try to refresh once more
+      try {
+        await this.refreshAccessToken();
+
+        // Retry the request with the new token
+        return await fetch(`https://www.googleapis.com/drive/v3${endpoint}`, {
+          ...options,
+          headers: {
+            ...options.headers,
+            Authorization: `Bearer ${this.tokens!.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (refreshError) {
+        console.error('Token refresh failed after 401:', refreshError);
+        this.clearTokensFromStorage();
+        throw new Error('Authentication expired, please reconnect');
+      }
     }
 
     return response;
@@ -245,11 +394,18 @@ export class GoogleDriveService {
   private async updateFileContent(fileId: string, content: string): Promise<string> {
     console.log(`Updating file content for ID: ${fileId}, content length: ${content.length}`);
 
+    // Ensure we have a valid access token
+    await this.ensureValidAccessToken();
+
+    if (!this.tokens) {
+      throw new Error('Authentication lost during token refresh');
+    }
+
     // Use the upload endpoint instead of regular API for media content
     const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
       method: 'PATCH',
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.tokens.access_token}`,
         'Content-Type': 'application/json',
       },
       body: content,
@@ -310,5 +466,19 @@ export class GoogleDriveService {
     }
 
     console.log(`File deleted successfully`);
+  }
+
+  // Helper method to check if refresh token is available
+  public hasRefreshToken(): boolean {
+    return !!this.tokens?.refresh_token;
+  }
+
+  // Helper method to get token expiration info
+  public getTokenExpirationInfo(): { expires_at: number; is_expired: boolean } | null {
+    if (!this.tokens) return null;
+    return {
+      expires_at: this.tokens.expires_at,
+      is_expired: this.isAccessTokenExpired(),
+    };
   }
 }

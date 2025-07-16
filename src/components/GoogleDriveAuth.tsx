@@ -1,7 +1,7 @@
 import { useSyncContext } from '@/contexts/SyncContext';
 import { AlertCircle, CheckCircle, Cloud, CloudOff, Download, Info, RefreshCw, Upload, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import { getGoogleDriveService, useGoogleAuth } from '../hooks/useGoogleAuth';
 import { ConfirmationModal } from './ConfirmationModal';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
@@ -22,6 +22,10 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 
         <div className="space-y-3 text-sm text-gray-700">
           <div>
+            <strong className="text-gray-900">Session-Based Authentication:</strong> Your Google Drive connection will
+            stay active for about 1 hour. You'll need to reconnect when the session expires.
+          </div>
+          <div>
             <strong className="text-gray-900">Sync Now:</strong> Downloads remote data, merges with local changes, and
             uploads the result. Your work is preserved.
           </div>
@@ -38,8 +42,8 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             copy.
           </div>
           <div>
-            <strong className="text-gray-900">Auto-sync:</strong> Runs every 5 minutes when enabled. Click the settings
-            icon to toggle.
+            <strong className="text-gray-900">Auto-sync:</strong> Runs every 5 minutes when enabled. Will stop working
+            when your session expires (~1 hour).
           </div>
         </div>
 
@@ -201,7 +205,34 @@ export const GoogleDriveAuth = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Cloud className="h-5 w-5 text-green-600" />
-            <span className="text-sm text-green-600 font-medium">Connected to Google Drive</span>
+            <div className="flex flex-col">
+              <span className="text-sm text-green-600 font-medium">Connected to Google Drive</span>
+              {(() => {
+                const service = getGoogleDriveService();
+                const hasRefreshToken = service.hasRefreshToken();
+                const tokenInfo = service.getTokenExpirationInfo();
+
+                if (hasRefreshToken) {
+                  return <span className="text-xs text-green-500">✓ Persistent connection enabled</span>;
+                } else if (tokenInfo) {
+                  const expiresIn = Math.max(0, tokenInfo.expires_at - Date.now());
+                  const hoursLeft = Math.floor(expiresIn / (1000 * 60 * 60));
+                  const minutesLeft = Math.floor((expiresIn % (1000 * 60 * 60)) / (1000 * 60));
+
+                  if (expiresIn > 0) {
+                    return (
+                      <span className="text-xs text-orange-500">
+                        ⚠ Session expires in {hoursLeft > 0 ? `${hoursLeft}h ` : ''}
+                        {minutesLeft}m
+                      </span>
+                    );
+                  } else {
+                    return <span className="text-xs text-red-500">⚠ Session expired, please reconnect</span>;
+                  }
+                }
+                return null;
+              })()}
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -225,7 +256,12 @@ export const GoogleDriveAuth = () => {
               {isSyncing && <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />}
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-gray-600">Auto-sync</span>
-                <Switch checked={autoSyncEnabled} onCheckedChange={() => toggleAutoSync()} disabled={isSyncing} />
+                <Switch
+                  className="bg-blue-600"
+                  checked={autoSyncEnabled}
+                  onCheckedChange={() => toggleAutoSync()}
+                  disabled={isSyncing}
+                />
               </div>
             </div>
           </div>
