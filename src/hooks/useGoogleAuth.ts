@@ -5,7 +5,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  user: { email?: string } | null;
+  user: { email?: string; name?: string } | null;
 }
 
 export interface AuthActions {
@@ -77,7 +77,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
       setState((prev) => ({ ...prev, isLoading: true }));
 
       // Monitor popup for URL changes
-      const checkPopup = setInterval(() => {
+      const checkPopup = setInterval(async () => {
         try {
           if (popup.closed) {
             clearInterval(checkPopup);
@@ -97,11 +97,15 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
 
               try {
                 service.handleAuthCallback(hashParams);
+
+                // Fetch actual user info
+                const userInfo = await service.getUserInfo();
+
                 setState((prev) => ({
                   ...prev,
                   isAuthenticated: true,
                   isLoading: false,
-                  user: { email: 'user@example.com' }, // TODO: Get actual user info
+                  user: { email: userInfo.email, name: userInfo.name },
                 }));
               } catch (error) {
                 setState((prev) => ({

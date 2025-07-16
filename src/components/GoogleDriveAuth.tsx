@@ -58,7 +58,7 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 };
 
 export const GoogleDriveAuth = () => {
-  const { isAuthenticated, isLoading, error, login, logout, clearError } = useGoogleAuth();
+  const { isAuthenticated, isLoading, error, user, login, logout, clearError } = useGoogleAuth();
 
   const {
     tripData,
@@ -207,6 +207,9 @@ export const GoogleDriveAuth = () => {
             <Cloud className="h-5 w-5 text-green-600" />
             <div className="flex flex-col">
               <span className="text-sm text-green-600 font-medium">Connected to Google Drive</span>
+              {user?.email && (
+                <span className="text-xs text-gray-600">{user.name ? `${user.name} (${user.email})` : user.email}</span>
+              )}
               {(() => {
                 const service = getGoogleDriveService();
                 const hasRefreshToken = service.hasRefreshToken();

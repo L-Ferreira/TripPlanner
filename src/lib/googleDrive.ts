@@ -192,6 +192,34 @@ export class GoogleDriveService {
     this.clearTokensFromStorage();
   }
 
+  public async getUserInfo(): Promise<{ email: string; name: string }> {
+    if (!this.isAuthenticated()) {
+      throw new Error('Not authenticated');
+    }
+
+    await this.ensureValidAccessToken();
+
+    if (!this.tokens) {
+      throw new Error('Authentication lost during token refresh');
+    }
+
+    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        Authorization: `Bearer ${this.tokens.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get user info: ${response.statusText}`);
+    }
+
+    const userInfo = await response.json();
+    return {
+      email: userInfo.email,
+      name: userInfo.name,
+    };
+  }
+
   private async makeApiRequest(endpoint: string, options: any = {}): Promise<Response> {
     if (!this.isAuthenticated()) {
       throw new Error('Not authenticated');
