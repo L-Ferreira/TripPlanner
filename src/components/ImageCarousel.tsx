@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { ChangeEvent, CSSProperties, useState } from 'react';
+import { ChangeEvent, CSSProperties, TouchEvent, useRef, useState } from 'react';
 
 interface ImageCarouselProps {
   images: string[];
@@ -14,6 +14,11 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
+
+  // Touch handling for swipe
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const minSwipeDistance = 50;
 
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
@@ -31,27 +36,69 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
     }
   };
 
+  // Touch event handlers for swipe
+  const handleTouchStart = (e: TouchEvent) => {
+    touchEndX.current = null;
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && images.length > 1) {
+      nextImage();
+    }
+    if (isRightSwipe && images.length > 1) {
+      prevImage();
+    }
+  };
+
   return (
     <Card className={`relative h-full ${className}`}>
       <CardContent className="p-0 h-full">
-        <div className="h-full relative bg-gray-100 rounded-lg overflow-hidden">
+        <div
+          className="h-full relative bg-gray-100 rounded-lg overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {images.length > 0 ? (
             <>
-              <img
-                src={images[currentImageIndex]}
-                alt={`Image ${currentImageIndex + 1}`}
-                className="w-full h-full object-cover object-center"
-                style={
-                  {
-                    imageRendering: 'crisp-edges' as const,
-                    WebkitImageRendering: 'crisp-edges' as const,
-                    MozImageRendering: 'crisp-edges' as const,
-                    msImageRendering: 'crisp-edges' as const,
-                  } as CSSProperties
-                }
-                loading="lazy"
-                decoding="async"
-              />
+              {/* Image container with sliding animation */}
+              <div
+                className="flex h-full transition-transform duration-300 ease-in-out"
+                style={{
+                  transform: `translateX(-${currentImageIndex * 100}%)`,
+                }}
+              >
+                {images.map((image, index) => (
+                  <div key={index} className="w-full h-full flex-shrink-0">
+                    <img
+                      src={image}
+                      alt={`Image ${index + 1}`}
+                      className="w-full h-full object-cover object-center"
+                      style={
+                        {
+                          imageRendering: 'crisp-edges' as const,
+                          WebkitImageRendering: 'crisp-edges' as const,
+                          MozImageRendering: 'crisp-edges' as const,
+                          msImageRendering: 'crisp-edges' as const,
+                        } as CSSProperties
+                      }
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ))}
+              </div>
 
               {/* Navigation buttons */}
               {images.length > 1 && (

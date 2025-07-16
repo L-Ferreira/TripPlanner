@@ -191,28 +191,39 @@ const TripPlanner = () => {
         onResetData={handleShowResetModal}
       />
 
-      <Accordion type="multiple" className="w-full space-y-3">
+      <Accordion type="single" collapsible className="w-full space-y-3">
         {tripData.days.map((day) => (
           <Fragment key={day.id}>
             <AccordionItem key={day.id} value={day.id} className="border border-gray-300 rounded-lg bg-white shadow-md">
               <AccordionTrigger className="text-left px-6 py-4 hover:bg-gray-50 data-[state=open]:rounded-t-lg data-[state=closed]:rounded-lg">
-                <div className="flex items-center gap-4 flex-wrap w-full">
+                <div className="flex items-center gap-4 w-full">
                   <div className="flex items-center gap-4 flex-1">
-                    <Badge variant="outline" className="px-3 py-1 text-sm font-semibold border-gray-400">
+                    <Badge
+                      variant="outline"
+                      className="hidden sm:block px-3 py-1 text-sm font-semibold border-gray-400"
+                    >
                       Day #{day.dayNumber}
                     </Badge>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <MapPin size={16} />
-                      <span className="font-medium">{day.region}</span>
-                    </div>
-                    {day.driveTimeHours > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="block sm:hidden px-3 py-1 text-sm font-semibold border-gray-400"
+                    >
+                      #{day.dayNumber}
+                    </Badge>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                       <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Car size={16} />
-                        <span>
-                          {formatDriveTime(day.driveTimeHours)} • {day.driveDistanceKm}km
-                        </span>
+                        <MapPin size={16} />
+                        <span className="font-medium break-words">{day.region}</span>
                       </div>
-                    )}
+                      {day.driveTimeHours > 0 && (
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <Car size={16} />
+                          <span className="break-words">
+                            {formatDriveTime(day.driveTimeHours)} • {day.driveDistanceKm}km
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 mr-3">
                     <div
@@ -254,16 +265,27 @@ const TripPlanner = () => {
                   </div>
                 </div>
               </AccordionTrigger>
-
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 py-4 space-y-6 accordion-content">
                 <div className="space-y-6">
                   {/* Google Maps Embed */}
                   {day.googleMapsEmbedUrl && (
                     <Card className="overflow-hidden border-gray-300 shadow-md">
                       <CardHeader className="pb-0">
-                        <CardTitle className="flex items-center gap-2 text-gray-800">
-                          <MapPin size={20} />
-                          Route Map
+                        <CardTitle className="flex items-center justify-between text-gray-800">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={20} />
+                            Route Map
+                          </div>
+                          {day.googleMapsUrl && (
+                            <a
+                              href={day.googleMapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
+                            >
+                              Open in Maps
+                            </a>
+                          )}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">

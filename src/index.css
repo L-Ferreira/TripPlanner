@@ -4,19 +4,32 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
 
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 @layer base {
   :root {
@@ -74,8 +87,6 @@ code {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border;
@@ -83,4 +94,11 @@ code {
   body {
     @apply bg-background text-foreground;
   }
-} 
+}
+
+/* Smooth accordion animations only */
+@layer components {
+  .accordion-content {
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

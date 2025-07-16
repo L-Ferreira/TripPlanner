@@ -26,6 +26,7 @@ export interface TripDay {
   region: string;
   driveTimeHours: number;
   driveDistanceKm: number;
+  googleMapsUrl: string;
   googleMapsEmbedUrl: string;
   accommodationId?: string; // Links days with same accommodation
   nightNumber?: number; // Which night of the stay (1, 2, 3, etc.)

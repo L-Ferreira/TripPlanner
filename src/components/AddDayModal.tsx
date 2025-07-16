@@ -125,6 +125,7 @@ const AddDayModal = ({
         region: formData.region.trim(),
         driveTimeHours: decimalHours,
         driveDistanceKm: Number(formData.driveDistanceKm) || 0,
+        googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.region),
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
         notes: undefined,
         accommodation: {
@@ -370,6 +371,20 @@ const AddDayModal = ({
               </div>
 
               {/* Google Maps */}
+              <div>
+                <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
+                <Input
+                  id="googleMapsUrl"
+                  name="googleMapsUrl"
+                  value={formData.googleMapsUrl}
+                  onChange={handleChange}
+                  placeholder="Google Maps URL for the route"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  URL to open the route in Google Maps (will auto-generate if not provided)
+                </p>
+              </div>
+
               <div>
                 <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
                 <Input

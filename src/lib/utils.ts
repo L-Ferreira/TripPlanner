@@ -67,6 +67,7 @@ export const getDefaultAccommodationFormData = () => ({
   driveTimeHours: 0,
   driveTimeMinutes: 0,
   driveDistanceKm: '',
+  googleMapsUrl: '',
   googleMapsEmbedUrl: '',
   accommodationName: '',
   accommodationWebsite: '',

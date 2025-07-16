@@ -19,6 +19,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
     region: '',
     driveTime: '',
     driveDistanceKm: '',
+    googleMapsUrl: '',
     googleMapsEmbedUrl: '',
   });
 
@@ -28,6 +29,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         region: day.region,
         driveTime: decimalHoursToTimeString(day.driveTimeHours),
         driveDistanceKm: day.driveDistanceKm.toString(),
+        googleMapsUrl: day.googleMapsUrl || '',
         googleMapsEmbedUrl: day.googleMapsEmbedUrl || '',
       });
     }
@@ -41,6 +43,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         region: formData.region.trim(),
         driveTimeHours: decimalHours,
         driveDistanceKm: Number(formData.driveDistanceKm) || 0,
+        googleMapsUrl: formData.googleMapsUrl.trim() || '',
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
       });
       onClose();
@@ -108,6 +111,18 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
                   placeholder="150"
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
+              <Input
+                id="googleMapsUrl"
+                name="googleMapsUrl"
+                value={formData.googleMapsUrl}
+                onChange={handleChange}
+                placeholder="Google Maps URL for the route"
+              />
+              <p className="text-sm text-gray-500 mt-1">URL to open the route in Google Maps</p>
             </div>
 
             <div>
