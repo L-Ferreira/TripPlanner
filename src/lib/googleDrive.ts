@@ -296,13 +296,24 @@ export class GoogleDriveService {
   }
 
   public async findTripPlannerFile(): Promise<GoogleDriveFile | null> {
+    // First try owned files
     const files = await this.searchFiles("name='trip-planner-data.json'");
 
     if (files.length > 0) {
       return files[0];
-    } else {
-      return null;
     }
+
+    // If not found, try shared files (for colleagues)
+    try {
+      const sharedFiles = await this.searchFiles("name='trip-planner-data.json' and sharedWithMe=true");
+      if (sharedFiles.length > 0) {
+        return sharedFiles[0];
+      }
+    } catch (error) {
+      console.warn('Failed to search shared files:', error);
+    }
+
+    return null;
   }
 
   public async downloadFile(fileId: string): Promise<string> {
