@@ -16,7 +16,7 @@ interface AccommodationUpdateConfirmationModalProps {
 }
 
 // Simple image carousel for the confirmation modal
-const ImageCarousel: React.FC<{ images: string[]; title: string }> = ({ images, title }) => {
+const ImageCarousel = ({ images, title }: { images: string[]; title: string }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextImage = () => {

@@ -50,7 +50,7 @@ export interface SyncActions {
 const SyncContext = createContext<(SyncState & SyncActions) | null>(null);
 
 // Provider Component
-export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<SyncState>(() => {
     const savedData = localStorage.getItem('tripData');
     const parsedData = savedData ? JSON.parse(savedData) : defaultTripData;
@@ -313,7 +313,6 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <ConflictResolutionModal
           conflicts={syncHook.conflictSummary.conflicts}
           localData={state.tripData}
-          remoteData={syncHook.pendingRemoteData}
           onResolve={syncHook.resolveConflicts}
           onCancel={syncHook.cancelConflictResolution}
         />

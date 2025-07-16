@@ -338,7 +338,7 @@ export class GoogleDriveService {
 
     // Step 3: Verify the file was created correctly
     try {
-      const verifyInfo = await this.getFileInfo(result);
+      await this.getFileInfo(result);
     } catch (error) {
       console.warn('File verification failed:', error);
     }

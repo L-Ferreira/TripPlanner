@@ -559,7 +559,6 @@ export const useGoogleDriveSync = (
         setTimeout(() => {
           setState((prev) => ({ ...prev }));
         }, 100);
-      } else {
       }
 
       // Upload merged data

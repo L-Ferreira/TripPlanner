@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TripData } from '../hooks/useTripData';
 import { Conflict, formatConflictValue } from '../utils/conflictDetection';
 import { Button } from './ui/button';
@@ -8,7 +8,6 @@ import { Card } from './ui/card';
 interface ConflictResolutionModalProps {
   conflicts: Conflict[];
   localData: TripData;
-  remoteData: TripData;
   onResolve: (resolvedData: TripData) => void;
   onCancel: () => void;
 }
@@ -20,7 +19,7 @@ type ConflictResolution = {
 };
 
 // Simple image carousel for the conflict resolution modal
-const ImageCarousel: React.FC<{ images: string[]; title: string }> = ({ images, title }) => {
+const ImageCarousel = ({ images, title }: { images: string[]; title: string }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextImage = () => {
@@ -72,10 +71,7 @@ const ImageCarousel: React.FC<{ images: string[]; title: string }> = ({ images, 
 };
 
 // Combined images display with carousel and editable JSON
-const CombinedImagesDisplay: React.FC<{
-  images: string[];
-  onUpdate: (newImages: string[]) => void;
-}> = ({ images, onUpdate }) => {
+const CombinedImagesDisplay = ({ images, onUpdate }: { images: string[]; onUpdate: (newImages: string[]) => void }) => {
   const [jsonValue, setJsonValue] = useState(JSON.stringify(images, null, 2));
   const [isValidJson, setIsValidJson] = useState(true);
 
@@ -114,13 +110,12 @@ const CombinedImagesDisplay: React.FC<{
   );
 };
 
-export const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
+export const ConflictResolutionModal = ({
   conflicts,
   localData,
-  remoteData, // Keep this for future use
   onResolve,
   onCancel,
-}) => {
+}: ConflictResolutionModalProps) => {
   const [resolutions, setResolutions] = useState<Map<string, ConflictResolution>>(new Map());
   const [manualEdits, setManualEdits] = useState<Map<string, string>>(new Map());
   const [showCombineView, setShowCombineView] = useState<Map<string, boolean>>(new Map());
@@ -184,14 +179,15 @@ export const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = (
         (data.tripInfo as any)[conflict.field] = value;
         break;
 
-      case 'day':
+      case 'day': {
         const day = data.days.find((d) => d.id === conflict.context.dayId);
         if (day) {
           (day as any)[conflict.field] = value;
         }
         break;
+      }
 
-      case 'accommodation':
+      case 'accommodation': {
         // Handle merged conflicts that affect multiple days
         const affectedDayIds = conflict.context.affectedDays || [conflict.context.dayId];
 
@@ -207,8 +203,9 @@ export const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = (
           }
         });
         break;
+      }
 
-      case 'place':
+      case 'place': {
         const placeDay = data.days.find((d) => d.id === conflict.context.dayId);
         if (placeDay) {
           const place = placeDay.places.find((p) => p.id === conflict.context.placeId);
@@ -217,6 +214,7 @@ export const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = (
           }
         }
         break;
+      }
 
       case 'dayAdded':
         // Remove the locally added day if choosing remote (which means don't add it)
