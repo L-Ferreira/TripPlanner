@@ -1,5 +1,5 @@
 import { Download, Edit2, Plus, RotateCcw, Upload } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { GoogleDriveAuth } from './GoogleDriveAuth';
 import { Button } from './ui/button';
 
@@ -15,16 +15,16 @@ interface TripHeaderProps {
   onResetData: () => void;
 }
 
-export const TripHeader = ({ 
-  tripTitle, 
-  tripDestination, 
-  tripStartDate, 
-  tripEndDate, 
-  onEditTrip, 
+export const TripHeader = ({
+  tripTitle,
+  tripDestination,
+  tripStartDate,
+  tripEndDate,
+  onEditTrip,
   onAddDay,
   onExportData,
   onImportData,
-  onResetData
+  onResetData,
 }: TripHeaderProps) => {
   const [showFloatingButton, setShowFloatingButton] = useState(false);
   const addDayButtonRef = useRef<HTMLButtonElement>(null);
@@ -33,10 +33,10 @@ export const TripHeader = ({
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
@@ -44,7 +44,7 @@ export const TripHeader = ({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       try {
@@ -67,17 +67,18 @@ export const TripHeader = ({
       },
       {
         threshold: 0,
-        rootMargin: '0px 0px -100px 0px' // Start showing floating button a bit before the original disappears
+        rootMargin: '0px 0px -100px 0px', // Start showing floating button a bit before the original disappears
       }
     );
 
-    if (addDayButtonRef.current) {
-      observer.observe(addDayButtonRef.current);
+    const currentButtonRef = addDayButtonRef.current;
+    if (currentButtonRef) {
+      observer.observe(currentButtonRef);
     }
 
     return () => {
-      if (addDayButtonRef.current) {
-        observer.unobserve(addDayButtonRef.current);
+      if (currentButtonRef) {
+        observer.unobserve(currentButtonRef);
       }
     };
   }, []);
@@ -93,27 +94,19 @@ export const TripHeader = ({
         {/* Trip Info Card */}
         <div className="bg-white rounded-lg shadow-md border border-gray-300 p-6">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {tripTitle || 'Untitled Trip'}
-            </h1>
-            <Button
-              onClick={onEditTrip}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
+            <h1 className="text-2xl font-bold text-gray-900">{tripTitle || 'Untitled Trip'}</h1>
+            <Button onClick={onEditTrip} variant="outline" size="sm" className="flex items-center gap-2">
               <Edit2 size={16} />
               Edit Trip
             </Button>
           </div>
-          
+
           <div className="text-gray-700 mb-4">
             {tripDestination && <p className="text-lg font-medium">{tripDestination}</p>}
             <p className="text-sm">
-              {tripStartDate && tripEndDate 
+              {tripStartDate && tripEndDate
                 ? `${formatDate(tripStartDate)} - ${formatDate(tripEndDate)}`
-                : 'No dates set'
-              }
+                : 'No dates set'}
             </p>
           </div>
 
@@ -128,30 +121,15 @@ export const TripHeader = ({
 
           {/* Data Management Buttons */}
           <div className="flex gap-2">
-            <Button
-              onClick={onExportData}
-              variant="outline"
-              size="sm"
-              className="flex-1"
-            >
+            <Button onClick={onExportData} variant="outline" size="sm" className="flex-1">
               <Download size={16} />
               Export
             </Button>
-            <Button
-              onClick={handleImportClick}
-              variant="outline"
-              size="sm"
-              className="flex-1"
-            >
+            <Button onClick={handleImportClick} variant="outline" size="sm" className="flex-1">
               <Upload size={16} />
               Import
             </Button>
-            <Button
-              onClick={onResetData}
-              variant="outline"
-              size="sm"
-              className="flex-1"
-            >
+            <Button onClick={onResetData} variant="outline" size="sm" className="flex-1">
               <RotateCcw size={16} />
               Reset
             </Button>
@@ -176,10 +154,10 @@ export const TripHeader = ({
             className="rounded-full shadow-lg hover:shadow-xl transition-shadow duration-200 flex items-center justify-center p-0 h-14 w-14 [&_svg]:size-8"
             size="icon"
           >
-            <Plus  />
+            <Plus />
           </Button>
         </div>
       )}
     </>
   );
-}; 
+};

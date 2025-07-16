@@ -18,8 +18,8 @@ export const ConfirmationModal = ({
   onConfirm,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   isDestructive = false,
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
@@ -32,21 +32,15 @@ export const ConfirmationModal = ({
             <AlertTriangle className={`h-5 w-5 ${isDestructive ? 'text-red-600' : 'text-orange-600'}`} />
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         <p className="text-gray-600 mb-6">{message}</p>
-        
+
         <div className="flex space-x-3 justify-end">
-          <Button
-            onClick={onClose}
-            variant="outline"
-          >
+          <Button onClick={onClose} variant="outline">
             {cancelText}
           </Button>
           <Button
@@ -54,7 +48,7 @@ export const ConfirmationModal = ({
               onConfirm();
               onClose();
             }}
-            variant={isDestructive ? "destructive" : "default"}
+            variant={isDestructive ? 'destructive' : 'default'}
           >
             {confirmText}
           </Button>
@@ -62,4 +56,4 @@ export const ConfirmationModal = ({
       </div>
     </div>
   );
-}; 
+};

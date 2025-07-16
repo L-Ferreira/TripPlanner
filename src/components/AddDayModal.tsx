@@ -1,6 +1,12 @@
-import { decimalHoursToTimeString, extractEmbedUrl, generateGoogleMapsUrl, getDefaultAccommodationFormData, timeStringToDecimalHours } from '@/lib/utils';
+import {
+  decimalHoursToTimeString,
+  extractEmbedUrl,
+  generateGoogleMapsUrl,
+  getDefaultAccommodationFormData,
+  timeStringToDecimalHours,
+} from '@/lib/utils';
 import { AlertTriangle, Plus, Trash2, X } from 'lucide-react';
-import { FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { TripData, TripDay } from '../hooks/useTripData';
 import AmenitiesChecklist from './AmenitiesChecklist';
 import { Button } from './ui/button';
@@ -12,21 +18,31 @@ interface AddDayModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (dayData: Omit<TripDay, 'id' | 'dayNumber'>) => string;
-  addDayAndLinkAccommodation: (dayData: Omit<TripDay, 'id' | 'dayNumber'>, existingAccommodationDayIds: string[]) => string;
+  addDayAndLinkAccommodation: (
+    dayData: Omit<TripDay, 'id' | 'dayNumber'>,
+    existingAccommodationDayIds: string[]
+  ) => string;
   tripData: TripData;
-  checkUnusedNights: (dayNumber: number) => { previousDay: TripDay; accommodationName: string; totalBookedNights: number; usedNights: number; unusedNights: number; hasUnusedNights: boolean; } | null;
+  checkUnusedNights: (dayNumber: number) => {
+    previousDay: TripDay;
+    accommodationName: string;
+    totalBookedNights: number;
+    usedNights: number;
+    unusedNights: number;
+    hasUnusedNights: boolean;
+  } | null;
   adjustPreviousAccommodationNights: (dayId: string, newNightCount: number) => void;
 }
 
-const AddDayModal: React.FC<AddDayModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onAdd, 
+const AddDayModal = ({
+  isOpen,
+  onClose,
+  onAdd,
   addDayAndLinkAccommodation,
-  tripData, 
-  checkUnusedNights, 
-  adjustPreviousAccommodationNights
-}) => {
+  tripData,
+  checkUnusedNights,
+  adjustPreviousAccommodationNights,
+}: AddDayModalProps) => {
   const [step, setStep] = useState<'accommodation-choice' | 'main-form'>('accommodation-choice');
   const [usingSameAccommodation, setUsingSameAccommodation] = useState(false);
   const [unusedNightsWarning, setUnusedNightsWarning] = useState<any>(null);
@@ -39,7 +55,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
 
   const [formData, setFormData] = useState({
     ...getDefaultAccommodationFormData(),
-    driveTime: ''
+    driveTime: '',
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -50,28 +66,28 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
       // Check for unused nights
       const unusedInfo = checkUnusedNights(newDayNumber);
       setUnusedNightsWarning(unusedInfo);
-      
+
       // Determine if we should show accommodation choice
       const shouldShowChoice = hasPreviousDay && unusedInfo?.hasUnusedNights;
       setStep(shouldShowChoice ? 'accommodation-choice' : 'main-form');
-      
+
       setUsingSameAccommodation(false);
       setShowUnusedNightsWarning(false);
-      
+
       // Reset form
       setFormData({
         ...getDefaultAccommodationFormData(),
-        driveTime: ''
+        driveTime: '',
       });
     }
   }, [isOpen, hasPreviousDay, newDayNumber, checkUnusedNights]);
 
   const handleAccommodationChoice = (sameAccommodation: boolean) => {
     setUsingSameAccommodation(sameAccommodation);
-    
+
     if (sameAccommodation && previousDay) {
       // Pre-fill form with previous day's accommodation AND region
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         region: previousDay.region, // Auto-fill region too!
         driveTime: decimalHoursToTimeString(previousDay.driveTimeHours),
@@ -84,7 +100,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
         accommodationNights: previousDay.accommodation.numberOfNights || 1,
         accommodationRoomType: previousDay.accommodation.roomType || '',
         accommodationImages: previousDay.accommodation.images,
-        accommodationAmenities: previousDay.accommodation.amenities
+        accommodationAmenities: previousDay.accommodation.amenities,
       }));
       setStep('main-form');
     } else if (!sameAccommodation && unusedNightsWarning?.hasUnusedNights) {
@@ -120,85 +136,81 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
           numberOfNights: formData.accommodationNights,
           roomType: formData.accommodationRoomType.trim() || undefined,
           images: formData.accommodationImages,
-          amenities: formData.accommodationAmenities
+          amenities: formData.accommodationAmenities,
         },
         places: [],
-        images: []
+        images: [],
       };
-      
+
       // Use the appropriate function based on accommodation choice
       if (usingSameAccommodation && previousDay) {
         // Get all days that should be linked with the same accommodation
-        const linkedDays = tripData.days.filter((d: TripDay) => 
-          d.accommodationId === previousDay.accommodationId || d.id === previousDay.id
+        const linkedDays = tripData.days.filter(
+          (d: TripDay) => d.accommodationId === previousDay.accommodationId || d.id === previousDay.id
         );
-        
+
         // Use the specialized function to add day and link accommodation
-        addDayAndLinkAccommodation(dayData, linkedDays.map((d: TripDay) => d.id));
+        addDayAndLinkAccommodation(
+          dayData,
+          linkedDays.map((d: TripDay) => d.id)
+        );
       } else {
         // Regular day addition without accommodation linking
         onAdd(dayData);
-        
+
         // If user chose to adjust previous accommodation's night count
         if (adjustPreviousNights && previousDay && unusedNightsWarning) {
           const newNightCount = unusedNightsWarning.usedNights;
           adjustPreviousAccommodationNights(previousDay.id, newNightCount);
         }
       }
-      
+
       // Reset form and close modal
       setFormData({
         ...getDefaultAccommodationFormData(),
-        driveTime: ''
+        driveTime: '',
       });
       setNewImageUrl('');
       onClose();
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value, 10) || (name === 'accommodationNights' ? 1 : 0) : value
+      [name]: type === 'number' ? parseInt(value, 10) || (name === 'accommodationNights' ? 1 : 0) : value,
     }));
   };
 
   const handleAddImage = () => {
     if (newImageUrl.trim()) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        accommodationImages: [...prev.accommodationImages, newImageUrl.trim()]
+        accommodationImages: [...prev.accommodationImages, newImageUrl.trim()],
       }));
       setNewImageUrl('');
     }
   };
 
   const handleRemoveImage = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      accommodationImages: prev.accommodationImages.filter((_, i) => i !== index)
+      accommodationImages: prev.accommodationImages.filter((_, i) => i !== index),
     }));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddImage();
-    }
   };
 
   const calculateDayDate = (dayNumber: number) => {
     if (!tripData.tripInfo.startDate) return '';
-    
+
     const startDate = new Date(tripData.tripInfo.startDate);
     const targetDate = new Date(startDate);
     targetDate.setDate(startDate.getDate() + dayNumber - 1);
-    
-    return targetDate.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
+
+    return targetDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -222,11 +234,13 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
               <div className="text-center">
                 <h3 className="text-lg font-semibold mb-2">Accommodation for Day {newDayNumber}</h3>
                 <p className="text-gray-600 mb-4">
-                  {previousDay?.accommodation?.name || 'Previous accommodation'} has {unusedNightsWarning?.unusedNights || 0} unused night{(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''}. 
-                  Would you like to stay there or book a new accommodation?
+                  {previousDay?.accommodation?.name || 'Previous accommodation'} has{' '}
+                  {unusedNightsWarning?.unusedNights || 0} unused night
+                  {(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''}. Would you like to stay there or book a
+                  new accommodation?
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button
                   variant="outline"
@@ -238,16 +252,14 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                     Continue staying at {previousDay?.accommodation?.name || 'previous accommodation'}
                   </div>
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   onClick={() => handleAccommodationChoice(false)}
                   className="p-6 h-auto flex flex-col items-center justify-center text-center"
                 >
                   <div className="text-lg font-semibold mb-2">Book New Accommodation</div>
-                  <div className="text-sm text-gray-600">
-                    Find a new place to stay for Day {newDayNumber}
-                  </div>
+                  <div className="text-sm text-gray-600">Find a new place to stay for Day {newDayNumber}</div>
                 </Button>
               </div>
             </div>
@@ -262,33 +274,38 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                   <div>
                     <h4 className="font-semibold text-yellow-800">Unused Accommodation Nights</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      {unusedNightsWarning?.accommodationName} has {unusedNightsWarning?.unusedNights} unused night{unusedNightsWarning?.unusedNights !== 1 ? 's' : ''}. 
-                      You booked {unusedNightsWarning?.totalBookedNights} night{unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''} but only used {unusedNightsWarning?.usedNights}.
+                      {unusedNightsWarning?.accommodationName} has {unusedNightsWarning?.unusedNights} unused night
+                      {unusedNightsWarning?.unusedNights !== 1 ? 's' : ''}. You booked{' '}
+                      {unusedNightsWarning?.totalBookedNights} night
+                      {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''} but only used{' '}
+                      {unusedNightsWarning?.usedNights}.
                     </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <p className="text-gray-600 mb-4">
-                  Would you like to adjust the previous accommodation's night count to match actual usage?
+                  Would you like to adjust the previous accommodation&apos;s night count to match actual usage?
                 </p>
-                
+
                 <div className="flex gap-4 justify-center">
                   <Button
                     variant="outline"
                     onClick={() => handleAdjustPreviousNights(true)}
                     className="flex-1 max-w-xs"
                   >
-                    Yes, Adjust to {unusedNightsWarning?.usedNights} Night{unusedNightsWarning?.usedNights !== 1 ? 's' : ''}
+                    Yes, Adjust to {unusedNightsWarning?.usedNights} Night
+                    {unusedNightsWarning?.usedNights !== 1 ? 's' : ''}
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     onClick={() => handleAdjustPreviousNights(false)}
                     className="flex-1 max-w-xs"
                   >
-                    No, Keep as {unusedNightsWarning?.totalBookedNights} Night{unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''}
+                    No, Keep as {unusedNightsWarning?.totalBookedNights} Night
+                    {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''}
                   </Button>
                 </div>
               </div>
@@ -311,7 +328,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                     placeholder="e.g., Porto, Lisbon, Aveiro"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="dateLabel">Date</Label>
                   <Input
@@ -335,11 +352,9 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                     onChange={handleChange}
                     placeholder="03:35"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Leave empty if no driving
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Leave empty if no driving</p>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="driveDistanceKm">Distance (km)</Label>
                   <Input
@@ -373,7 +388,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
               {!usingSameAccommodation && (
                 <div className="border-t pt-6">
                   <h3 className="text-lg font-semibold mb-4">Accommodation Information</h3>
-                  
+
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -387,7 +402,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                         placeholder="Hotel Name"
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="accommodationWebsite">Website URL (optional)</Label>
                       <Input
@@ -413,7 +428,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                         placeholder="Brief description of the accommodation"
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="accommodationNights">Number of Nights *</Label>
                       <Input
@@ -454,7 +469,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                         placeholder="https://maps.google.com/..."
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="accommodationMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
                       <Input
@@ -481,11 +496,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                           {formData.accommodationImages.map((imageUrl, index) => (
                             <div key={index} className="relative group">
                               <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                                <img
-                                  src={imageUrl}
-                                  alt={`Image ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
+                                <img src={imageUrl} alt={`Image ${index + 1}`} className="w-full h-full object-cover" />
                               </div>
                               <Button
                                 type="button"
@@ -500,7 +511,7 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                           ))}
                         </div>
                       )}
-                      
+
                       {/* Add New Image */}
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                         <div className="flex gap-2">
@@ -533,14 +544,19 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
                   {/* Amenities */}
                   <AmenitiesChecklist
                     amenities={formData.accommodationAmenities}
-                    onChange={(amenities) => setFormData(prev => ({ ...prev, accommodationAmenities: amenities }))}
+                    onChange={(amenities) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        accommodationAmenities: amenities,
+                      }))
+                    }
                   />
                 </div>
               )}
             </form>
           )}
         </CardContent>
-        
+
         {/* Footer */}
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
@@ -559,4 +575,4 @@ const AddDayModal: React.FC<AddDayModalProps> = ({
   );
 };
 
-export default AddDayModal; 
+export default AddDayModal;

@@ -4,7 +4,7 @@ export interface AmenitiesData {
   wifi: boolean;
   airConditioning: boolean;
   heating: boolean;
-  
+
   // Kitchen & Dining
   kitchen: boolean;
   kitchenette: boolean;
@@ -18,7 +18,7 @@ export interface AmenitiesData {
   dining: boolean;
   restaurant: boolean;
   breakfast: boolean;
-  
+
   // Bathroom & Laundry
   hairDryer: boolean;
   bathtub: boolean;
@@ -27,7 +27,7 @@ export interface AmenitiesData {
   dryer: boolean;
   iron: boolean;
   bathrobes: boolean;
-  
+
   // Bedroom & Living
   tv: boolean;
   cableTV: boolean;
@@ -35,7 +35,7 @@ export interface AmenitiesData {
   desk: boolean;
   safe: boolean;
   fireplace: boolean;
-  
+
   // Outdoor & Views
   balcony: boolean;
   terrace: boolean;
@@ -46,7 +46,7 @@ export interface AmenitiesData {
   cityView: boolean;
   lakeView: boolean;
   gardenView: boolean;
-  
+
   // Recreation & Wellness
   pool: boolean;
   hotTub: boolean;
@@ -54,32 +54,32 @@ export interface AmenitiesData {
   gym: boolean;
   spa: boolean;
   gameRoom: boolean;
-  
+
   // Transportation & Parking
   parking: boolean;
   garage: boolean;
   electricCarCharging: boolean;
   bicycles: boolean;
-  
+
   // Family & Accessibility
   familyFriendly: boolean;
   crib: boolean;
   highChair: boolean;
   wheelchair: boolean;
-  
+
   // Policies & Services
   petFriendly: boolean;
   smokingAllowed: boolean;
   longTermStays: boolean;
   selfCheckIn: boolean;
   concierge: boolean;
-  
+
   // Security & Safety
   securitySystem: boolean;
   smokeDetector: boolean;
   carbonMonoxideDetector: boolean;
   firstAidKit: boolean;
-  
+
   // Additional amenities
   other: string[];
 }
@@ -90,7 +90,7 @@ export const getDefaultAmenities = (): AmenitiesData => ({
   wifi: false,
   airConditioning: false,
   heating: false,
-  
+
   // Kitchen & Dining
   kitchen: false,
   kitchenette: false,
@@ -104,7 +104,7 @@ export const getDefaultAmenities = (): AmenitiesData => ({
   dining: false,
   restaurant: false,
   breakfast: false,
-  
+
   // Bathroom & Laundry
   hairDryer: false,
   bathtub: false,
@@ -113,7 +113,7 @@ export const getDefaultAmenities = (): AmenitiesData => ({
   dryer: false,
   iron: false,
   bathrobes: false,
-  
+
   // Bedroom & Living
   tv: false,
   cableTV: false,
@@ -121,7 +121,7 @@ export const getDefaultAmenities = (): AmenitiesData => ({
   desk: false,
   safe: false,
   fireplace: false,
-  
+
   // Outdoor & Views
   balcony: false,
   terrace: false,
@@ -132,7 +132,7 @@ export const getDefaultAmenities = (): AmenitiesData => ({
   cityView: false,
   lakeView: false,
   gardenView: false,
-  
+
   // Recreation & Wellness
   pool: false,
   hotTub: false,
@@ -140,34 +140,34 @@ export const getDefaultAmenities = (): AmenitiesData => ({
   gym: false,
   spa: false,
   gameRoom: false,
-  
+
   // Transportation & Parking
   parking: false,
   garage: false,
   electricCarCharging: false,
   bicycles: false,
-  
+
   // Family & Accessibility
   familyFriendly: false,
   crib: false,
   highChair: false,
   wheelchair: false,
-  
+
   // Policies & Services
   petFriendly: false,
   smokingAllowed: false,
   longTermStays: false,
   selfCheckIn: false,
   concierge: false,
-  
+
   // Security & Safety
   securitySystem: false,
   smokeDetector: false,
   carbonMonoxideDetector: false,
   firstAidKit: false,
-  
+
   // Additional amenities
-  other: []
+  other: [],
 });
 
 // Amenity categories for organized display
@@ -178,7 +178,7 @@ export const amenityCategories = [
       { key: 'wifi' as const, label: 'Free WiFi' },
       { key: 'airConditioning' as const, label: 'Air Conditioning' },
       { key: 'heating' as const, label: 'Heating' },
-    ]
+    ],
   },
   {
     title: 'Kitchen & Dining',
@@ -195,7 +195,7 @@ export const amenityCategories = [
       { key: 'dining' as const, label: 'Dining Area' },
       { key: 'restaurant' as const, label: 'Restaurant' },
       { key: 'breakfast' as const, label: 'Breakfast Included' },
-    ]
+    ],
   },
   {
     title: 'Bathroom & Laundry',
@@ -207,7 +207,7 @@ export const amenityCategories = [
       { key: 'dryer' as const, label: 'Dryer' },
       { key: 'iron' as const, label: 'Iron & Ironing Board' },
       { key: 'bathrobes' as const, label: 'Bathrobes' },
-    ]
+    ],
   },
   {
     title: 'Bedroom & Living',
@@ -218,7 +218,7 @@ export const amenityCategories = [
       { key: 'desk' as const, label: 'Desk/Workspace' },
       { key: 'safe' as const, label: 'Safe' },
       { key: 'fireplace' as const, label: 'Fireplace' },
-    ]
+    ],
   },
   {
     title: 'Outdoor & Views',
@@ -232,7 +232,7 @@ export const amenityCategories = [
       { key: 'cityView' as const, label: 'City View' },
       { key: 'lakeView' as const, label: 'Lake View' },
       { key: 'gardenView' as const, label: 'Garden View' },
-    ]
+    ],
   },
   {
     title: 'Recreation & Wellness',
@@ -243,7 +243,7 @@ export const amenityCategories = [
       { key: 'gym' as const, label: 'Gym/Fitness Center' },
       { key: 'spa' as const, label: 'Spa Services' },
       { key: 'gameRoom' as const, label: 'Game Room' },
-    ]
+    ],
   },
   {
     title: 'Transportation & Parking',
@@ -252,7 +252,7 @@ export const amenityCategories = [
       { key: 'garage' as const, label: 'Garage' },
       { key: 'electricCarCharging' as const, label: 'Electric Car Charging' },
       { key: 'bicycles' as const, label: 'Bicycles' },
-    ]
+    ],
   },
   {
     title: 'Family & Accessibility',
@@ -261,7 +261,7 @@ export const amenityCategories = [
       { key: 'crib' as const, label: 'Baby Crib' },
       { key: 'highChair' as const, label: 'High Chair' },
       { key: 'wheelchair' as const, label: 'Wheelchair Accessible' },
-    ]
+    ],
   },
   {
     title: 'Policies & Services',
@@ -271,17 +271,20 @@ export const amenityCategories = [
       { key: 'longTermStays' as const, label: 'Long Term Stays' },
       { key: 'selfCheckIn' as const, label: 'Self Check-in' },
       { key: 'concierge' as const, label: 'Concierge Service' },
-    ]
+    ],
   },
   {
     title: 'Security & Safety',
     items: [
       { key: 'securitySystem' as const, label: 'Security System' },
       { key: 'smokeDetector' as const, label: 'Smoke Detector' },
-      { key: 'carbonMonoxideDetector' as const, label: 'Carbon Monoxide Detector' },
+      {
+        key: 'carbonMonoxideDetector' as const,
+        label: 'Carbon Monoxide Detector',
+      },
       { key: 'firstAidKit' as const, label: 'First Aid Kit' },
-    ]
-  }
+    ],
+  },
 ];
 
 // Amenity labels for display - flattened from categories for easy lookup
@@ -290,7 +293,7 @@ export const amenityLabels: { [key: string]: string } = {
   wifi: 'WiFi',
   airConditioning: 'A/C',
   heating: 'Heating',
-  
+
   // Kitchen & Dining
   kitchen: 'Kitchen',
   kitchenette: 'Kitchenette',
@@ -304,7 +307,7 @@ export const amenityLabels: { [key: string]: string } = {
   dining: 'Dining Area',
   restaurant: 'Restaurant',
   breakfast: 'Breakfast',
-  
+
   // Bathroom & Laundry
   hairDryer: 'Hair Dryer',
   bathtub: 'Bathtub',
@@ -313,7 +316,7 @@ export const amenityLabels: { [key: string]: string } = {
   dryer: 'Dryer',
   iron: 'Iron',
   bathrobes: 'Bathrobes',
-  
+
   // Bedroom & Living
   tv: 'TV',
   cableTV: 'Cable TV',
@@ -321,7 +324,7 @@ export const amenityLabels: { [key: string]: string } = {
   desk: 'Desk',
   safe: 'Safe',
   fireplace: 'Fireplace',
-  
+
   // Outdoor & Views
   balcony: 'Balcony',
   terrace: 'Terrace',
@@ -332,7 +335,7 @@ export const amenityLabels: { [key: string]: string } = {
   cityView: 'City View',
   lakeView: 'Lake View',
   gardenView: 'Garden View',
-  
+
   // Recreation & Wellness
   pool: 'Pool',
   hotTub: 'Hot Tub',
@@ -340,31 +343,31 @@ export const amenityLabels: { [key: string]: string } = {
   gym: 'Gym',
   spa: 'Spa',
   gameRoom: 'Game Room',
-  
+
   // Transportation & Parking
   parking: 'Parking',
   garage: 'Garage',
   electricCarCharging: 'EV Charging',
   bicycles: 'Bicycles',
-  
+
   // Family & Accessibility
   familyFriendly: 'Family Friendly',
   crib: 'Baby Crib',
   highChair: 'High Chair',
   wheelchair: 'Wheelchair Accessible',
-  
+
   // Policies & Services
   petFriendly: 'Pet Friendly',
   smokingAllowed: 'Smoking',
   longTermStays: 'Long Term Stays',
   selfCheckIn: 'Self Check-in',
   concierge: 'Concierge',
-  
+
   // Security & Safety
   securitySystem: 'Security System',
   smokeDetector: 'Smoke Detector',
   carbonMonoxideDetector: 'CO Detector',
-  firstAidKit: 'First Aid Kit'
+  firstAidKit: 'First Aid Kit',
 };
 
 // Extended amenity labels for confirmation modal (more descriptive)
@@ -373,7 +376,7 @@ export const extendedAmenityLabels: { [key: string]: string } = {
   wifi: 'WiFi',
   airConditioning: 'Air Conditioning',
   heating: 'Heating',
-  
+
   // Kitchen & Dining
   kitchen: 'Kitchen',
   kitchenette: 'Kitchenette',
@@ -387,7 +390,7 @@ export const extendedAmenityLabels: { [key: string]: string } = {
   dining: 'Dining Area',
   restaurant: 'Restaurant',
   breakfast: 'Breakfast',
-  
+
   // Bathroom & Laundry
   hairDryer: 'Hair Dryer',
   bathtub: 'Bathtub',
@@ -396,7 +399,7 @@ export const extendedAmenityLabels: { [key: string]: string } = {
   dryer: 'Dryer',
   iron: 'Iron',
   bathrobes: 'Bathrobes',
-  
+
   // Bedroom & Living
   tv: 'TV',
   cableTV: 'Cable TV',
@@ -404,7 +407,7 @@ export const extendedAmenityLabels: { [key: string]: string } = {
   desk: 'Desk',
   safe: 'Safe',
   fireplace: 'Fireplace',
-  
+
   // Outdoor & Views
   balcony: 'Balcony',
   terrace: 'Terrace',
@@ -415,7 +418,7 @@ export const extendedAmenityLabels: { [key: string]: string } = {
   cityView: 'City View',
   lakeView: 'Lake View',
   gardenView: 'Garden View',
-  
+
   // Recreation & Wellness
   pool: 'Pool',
   hotTub: 'Hot Tub',
@@ -423,29 +426,29 @@ export const extendedAmenityLabels: { [key: string]: string } = {
   gym: 'Gym',
   spa: 'Spa',
   gameRoom: 'Game Room',
-  
+
   // Transportation & Parking
   parking: 'Parking',
   garage: 'Garage',
   electricCarCharging: 'EV Charging',
   bicycles: 'Bicycles',
-  
+
   // Family & Accessibility
   familyFriendly: 'Family Friendly',
   crib: 'Baby Crib',
   highChair: 'High Chair',
   wheelchair: 'Wheelchair Accessible',
-  
+
   // Policies & Services
   petFriendly: 'Pet Friendly',
   smokingAllowed: 'Smoking Allowed',
   longTermStays: 'Long Term Stays',
   selfCheckIn: 'Self Check-in',
   concierge: 'Concierge',
-  
+
   // Security & Safety
   securitySystem: 'Security System',
   smokeDetector: 'Smoke Detector',
   carbonMonoxideDetector: 'CO Detector',
-  firstAidKit: 'First Aid Kit'
-}; 
+  firstAidKit: 'First Aid Kit',
+};

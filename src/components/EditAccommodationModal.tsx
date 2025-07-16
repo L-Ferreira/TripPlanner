@@ -17,13 +17,7 @@ interface EditAccommodationModalProps {
   dayNumber: number;
 }
 
-const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  accommodation,
-  dayNumber 
-}) => {
+const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNumber }: EditAccommodationModalProps) => {
   const [formData, setFormData] = useState({
     name: accommodation?.name || '',
     websiteUrl: accommodation?.websiteUrl || '',
@@ -33,7 +27,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
     numberOfNights: accommodation?.numberOfNights || 1,
     roomType: accommodation?.roomType || '',
     images: accommodation?.images || [],
-    amenities: accommodation?.amenities || getDefaultAmenities()
+    amenities: accommodation?.amenities || getDefaultAmenities(),
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -49,7 +43,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
         numberOfNights: accommodation.numberOfNights || 1,
         roomType: accommodation.roomType || '',
         images: accommodation.images || [],
-        amenities: accommodation.amenities || getDefaultAmenities()
+        amenities: accommodation.amenities || getDefaultAmenities(),
       });
     }
   }, [accommodation]);
@@ -60,9 +54,9 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
       // Filter out empty amenities from the 'other' array
       const filteredAmenities = {
         ...formData.amenities,
-        other: formData.amenities.other.filter(amenity => amenity.trim() !== '')
+        other: formData.amenities.other.filter((amenity) => amenity.trim() !== ''),
       };
-      
+
       onSave({
         name: formData.name.trim(),
         websiteUrl: formData.websiteUrl.trim() || undefined,
@@ -72,7 +66,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
         numberOfNights: formData.numberOfNights,
         roomType: formData.roomType.trim() || undefined,
         images: formData.images,
-        amenities: filteredAmenities
+        amenities: filteredAmenities,
       });
       onClose();
     }
@@ -80,33 +74,33 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value, 10) || 1 : value
+      [name]: type === 'number' ? parseInt(value, 10) || 1 : value,
     }));
   };
 
   const handleAddImage = () => {
     if (newImageUrl.trim()) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, newImageUrl.trim()]
+        images: [...prev.images, newImageUrl.trim()],
       }));
       setNewImageUrl('');
     }
   };
 
   const handleRemoveImage = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
   const handleAmenitiesChange = (amenities: AmenitiesData) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      amenities
+      amenities,
     }));
   };
 
@@ -138,7 +132,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
                   placeholder="Hotel Name"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="websiteUrl">Website URL (optional)</Label>
                 <Input
@@ -164,7 +158,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
                   placeholder="Brief description of the accommodation"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="numberOfNights">Number of Nights *</Label>
                 <Input
@@ -205,7 +199,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
                   placeholder="https://maps.google.com/..."
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
                 <Input
@@ -232,11 +226,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
                     {formData.images.map((imageUrl, index) => (
                       <div key={index} className="relative group">
                         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={imageUrl}
-                            alt={`Image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={imageUrl} alt={`Image ${index + 1}`} className="w-full h-full object-cover" />
                         </div>
                         <Button
                           type="button"
@@ -251,7 +241,7 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
                     ))}
                   </div>
                 )}
-                
+
                 {/* Add New Image */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <div className="flex gap-2">
@@ -274,16 +264,11 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
                       Add
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {formData.images.length} image(s) added
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">{formData.images.length} image(s) added</p>
                 </div>
 
                 {/* Amenities */}
-                <AmenitiesChecklist
-                  amenities={formData.amenities}
-                  onChange={handleAmenitiesChange}
-                />
+                <AmenitiesChecklist amenities={formData.amenities} onChange={handleAmenitiesChange} />
               </div>
             </div>
           </form>
@@ -303,4 +288,4 @@ const EditAccommodationModal: React.FC<EditAccommodationModalProps> = ({
   );
 };
 
-export default EditAccommodationModal; 
+export default EditAccommodationModal;

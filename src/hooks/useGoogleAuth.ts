@@ -40,8 +40,8 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
   const updateAuthState = useCallback(() => {
     const service = getGoogleDriveService();
     const isAuthenticated = service.isAuthenticated();
-    
-    setState(prev => ({
+
+    setState((prev) => ({
       ...prev,
       isAuthenticated,
       isLoading: false,
@@ -51,7 +51,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
   const login = useCallback(() => {
     try {
       if (!GOOGLE_DRIVE_CONFIG.clientId) {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           error: 'Google Client ID not configured. Please set VITE_GOOGLE_CLIENT_ID in your environment variables.',
         }));
@@ -60,30 +60,26 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
 
       const service = getGoogleDriveService();
       const authUrl = service.getAuthUrl();
-      
+
       // Open popup window for authentication
-      const popup = window.open(
-        authUrl,
-        'google-auth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
-      );
+      const popup = window.open(authUrl, 'google-auth', 'width=500,height=600,scrollbars=yes,resizable=yes');
 
       if (!popup) {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           error: 'Popup blocked. Please allow popups for this site.',
         }));
         return;
       }
 
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isLoading: true }));
 
       // Monitor popup for URL changes
       const checkPopup = setInterval(() => {
         try {
           if (popup.closed) {
             clearInterval(checkPopup);
-            setState(prev => ({ ...prev, isLoading: false }));
+            setState((prev) => ({ ...prev, isLoading: false }));
             return;
           }
 
@@ -91,17 +87,17 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
           const popupUrl = popup.location.href;
           if (popupUrl && popupUrl.includes(GOOGLE_DRIVE_CONFIG.redirectUri)) {
             const hashParams = new URLSearchParams(popup.location.hash.substring(1));
-            
+
             if (hashParams.has('access_token')) {
               service.handleAuthCallback(hashParams);
-              setState(prev => ({
+              setState((prev) => ({
                 ...prev,
                 isAuthenticated: true,
                 isLoading: false,
                 user: { email: 'user@example.com' }, // TODO: Get actual user info
               }));
             } else if (hashParams.has('error')) {
-              setState(prev => ({
+              setState((prev) => ({
                 ...prev,
                 error: hashParams.get('error_description') || 'Authentication failed',
                 isLoading: false,
@@ -115,7 +111,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
           // Cross-origin errors are expected until redirect
           if (popup.closed) {
             clearInterval(checkPopup);
-            setState(prev => ({ ...prev, isLoading: false }));
+            setState((prev) => ({ ...prev, isLoading: false }));
           }
         }
       }, 1000);
@@ -124,9 +120,8 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
       popup.addEventListener('beforeunload', () => {
         clearInterval(checkPopup);
       });
-
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Login failed',
         isLoading: false,
@@ -138,7 +133,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
     try {
       const service = getGoogleDriveService();
       service.logout();
-      
+
       setState({
         isAuthenticated: false,
         isLoading: false,
@@ -146,7 +141,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
         user: null,
       });
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Logout failed',
       }));
@@ -154,7 +149,7 @@ export const useGoogleAuth = (): AuthState & AuthActions => {
   }, []);
 
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
+    setState((prev) => ({ ...prev, error: null }));
   }, []);
 
   useEffect(() => {

@@ -1,9 +1,7 @@
-import TripPlanner from './components/TripPlanner'
+import TripPlanner from './components/TripPlanner';
 
 function App() {
-  return (
-    <TripPlanner />
-  )
+  return <TripPlanner />;
 }
 
-export default App 
+export default App;

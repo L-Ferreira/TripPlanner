@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { TripInfo } from '../hooks/useTripData';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -29,13 +29,13 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
     }
   }, [isOpen, tripInfo]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
 
   const handleChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   if (!isOpen) return null;
@@ -46,7 +46,7 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
         <div className="flex-shrink-0 p-6 pb-4">
           <h2 className="text-xl font-bold mb-0">Edit Trip Information</h2>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto px-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -65,7 +65,7 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
               <Textarea
                 id="tripDescription"
                 value={formData.description}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('description', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleChange('description', e.target.value)}
                 placeholder="Enter trip description"
                 rows={3}
               />
@@ -89,19 +89,13 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
 
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-            >
+            <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
-              Save Changes
-            </Button>
+            <Button onClick={handleSubmit}>Save Changes</Button>
           </div>
         </div>
       </div>
     </div>
   );
-}; 
+};

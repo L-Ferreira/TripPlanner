@@ -1,15 +1,15 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { getDefaultAmenities } from './amenities';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 // URL extraction utility for Google Maps embed URLs
 export const extractEmbedUrl = (input: string): string => {
   if (!input.trim()) return '';
-  
+
   // If it's an iframe HTML, extract the src attribute
   if (input.includes('<iframe') && input.includes('src=')) {
     const srcMatch = input.match(/src="([^"]+)"/);
@@ -17,12 +17,12 @@ export const extractEmbedUrl = (input: string): string => {
       return srcMatch[1];
     }
   }
-  
+
   // If it's already a clean embed URL, return as is
   if (input.includes('maps/embed')) {
     return input;
   }
-  
+
   // If it's a regular Google Maps URL, try to extract the embed URL
   // This is a basic implementation - in a real app, you might want more sophisticated parsing
   return input;
@@ -46,7 +46,7 @@ export const decimalHoursToTimeString = (decimalHours: number): string => {
 export const timeStringToDecimalHours = (timeString: string): number => {
   if (!timeString.trim()) return 0;
   const [hours, minutes] = timeString.split(':').map(Number);
-  return hours + (minutes / 60);
+  return hours + minutes / 60;
 };
 
 // Convert decimal hours to hours and minutes (for display)
@@ -58,7 +58,7 @@ export const decimalHoursToHoursMinutes = (decimalHours: number): { hours: numbe
 
 // Convert hours and minutes to decimal hours
 export const hoursMinutesToDecimalHours = (hours: number, minutes: number): number => {
-  return hours + (minutes / 60);
+  return hours + minutes / 60;
 };
 
 // Default form data for accommodation
@@ -77,7 +77,7 @@ export const getDefaultAccommodationFormData = () => ({
   accommodationRoomType: '',
   accommodationImages: [] as string[],
   accommodationAmenities: getDefaultAmenities(),
-  images: [] as string[]
+  images: [] as string[],
 });
 
 // Default form data for places
@@ -87,5 +87,5 @@ export const getDefaultPlaceFormData = () => ({
   websiteUrl: '',
   googleMapsUrl: '',
   googleMapsEmbedUrl: '',
-  images: [] as string[]
+  images: [] as string[],
 });

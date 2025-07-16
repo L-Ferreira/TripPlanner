@@ -7,7 +7,7 @@ interface DayNotesCardProps {
   onUpdateNotes: (dayId: string, notes: string) => void;
 }
 
-const DayNotesCard: React.FC<DayNotesCardProps> = ({ day, onUpdateNotes }) => {
+const DayNotesCard = ({ day, onUpdateNotes }: DayNotesCardProps) => {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-0">
@@ -28,4 +28,4 @@ const DayNotesCard: React.FC<DayNotesCardProps> = ({ day, onUpdateNotes }) => {
   );
 };
 
-export default DayNotesCard; 
+export default DayNotesCard;

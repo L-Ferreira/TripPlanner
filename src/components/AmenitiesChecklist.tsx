@@ -12,7 +12,7 @@ interface AmenitiesChecklistProps {
   onChange: (amenities: AmenitiesData) => void;
 }
 
-const AmenitiesChecklist: React.FC<AmenitiesChecklistProps> = ({ amenities, onChange }) => {
+const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) => {
   const [newAmenity, setNewAmenity] = useState('');
 
   const handleCheckboxChange = (key: keyof Omit<AmenitiesData, 'other'>) => {
@@ -82,12 +82,7 @@ const AmenitiesChecklist: React.FC<AmenitiesChecklistProps> = ({ amenities, onCh
               }}
               className="flex-1"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddOtherAmenity}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={handleAddOtherAmenity}>
               <Plus size={16} />
             </Button>
           </div>
@@ -115,4 +110,4 @@ const AmenitiesChecklist: React.FC<AmenitiesChecklistProps> = ({ amenities, onCh
   );
 };
 
-export default AmenitiesChecklist; 
+export default AmenitiesChecklist;

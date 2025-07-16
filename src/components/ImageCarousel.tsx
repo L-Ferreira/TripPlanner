@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { ChangeEvent, CSSProperties, useState } from 'react';
 
 interface ImageCarouselProps {
   images: string[];
@@ -10,25 +10,17 @@ interface ImageCarouselProps {
   className?: string;
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({
-  images,
-  onAddImage,
-  className = ''
-}) => {
+const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
 
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
+    setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
   };
 
   const handleAddImage = () => {
@@ -38,8 +30,6 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       setShowAddForm(false);
     }
   };
-
-
 
   return (
     <Card className={`relative h-full ${className}`}>
@@ -51,16 +41,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
                 src={images[currentImageIndex]}
                 alt={`Image ${currentImageIndex + 1}`}
                 className="w-full h-full object-cover object-center"
-                style={{
-                  imageRendering: 'crisp-edges' as const,
-                  WebkitImageRendering: 'crisp-edges' as const,
-                  MozImageRendering: 'crisp-edges' as const,
-                  msImageRendering: 'crisp-edges' as const
-                } as React.CSSProperties}
+                style={
+                  {
+                    imageRendering: 'crisp-edges' as const,
+                    WebkitImageRendering: 'crisp-edges' as const,
+                    MozImageRendering: 'crisp-edges' as const,
+                    msImageRendering: 'crisp-edges' as const,
+                  } as CSSProperties
+                }
                 loading="lazy"
                 decoding="async"
               />
-              
+
               {/* Navigation buttons */}
               {images.length > 1 && (
                 <>
@@ -118,15 +110,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
                   type="url"
                   placeholder="Enter image URL"
                   value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setNewImageUrl(e.target.value)}
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={handleAddImage}
-                    className="flex-1"
-                  >
+                  <Button size="sm" onClick={handleAddImage} className="flex-1">
                     Add
                   </Button>
                   <Button
@@ -161,4 +149,4 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   );
 };
 
-export default ImageCarousel; 
+export default ImageCarousel;

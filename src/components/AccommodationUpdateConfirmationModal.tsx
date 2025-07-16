@@ -13,21 +13,26 @@ interface AccommodationUpdateConfirmationModalProps {
   newAccommodation: TripDay['accommodation'];
 }
 
-const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirmationModalProps> = ({
+const AccommodationUpdateConfirmationModal = ({
   isOpen,
   onClose,
   onConfirm,
   affectedDays,
   currentDay,
   oldAccommodation,
-  newAccommodation
-}) => {
+  newAccommodation,
+}: AccommodationUpdateConfirmationModalProps) => {
   if (!isOpen) return null;
 
   // Helper function to get changed fields
   const getChangedFields = () => {
-    const changes: Array<{field: string, label: string, oldValue: any, newValue: any}> = [];
-    
+    const changes: Array<{
+      field: string;
+      label: string;
+      oldValue: any;
+      newValue: any;
+    }> = [];
+
     const fieldsToCheck = [
       { key: 'name', label: 'Name' },
       { key: 'websiteUrl', label: 'Website URL' },
@@ -38,16 +43,16 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
       { key: 'roomType', label: 'Room Type' },
     ];
 
-    fieldsToCheck.forEach(field => {
+    fieldsToCheck.forEach((field) => {
       const oldValue = oldAccommodation[field.key as keyof TripDay['accommodation']];
       const newValue = newAccommodation[field.key as keyof TripDay['accommodation']];
-      
+
       if (oldValue !== newValue) {
         changes.push({
           field: field.key,
           label: field.label,
           oldValue: oldValue || '(empty)',
-          newValue: newValue || '(empty)'
+          newValue: newValue || '(empty)',
         });
       }
     });
@@ -59,15 +64,21 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
       changes.push({
         field: 'images',
         label: 'Images',
-        oldValue: oldImages.length > 0 ? oldImages.map((img, i) => `Image ${i + 1}: ${img.substring(0, 50)}...`).join('\n') : '(no images)',
-        newValue: newImages.length > 0 ? newImages.map((img, i) => `Image ${i + 1}: ${img.substring(0, 50)}...`).join('\n') : '(no images)'
+        oldValue:
+          oldImages.length > 0
+            ? oldImages.map((img, i) => `Image ${i + 1}: ${img.substring(0, 50)}...`).join('\n')
+            : '(no images)',
+        newValue:
+          newImages.length > 0
+            ? newImages.map((img, i) => `Image ${i + 1}: ${img.substring(0, 50)}...`).join('\n')
+            : '(no images)',
       });
     }
 
     // Check amenities with detailed comparison
     const oldAmenities = oldAccommodation.amenities;
     const newAmenities = newAccommodation.amenities;
-    
+
     const getAmenityChanges = () => {
       const changedAmenities = [];
 
@@ -96,7 +107,7 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
         field: 'amenities',
         label: 'Amenities',
         oldValue: 'See detailed changes below',
-        newValue: amenityChanges.join('\n')
+        newValue: amenityChanges.join('\n'),
       });
     }
 
@@ -105,10 +116,10 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
 
   const changedFields = getChangedFields();
   const allAffectedDays = [currentDay, ...affectedDays];
-  
+
   // Sort affected days by day number
   const sortedAffectedDays = allAffectedDays.sort((a, b) => a.dayNumber - b.dayNumber);
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden">
@@ -121,7 +132,7 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
             <div>
               <h3 className="font-semibold mb-2">This change will affect the following days:</h3>
               <div className="flex flex-wrap gap-2 text-sm">
-                {sortedAffectedDays.map(day => (
+                {sortedAffectedDays.map((day) => (
                   <span key={day.id} className="bg-gray-100 px-2 py-1 rounded">
                     Day {day.dayNumber}: {day.region}
                   </span>
@@ -149,8 +160,8 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
 
             <div className="bg-blue-50 p-4 rounded">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> This will update the accommodation details for all linked days. 
-                If you only want to update the current day, you'll need to create a separate accommodation entry.
+                <strong>Note:</strong> This will update the accommodation details for all linked days. If you only want
+                to update the current day, you&apos;ll need to create a separate accommodation entry.
               </p>
             </div>
           </div>
@@ -168,4 +179,4 @@ const AccommodationUpdateConfirmationModal: React.FC<AccommodationUpdateConfirma
   );
 };
 
-export default AccommodationUpdateConfirmationModal; 
+export default AccommodationUpdateConfirmationModal;

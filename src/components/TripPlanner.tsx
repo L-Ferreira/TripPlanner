@@ -22,7 +22,7 @@ import { EditTripInfoModal } from './EditTripInfoModal';
 import PlacesCard from './PlacesCard';
 import { TripHeader } from './TripHeader';
 
-const TripPlanner: React.FC = () => {
+const TripPlanner = () => {
   const {
     tripData,
     updateTripInfo,
@@ -45,7 +45,7 @@ const TripPlanner: React.FC = () => {
 
     checkUnusedNights,
     adjustPreviousAccommodationNights,
-    setFullTripData
+    setFullTripData,
   } = useTripData();
 
   // Google Drive sync functionality
@@ -57,7 +57,8 @@ const TripPlanner: React.FC = () => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasLocalChanges) {
         e.preventDefault();
-        e.returnValue = 'You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?';
+        e.returnValue =
+          'You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?';
         return 'You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?';
       }
     };
@@ -83,7 +84,7 @@ const TripPlanner: React.FC = () => {
     openDeleteModal,
     closeDeleteModal,
     openAccommodationUpdateModal,
-    closeAccommodationUpdateModal
+    closeAccommodationUpdateModal,
   } = useModalState();
 
   // CRUD handlers
@@ -102,10 +103,10 @@ const TripPlanner: React.FC = () => {
   const handleUpdateAccommodation = (accommodationData: any) => {
     const dayId = modals.editAccommodation.dayId;
     const linkedInfo = findLinkedAccommodationDays(dayId);
-    
+
     if (linkedInfo.isLinked) {
       // Show confirmation modal for linked accommodations
-      const currentDay = tripData.days.find(d => d.id === dayId);
+      const currentDay = tripData.days.find((d) => d.id === dayId);
       openAccommodationUpdateModal(
         dayId,
         currentDay!.accommodation,
@@ -125,7 +126,7 @@ const TripPlanner: React.FC = () => {
   };
 
   const handleDeleteDay = (dayId: string) => {
-    const day = tripData.days.find(d => d.id === dayId);
+    const day = tripData.days.find((d) => d.id === dayId);
     openDeleteModal(
       'Delete Day',
       `Are you sure you want to delete Day #${day?.dayNumber} (${day?.region})? This action cannot be undone.`,
@@ -134,16 +135,14 @@ const TripPlanner: React.FC = () => {
   };
 
   const handleDeletePlace = (dayId: string, placeId: string) => {
-    const day = tripData.days.find(d => d.id === dayId);
-    const place = day?.places.find(p => p.id === placeId);
+    const day = tripData.days.find((d) => d.id === dayId);
+    const place = day?.places.find((p) => p.id === placeId);
     openDeleteModal(
       'Delete Place',
       `Are you sure you want to delete "${place?.name}"? This action cannot be undone.`,
       () => deletePlace(dayId, placeId)
     );
   };
-
-
 
   const handleShowResetModal = () => {
     openDeleteModal(
@@ -201,7 +200,9 @@ const TripPlanner: React.FC = () => {
                     {day.driveTimeHours > 0 && (
                       <div className="flex items-center gap-2 text-sm text-gray-700">
                         <Car size={16} />
-                        <span>{formatDriveTime(day.driveTimeHours)} • {day.driveDistanceKm}km</span>
+                        <span>
+                          {formatDriveTime(day.driveTimeHours)} • {day.driveDistanceKm}km
+                        </span>
                       </div>
                     )}
                   </div>
@@ -258,10 +259,7 @@ const TripPlanner: React.FC = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">
-                        <div className={cn(
-                          "bg-gray-100 rounded-lg overflow-hidden",
-                          "h-64 lg:h-80 max-h-[400px]"
-                        )}>
+                        <div className={cn('bg-gray-100 rounded-lg overflow-hidden', 'h-64 lg:h-80 max-h-[400px]')}>
                           <iframe
                             src={day.googleMapsEmbedUrl}
                             width="100%"
@@ -277,10 +275,7 @@ const TripPlanner: React.FC = () => {
                   )}
 
                   {/* Accommodation */}
-                  <AccommodationCard
-                    day={day}
-                    onEditAccommodation={openEditAccommodationModal}
-                  />
+                  <AccommodationCard day={day} onEditAccommodation={openEditAccommodationModal} />
 
                   {/* Places to Visit */}
                   <PlacesCard
@@ -292,27 +287,19 @@ const TripPlanner: React.FC = () => {
                   />
 
                   {/* Day Notes */}
-                  <DayNotesCard
-                    day={day}
-                    onUpdateNotes={updateDayNotes}
-                  />
+                  <DayNotesCard day={day} onUpdateNotes={updateDayNotes} />
                 </div>
               </AccordionContent>
             </AccordionItem>
-            <div className={cn(
-              "h-0.5 m-2 bg-gray-200",
-              day.id === tripData.days[tripData.days.length - 1].id && "hidden"
-            )} />
+            <div
+              className={cn('h-0.5 m-2 bg-gray-200', day.id === tripData.days[tripData.days.length - 1].id && 'hidden')}
+            />
           </Fragment>
         ))}
       </Accordion>
 
       {/* Modals */}
-      <AddPlaceModal
-        isOpen={modals.addPlace.isOpen}
-        onClose={closeAllModals}
-        onAddPlace={handleAddPlace}
-      />
+      <AddPlaceModal isOpen={modals.addPlace.isOpen} onClose={closeAllModals} onAddPlace={handleAddPlace} />
 
       <EditPlaceModal
         isOpen={modals.editPlace.isOpen}
@@ -333,7 +320,11 @@ const TripPlanner: React.FC = () => {
         onClose={closeAllModals}
         onSave={handleUpdateAccommodation}
         accommodation={modals.editAccommodation.accommodation}
-        dayNumber={modals.editAccommodation.dayId ? tripData.days.find(d => d.id === modals.editAccommodation.dayId)?.dayNumber || 1 : 1}
+        dayNumber={
+          modals.editAccommodation.dayId
+            ? tripData.days.find((d) => d.id === modals.editAccommodation.dayId)?.dayNumber || 1
+            : 1
+        }
       />
 
       <AddDayModal
@@ -376,4 +367,4 @@ const TripPlanner: React.FC = () => {
   );
 };
 
-export default TripPlanner; 
+export default TripPlanner;

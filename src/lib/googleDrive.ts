@@ -34,7 +34,7 @@ export class GoogleDriveService {
   private loadTokenFromStorage(): void {
     const token = localStorage.getItem('google_drive_token');
     const expiry = localStorage.getItem('google_drive_token_expiry');
-    
+
     if (token && expiry) {
       this.accessToken = token;
       this.tokenExpiry = parseInt(expiry, 10);
@@ -42,7 +42,7 @@ export class GoogleDriveService {
   }
 
   private saveTokenToStorage(token: string, expiresIn: number): void {
-    const expiry = Date.now() + (expiresIn * 1000);
+    const expiry = Date.now() + expiresIn * 1000;
     localStorage.setItem('google_drive_token', token);
     localStorage.setItem('google_drive_token_expiry', expiry.toString());
     this.accessToken = token;
@@ -74,7 +74,7 @@ export class GoogleDriveService {
   public handleAuthCallback(hashParams: URLSearchParams): void {
     const accessToken = hashParams.get('access_token');
     const expiresIn = hashParams.get('expires_in');
-    
+
     if (!accessToken || !expiresIn) {
       throw new Error('Invalid authentication response');
     }
@@ -86,7 +86,7 @@ export class GoogleDriveService {
     this.clearTokenFromStorage();
   }
 
-  private async makeApiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
+  private async makeApiRequest(endpoint: string, options: any = {}): Promise<Response> {
     if (!this.isAuthenticated()) {
       throw new Error('Not authenticated');
     }
@@ -95,7 +95,7 @@ export class GoogleDriveService {
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -136,7 +136,7 @@ export class GoogleDriveService {
 
   public async findTripPlannerFile(): Promise<GoogleDriveFile | null> {
     const files = await this.searchFiles("name='trip-planner-data.json'");
-    
+
     if (files.length > 0) {
       return files[0];
     } else {
@@ -147,20 +147,20 @@ export class GoogleDriveService {
   public async downloadFile(fileId: string): Promise<string> {
     // First, get file info to check size
     const fileInfo = await this.getFileInfo(fileId);
-    
+
     if (fileInfo.size === '0') {
       throw new Error('Cannot download file - file is empty (0 bytes)');
     }
-    
+
     const response = await this.makeApiRequest(`/files/${fileId}?alt=media`);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Download failed: ${response.statusText} - ${errorText}`);
     }
 
     const content = await response.text();
-    
+
     // Validate that we got actual content
     if (!content || content.trim() === '') {
       throw new Error('Downloaded file is empty');
@@ -181,11 +181,11 @@ export class GoogleDriveService {
 
   private async createNewFile(name: string, content: string): Promise<string> {
     // Step 1: Create file metadata (ensure it goes to root folder, not app data)
-    const metadata = { 
+    const metadata = {
       name,
-      parents: ['root'] // Explicitly put in root folder so it's visible
+      parents: ['root'], // Explicitly put in root folder so it's visible
     };
-    
+
     const createResponse = await this.makeApiRequest('/files', {
       method: 'POST',
       body: JSON.stringify(metadata),
@@ -197,17 +197,17 @@ export class GoogleDriveService {
     }
 
     const fileData = await createResponse.json();
-    
+
     // Step 2: Upload content to the created file
     const result = await this.updateFileContent(fileData.id, content);
-    
+
     // Step 3: Verify the file was created correctly
     try {
       await this.getFileInfo(result);
     } catch (error) {
       // Verification failed, but file was created
     }
-    
+
     return result;
   }
 
@@ -216,7 +216,7 @@ export class GoogleDriveService {
     const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
       },
       body: content,
@@ -232,7 +232,7 @@ export class GoogleDriveService {
       const verifyResponse = await this.makeApiRequest(`/files/${fileId}?fields=size`);
       if (verifyResponse.ok) {
         const fileInfo = await verifyResponse.json();
-        
+
         if (fileInfo.size === '0') {
           throw new Error('File was uploaded but shows 0 bytes');
         }
@@ -240,13 +240,13 @@ export class GoogleDriveService {
     } catch (verifyError) {
       // Verification failed, but upload may have succeeded
     }
-    
+
     return fileId;
   }
 
   public async getFileInfo(fileId: string): Promise<GoogleDriveFile> {
     const response = await this.makeApiRequest(`/files/${fileId}?fields=id,name,modifiedTime,size,parents,webViewLink`);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to get file info: ${response.statusText} - ${errorText}`);
@@ -265,6 +265,4 @@ export class GoogleDriveService {
       throw new Error(`Delete failed: ${response.statusText}`);
     }
   }
-
-
-} 
+}

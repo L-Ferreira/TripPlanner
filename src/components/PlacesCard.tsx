@@ -12,13 +12,7 @@ interface PlacesCardProps {
   onAddPlaceImage: (dayId: string, placeId: string, imageUrl: string) => void;
 }
 
-const PlacesCard: React.FC<PlacesCardProps> = ({ 
-  day, 
-  onAddPlace, 
-  onEditPlace, 
-  onDeletePlace, 
-  onAddPlaceImage 
-}) => {
+const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceImage }: PlacesCardProps) => {
   return (
     <Card className="overflow-hidden">
       <CardHeader className={`${day.places.length > 0 ? 'pb-0' : ''}`}>
@@ -27,9 +21,9 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
             <MapPin size={20} />
             Places to Visit
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onAddPlace(day.id)}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
           >
@@ -65,43 +59,43 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
                     </Button>
                   </div>
                 </div>
-        <div className={`${((place.images && place.images.length > 0) || place.googleMapsEmbedUrl) ? 'border-b border-gray-50 pb-3 mb-3' : ''}`}>
+                <div
+                  className={`${(place.images && place.images.length > 0) || place.googleMapsEmbedUrl ? 'border-b border-gray-50 pb-3 mb-3' : ''}`}
+                >
+                  {place.description && <p className="text-gray-600 text-sm mb-4 text-left">{place.description}</p>}
 
-                {place.description && (
-                  <p className="text-gray-600 text-sm mb-4 text-left">{place.description}</p>
-                )}
-                
-                {/* Links - conditional spacing based on content above */}
-                {(place.websiteUrl || place.googleMapsUrl) && <div className={`flex gap-3`}>
-                  {place.websiteUrl && (
-                    <a
-                      href={place.websiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm transition-colors"
-                    >
-                      <ExternalLink size={14} />
-                      Website
-                    </a>
+                  {/* Links - conditional spacing based on content above */}
+                  {(place.websiteUrl || place.googleMapsUrl) && (
+                    <div className={`flex gap-3`}>
+                      {place.websiteUrl && (
+                        <a
+                          href={place.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm transition-colors"
+                        >
+                          <ExternalLink size={14} />
+                          Website
+                        </a>
+                      )}
+                      {place.googleMapsUrl && (
+                        <a
+                          href={place.googleMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
+                        >
+                          <MapPin size={14} />
+                          Maps
+                        </a>
+                      )}
+                    </div>
                   )}
-                  {place.googleMapsUrl && (
-                    <a
-                      href={place.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
-                    >
-                      <MapPin size={14} />
-                      Maps
-                    </a>
-                  )}
-                </div>}
                 </div>
 
                 {/* Carousel and Map Section */}
                 {((place.images && place.images.length > 0) || place.googleMapsEmbedUrl) && (
                   <div className="flex flex-col lg:flex-row gap-4 max-h-[700px]">
-
                     {/* Image Carousel Section */}
                     {place.images && place.images.length > 0 && (
                       <div className={`${place.googleMapsEmbedUrl ? 'lg:w-[60%]' : 'w-full'} relative`}>
@@ -117,7 +111,9 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
 
                     {/* Map Section */}
                     {place.googleMapsEmbedUrl && (
-                      <div className={`${place.images && place.images.length > 0 ? 'lg:w-[40%]' : 'w-full'} bg-gray-100 rounded-lg overflow-hidden`}>
+                      <div
+                        className={`${place.images && place.images.length > 0 ? 'lg:w-[40%]' : 'w-full'} bg-gray-100 rounded-lg overflow-hidden`}
+                      >
                         <div className="h-64 lg:h-80 max-h-[400px]">
                           <iframe
                             src={place.googleMapsEmbedUrl}
@@ -137,9 +133,9 @@ const PlacesCard: React.FC<PlacesCardProps> = ({
             ))}
           </div>
         </CardContent>
-      )} 
+      )}
     </Card>
   );
 };
 
-export default PlacesCard; 
+export default PlacesCard;

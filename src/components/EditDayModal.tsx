@@ -14,12 +14,12 @@ interface EditDayModalProps {
   day: TripDay | null;
 }
 
-const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, day }) => {
+const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
   const [formData, setFormData] = useState({
     region: '',
     driveTime: '',
     driveDistanceKm: '',
-    googleMapsEmbedUrl: ''
+    googleMapsEmbedUrl: '',
   });
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
         region: day.region,
         driveTime: decimalHoursToTimeString(day.driveTimeHours),
         driveDistanceKm: day.driveDistanceKm.toString(),
-        googleMapsEmbedUrl: day.googleMapsEmbedUrl || ''
+        googleMapsEmbedUrl: day.googleMapsEmbedUrl || '',
       });
     }
   }, [day]);
@@ -41,7 +41,7 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
         region: formData.region.trim(),
         driveTimeHours: decimalHours,
         driveDistanceKm: Number(formData.driveDistanceKm) || 0,
-        googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl)
+        googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
       });
       onClose();
     }
@@ -49,9 +49,9 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -81,7 +81,7 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
                 placeholder="e.g., Porto, Lisbon, Aveiro"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="driveTime">Drive Time</Label>
@@ -93,11 +93,9 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
                   onChange={handleChange}
                   placeholder="03:35"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Leave empty if no driving
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Leave empty if no driving</p>
               </div>
-              
+
               <div>
                 <Label htmlFor="driveDistanceKm">Distance (km)</Label>
                 <Input
@@ -111,7 +109,7 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
                 />
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
               <Input
@@ -142,4 +140,4 @@ const EditDayModal: React.FC<EditDayModalProps> = ({ isOpen, onClose, onSave, da
   );
 };
 
-export default EditDayModal; 
+export default EditDayModal;

@@ -1,4 +1,4 @@
-import React from 'react';
+import { ChangeEvent } from 'react';
 
 interface CheckboxProps {
   id?: string;
@@ -8,14 +8,8 @@ interface CheckboxProps {
   className?: string;
 }
 
-const Checkbox: React.FC<CheckboxProps> = ({
-  id,
-  checked = false,
-  onCheckedChange,
-  disabled = false,
-  className = '',
-}) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const Checkbox = ({ id, checked = false, onCheckedChange, disabled = false, className = '' }: CheckboxProps) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onCheckedChange?.(e.target.checked);
   };
 

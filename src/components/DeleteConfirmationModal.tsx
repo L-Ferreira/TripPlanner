@@ -10,13 +10,7 @@ interface DeleteConfirmationModalProps {
   message: string;
 }
 
-const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  message
-}) => {
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }: DeleteConfirmationModalProps) => {
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -41,18 +35,10 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         <CardContent>
           <p className="text-gray-600 mb-6">{message}</p>
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-            >
+            <Button variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirm}
-              className="flex-1"
-            >
+            <Button variant="destructive" onClick={handleConfirm} className="flex-1">
               Delete
             </Button>
           </div>
@@ -62,4 +48,4 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   );
 };
 
-export default DeleteConfirmationModal; 
+export default DeleteConfirmationModal;

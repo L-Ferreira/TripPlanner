@@ -26,9 +26,9 @@ export interface TripDay {
   driveTimeHours: number;
   driveDistanceKm: number;
   googleMapsEmbedUrl: string;
-  accommodationId?: string;  // Links days with same accommodation
-  nightNumber?: number;      // Which night of the stay (1, 2, 3, etc.)
-  notes?: string;           // Day notes
+  accommodationId?: string; // Links days with same accommodation
+  nightNumber?: number; // Which night of the stay (1, 2, 3, etc.)
+  notes?: string; // Day notes
   accommodation: {
     name: string;
     websiteUrl?: string;
@@ -73,18 +73,18 @@ export const useTripData = () => {
 
   // Trip Info CRUD
   const updateTripInfo = (newTripInfo: Partial<TripInfo>) => {
-    setTripData(prev => {
+    setTripData((prev) => {
       const updatedTripInfo = { ...prev.tripInfo, ...newTripInfo };
-      
+
       // If startDate is being updated, recalculate endDate based on number of days
       if (newTripInfo.startDate && prev.days.length > 0) {
         const newEndDate = calculateEndDate(newTripInfo.startDate, prev.days.length);
         updatedTripInfo.endDate = newEndDate;
       }
-      
+
       return {
         ...prev,
-        tripInfo: updatedTripInfo
+        tripInfo: updatedTripInfo,
       };
     });
   };
@@ -93,14 +93,13 @@ export const useTripData = () => {
   const calculateEndDate = (startDate: string, numberOfDays: number): string => {
     const start = new Date(startDate);
     const end = new Date(start);
-    
+
     // If there are no days, end date should be the same as start date
     if (numberOfDays === 0) {
       return startDate;
     }
-    
-    
-    end.setDate(start.getDate() + numberOfDays -1);
+
+    end.setDate(start.getDate() + numberOfDays - 1);
     return end.toISOString().split('T')[0]; // Format as YYYY-MM-DD
   };
 
@@ -109,76 +108,78 @@ export const useTripData = () => {
     const newDay: TripDay = {
       ...dayData,
       id: Date.now().toString(),
-      dayNumber: tripData.days.length + 1
+      dayNumber: tripData.days.length + 1,
     };
-    
-    setTripData(prev => {
+
+    setTripData((prev) => {
       const newDays = [...prev.days, newDay];
       const newEndDate = calculateEndDate(prev.tripInfo.startDate, newDays.length);
-      
+
       return {
         ...prev,
         tripInfo: {
           ...prev.tripInfo,
-          endDate: newEndDate
+          endDate: newEndDate,
         },
-        days: newDays
+        days: newDays,
       };
     });
-    
+
     return newDay.id;
   };
 
   // Add day and link to accommodation in one operation
   const addDayAndLinkAccommodation = (
-    dayData: Omit<TripDay, 'id' | 'dayNumber'>, 
+    dayData: Omit<TripDay, 'id' | 'dayNumber'>,
     existingAccommodationDayIds: string[]
   ) => {
     const newDayId = Date.now().toString();
-    const accommodationId = existingAccommodationDayIds.length > 0 
-      ? tripData.days.find(d => existingAccommodationDayIds.includes(d.id))?.accommodationId || generateAccommodationId()
-      : generateAccommodationId();
-    
+    const accommodationId =
+      existingAccommodationDayIds.length > 0
+        ? tripData.days.find((d) => existingAccommodationDayIds.includes(d.id))?.accommodationId ||
+          generateAccommodationId()
+        : generateAccommodationId();
+
     const newDay: TripDay = {
       ...dayData,
       id: newDayId,
       dayNumber: tripData.days.length + 1,
-      accommodationId
+      accommodationId,
     };
-    
-    setTripData(prev => {
+
+    setTripData((prev) => {
       const updatedDays = [...prev.days, newDay];
       const newEndDate = calculateEndDate(prev.tripInfo.startDate, updatedDays.length);
-      
+
       // Find all days that will be linked (existing + new)
       const allLinkedDayIds = [...existingAccommodationDayIds, newDayId];
-      const linkedDays = updatedDays.filter(d => allLinkedDayIds.includes(d.id));
-      
+      const linkedDays = updatedDays.filter((d) => allLinkedDayIds.includes(d.id));
+
       // Sort by dayNumber to assign correct nightNumber
       linkedDays.sort((a, b) => a.dayNumber - b.dayNumber);
-      
+
       // Update all days with proper accommodationId, nightNumber, and accommodation data
       return {
         ...prev,
         tripInfo: {
           ...prev.tripInfo,
-          endDate: newEndDate
+          endDate: newEndDate,
         },
-        days: updatedDays.map(day => {
-          const linkedIndex = linkedDays.findIndex(ld => ld.id === day.id);
+        days: updatedDays.map((day) => {
+          const linkedIndex = linkedDays.findIndex((ld) => ld.id === day.id);
           if (linkedIndex !== -1) {
             return {
               ...day,
               accommodationId,
               nightNumber: linkedIndex + 1,
-              accommodation: dayData.accommodation
+              accommodation: dayData.accommodation,
             };
           }
           return day;
-        })
+        }),
       };
     });
-    
+
     return newDayId;
   };
 
@@ -189,25 +190,25 @@ export const useTripData = () => {
 
   // Get accommodation info for a day
   const getAccommodationInfo = (dayId: string) => {
-    const day = tripData.days.find(d => d.id === dayId);
+    const day = tripData.days.find((d) => d.id === dayId);
     if (!day) return null;
 
-    const accommodationDays = tripData.days.filter(d => 
-      d.accommodationId === day.accommodationId
-    ).sort((a, b) => (a.nightNumber || 0) - (b.nightNumber || 0));
+    const accommodationDays = tripData.days
+      .filter((d) => d.accommodationId === day.accommodationId)
+      .sort((a, b) => (a.nightNumber || 0) - (b.nightNumber || 0));
 
     return {
       currentDay: day,
       accommodationDays,
       totalNights: accommodationDays.length,
       currentNight: day.nightNumber || 1,
-      isMultiNight: accommodationDays.length > 1
+      isMultiNight: accommodationDays.length > 1,
     };
   };
 
   // Check if previous day accommodation has unused nights
   const checkUnusedNights = (dayNumber: number) => {
-    const previousDay = tripData.days.find(d => d.dayNumber === dayNumber - 1);
+    const previousDay = tripData.days.find((d) => d.dayNumber === dayNumber - 1);
     if (!previousDay) return null;
 
     const accommodationInfo = getAccommodationInfo(previousDay.id);
@@ -224,81 +225,77 @@ export const useTripData = () => {
       totalBookedNights,
       usedNights,
       unusedNights,
-      hasUnusedNights: unusedNights > 0
+      hasUnusedNights: unusedNights > 0,
     };
   };
 
   // Adjust previous accommodation's night count
   const adjustPreviousAccommodationNights = (dayId: string, newNightCount: number) => {
-    const day = tripData.days.find(d => d.id === dayId);
+    const day = tripData.days.find((d) => d.id === dayId);
     if (!day) return;
 
     // Update all days with the same accommodation ID
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(d => 
+      days: prev.days.map((d) =>
         d.accommodationId === day.accommodationId || d.id === day.id
           ? {
               ...d,
               accommodation: {
                 ...d.accommodation,
-                numberOfNights: newNightCount
-              }
+                numberOfNights: newNightCount,
+              },
             }
           : d
-      )
+      ),
     }));
   };
 
   const updateDay = (dayId: string, updates: Partial<TripDay>) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId ? { ...day, ...updates } : day
-      )
+      days: prev.days.map((day) => (day.id === dayId ? { ...day, ...updates } : day)),
     }));
   };
 
   // Update notes for a day
   const updateDayNotes = (dayId: string, notes: string) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId ? { ...day, notes: notes.trim() || undefined } : day
-      )
+      days: prev.days.map((day) => (day.id === dayId ? { ...day, notes: notes.trim() || undefined } : day)),
     }));
   };
 
   const deleteDay = (dayId: string) => {
-    setTripData(prev => {
-      const dayToDelete = prev.days.find(d => d.id === dayId);
+    setTripData((prev) => {
+      const dayToDelete = prev.days.find((d) => d.id === dayId);
       const filteredDays = prev.days
-        .filter(day => day.id !== dayId)
+        .filter((day) => day.id !== dayId)
         .map((day, index) => ({ ...day, dayNumber: index + 1 }));
-      
+
       const newEndDate = calculateEndDate(prev.tripInfo.startDate, filteredDays.length);
-      
+
       // If the deleted day had an accommodationId, we need to reassign nightNumbers
       if (dayToDelete?.accommodationId) {
-        const linkedDays = filteredDays.filter(d => d.accommodationId === dayToDelete.accommodationId);
+        const linkedDays = filteredDays.filter((d) => d.accommodationId === dayToDelete.accommodationId);
         linkedDays.sort((a, b) => a.dayNumber - b.dayNumber);
-        
+
         // Update nightNumbers for remaining linked days
         linkedDays.forEach((day, index) => {
-          const dayIndex = filteredDays.findIndex(d => d.id === day.id);
+          const dayIndex = filteredDays.findIndex((d) => d.id === day.id);
           if (dayIndex !== -1) {
             filteredDays[dayIndex].nightNumber = index + 1;
           }
         });
       }
-      
+
       return {
         ...prev,
         tripInfo: {
           ...prev.tripInfo,
-          endDate: newEndDate
+          endDate: newEndDate,
         },
-        days: filteredDays
+        days: filteredDays,
       };
     });
   };
@@ -307,139 +304,124 @@ export const useTripData = () => {
   const addPlace = (dayId: string, placeData: Omit<Place, 'id'>) => {
     const newPlace: Place = {
       ...placeData,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     };
 
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId 
-          ? { ...day, places: [...day.places, newPlace] }
-          : day
-      )
+      days: prev.days.map((day) => (day.id === dayId ? { ...day, places: [...day.places, newPlace] } : day)),
     }));
   };
 
   const updatePlace = (dayId: string, placeId: string, updates: Partial<Place>) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId 
+      days: prev.days.map((day) =>
+        day.id === dayId
           ? {
               ...day,
-              places: day.places.map(place => 
-                place.id === placeId ? { ...place, ...updates } : place
-              )
+              places: day.places.map((place) => (place.id === placeId ? { ...place, ...updates } : place)),
             }
           : day
-      )
+      ),
     }));
   };
 
   const deletePlace = (dayId: string, placeId: string) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId 
-          ? { ...day, places: day.places.filter(place => place.id !== placeId) }
-          : day
-      )
+      days: prev.days.map((day) =>
+        day.id === dayId ? { ...day, places: day.places.filter((place) => place.id !== placeId) } : day
+      ),
     }));
   };
 
   // Find all days that share the same accommodation
   const findLinkedAccommodationDays = (dayId: string) => {
-    const day = tripData.days.find(d => d.id === dayId);
+    const day = tripData.days.find((d) => d.id === dayId);
     if (!day || !day.accommodationId) {
       return { linkedDays: [], isLinked: false };
     }
 
-    const linkedDays = tripData.days.filter(d => 
-      d.accommodationId === day.accommodationId && d.id !== dayId
-    );
+    const linkedDays = tripData.days.filter((d) => d.accommodationId === day.accommodationId && d.id !== dayId);
 
     return {
       linkedDays,
       isLinked: linkedDays.length > 0,
-      currentDay: day
+      currentDay: day,
     };
   };
 
   // Accommodation CRUD
   const updateAccommodation = (dayId: string, accommodationData: TripDay['accommodation']) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId 
-          ? { ...day, accommodation: accommodationData }
-          : day
-      )
+      days: prev.days.map((day) => (day.id === dayId ? { ...day, accommodation: accommodationData } : day)),
     }));
   };
 
   // Update accommodation for all linked days
   const updateLinkedAccommodation = (dayId: string, accommodationData: TripDay['accommodation']) => {
-    const day = tripData.days.find(d => d.id === dayId);
+    const day = tripData.days.find((d) => d.id === dayId);
     if (!day || !day.accommodationId) {
       // If no accommodationId, just update the single day
       updateAccommodation(dayId, accommodationData);
       return;
     }
 
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(d => 
-        d.accommodationId === day.accommodationId
-          ? { ...d, accommodation: accommodationData }
-          : d
-      )
+      days: prev.days.map((d) =>
+        d.accommodationId === day.accommodationId ? { ...d, accommodation: accommodationData } : d
+      ),
     }));
   };
 
   // Place Image management
   const addPlaceImage = (dayId: string, placeId: string, imageUrl: string) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId 
+      days: prev.days.map((day) =>
+        day.id === dayId
           ? {
               ...day,
-              places: day.places.map(place => 
-                place.id === placeId 
-                  ? { ...place, images: [...place.images, imageUrl] }
-                  : place
-              )
+              places: day.places.map((place) =>
+                place.id === placeId ? { ...place, images: [...place.images, imageUrl] } : place
+              ),
             }
           : day
-      )
+      ),
     }));
   };
 
   const removePlaceImage = (dayId: string, placeId: string, imageUrl: string) => {
-    setTripData(prev => ({
+    setTripData((prev) => ({
       ...prev,
-      days: prev.days.map(day => 
-        day.id === dayId 
+      days: prev.days.map((day) =>
+        day.id === dayId
           ? {
               ...day,
-              places: day.places.map(place => 
-                place.id === placeId 
-                  ? { ...place, images: place.images.filter(img => img !== imageUrl) }
+              places: day.places.map((place) =>
+                place.id === placeId
+                  ? {
+                      ...place,
+                      images: place.images.filter((img) => img !== imageUrl),
+                    }
                   : place
-              )
+              ),
             }
           : day
-      )
+      ),
     }));
   };
 
   // Import/Export functionality
   const exportData = () => {
     const dataStr = JSON.stringify(tripData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
     const exportFileDefaultName = `trip-${tripData.tripInfo.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -452,12 +434,12 @@ export const useTripData = () => {
       reader.onload = (e) => {
         try {
           const importedData = JSON.parse(e.target?.result as string);
-          
+
           // Basic validation
           if (!importedData.tripInfo || !importedData.days) {
             throw new Error('Invalid trip data format');
           }
-          
+
           setTripData(importedData);
           resolve();
         } catch (error) {
@@ -473,18 +455,18 @@ export const useTripData = () => {
     // Use today's date as the start date for a fresh start
     const today = new Date().toISOString().split('T')[0];
     const correctEndDate = calculateEndDate(today, defaultTripData.days.length);
-    
+
     const correctedTripData = {
       ...defaultTripData,
       tripInfo: {
         ...defaultTripData.tripInfo,
         startDate: today,
-        endDate: correctEndDate
-      }
+        endDate: correctEndDate,
+      },
     };
-    
+
     setTripData(correctedTripData);
-    
+
     // Also clear localStorage to ensure complete reset
     localStorage.removeItem(STORAGE_KEY);
   };
@@ -521,6 +503,6 @@ export const useTripData = () => {
     exportData,
     importData,
     resetData,
-    setFullTripData
+    setFullTripData,
   };
-}; 
+};

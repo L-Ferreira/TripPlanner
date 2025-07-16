@@ -31,14 +31,14 @@ const initialModalState: ModalState = {
   editDay: { isOpen: false, day: null },
   editAccommodation: { isOpen: false, dayId: '', accommodation: null },
   addDay: { isOpen: false },
-  editTripInfo: { isOpen: false }
+  editTripInfo: { isOpen: false },
 };
 
 const initialDeleteModalState: DeleteModalState = {
   isOpen: false,
   title: '',
   message: '',
-  onConfirm: () => {}
+  onConfirm: () => {},
 };
 
 const initialAccommodationUpdateModalState: AccommodationUpdateModalState = {
@@ -47,36 +47,41 @@ const initialAccommodationUpdateModalState: AccommodationUpdateModalState = {
   oldAccommodation: null,
   newAccommodation: null,
   affectedDays: [],
-  currentDay: null
+  currentDay: null,
 };
 
 export const useModalState = () => {
   const [modals, setModals] = useState<ModalState>(initialModalState);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>(initialDeleteModalState);
-  const [accommodationUpdateModal, setAccommodationUpdateModal] = useState<AccommodationUpdateModalState>(initialAccommodationUpdateModalState);
+  const [accommodationUpdateModal, setAccommodationUpdateModal] = useState<AccommodationUpdateModalState>(
+    initialAccommodationUpdateModalState
+  );
 
   const openAddPlaceModal = (dayId: string) => {
-    setModals(prev => ({ ...prev, addPlace: { isOpen: true, dayId } }));
+    setModals((prev) => ({ ...prev, addPlace: { isOpen: true, dayId } }));
   };
 
   const openEditPlaceModal = (dayId: string, place: any) => {
-    setModals(prev => ({ ...prev, editPlace: { isOpen: true, dayId, place } }));
+    setModals((prev) => ({ ...prev, editPlace: { isOpen: true, dayId, place } }));
   };
 
   const openEditDayModal = (day: any) => {
-    setModals(prev => ({ ...prev, editDay: { isOpen: true, day } }));
+    setModals((prev) => ({ ...prev, editDay: { isOpen: true, day } }));
   };
 
   const openEditAccommodationModal = (dayId: string, accommodation: any) => {
-    setModals(prev => ({ ...prev, editAccommodation: { isOpen: true, dayId, accommodation } }));
+    setModals((prev) => ({
+      ...prev,
+      editAccommodation: { isOpen: true, dayId, accommodation },
+    }));
   };
 
   const openAddDayModal = () => {
-    setModals(prev => ({ ...prev, addDay: { isOpen: true } }));
+    setModals((prev) => ({ ...prev, addDay: { isOpen: true } }));
   };
 
   const openEditTripInfoModal = () => {
-    setModals(prev => ({ ...prev, editTripInfo: { isOpen: true } }));
+    setModals((prev) => ({ ...prev, editTripInfo: { isOpen: true } }));
   };
 
   const closeAllModals = () => {
@@ -104,7 +109,7 @@ export const useModalState = () => {
       oldAccommodation,
       newAccommodation,
       affectedDays,
-      currentDay
+      currentDay,
     });
   };
 
@@ -126,6 +131,6 @@ export const useModalState = () => {
     openDeleteModal,
     closeDeleteModal,
     openAccommodationUpdateModal,
-    closeAccommodationUpdateModal
+    closeAccommodationUpdateModal,
   };
-}; 
+};

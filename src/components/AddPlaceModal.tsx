@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { extractEmbedUrl, generateGoogleMapsUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
 
 interface AddPlaceModalProps {
   isOpen: boolean;
@@ -19,19 +19,19 @@ interface AddPlaceModalProps {
   }) => void;
 }
 
-const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPlace }) => {
+const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     websiteUrl: '',
     googleMapsUrl: '',
     googleMapsEmbedUrl: '',
-    images: [] as string[]
+    images: [] as string[],
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (formData.name.trim()) {
       onAddPlace({
@@ -40,10 +40,10 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
         websiteUrl: formData.websiteUrl.trim() || undefined,
         googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.name),
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl) || undefined,
-        images: formData.images
+        images: formData.images,
       });
       onClose();
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -51,37 +51,37 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
         websiteUrl: '',
         googleMapsUrl: '',
         googleMapsEmbedUrl: '',
-        images: []
+        images: [],
       });
       setNewImageUrl('');
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   const handleAddImage = () => {
     if (newImageUrl.trim()) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, newImageUrl.trim()]
+        images: [...prev.images, newImageUrl.trim()],
       }));
       setNewImageUrl('');
     }
   };
 
   const handleRemoveImage = (imageUrl: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter(img => img !== imageUrl)
+      images: prev.images.filter((img) => img !== imageUrl),
     }));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddImage();
@@ -114,7 +114,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                 placeholder="Enter place name"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="description">Description</Label>
               <Input
@@ -125,7 +125,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                 placeholder="Brief description of the place (optional)"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="websiteUrl">Website URL (optional)</Label>
               <Input
@@ -137,7 +137,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                 placeholder="https://example.com"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
               <Input
@@ -149,7 +149,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                 placeholder="https://maps.google.com/..."
               />
             </div>
-            
+
             <div>
               <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
               <Input
@@ -164,7 +164,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                 Paste the full iframe HTML from Google Maps → Share → Embed a map
               </p>
             </div>
-            
+
             <div>
               <Label className="text-sm font-medium">Images ({formData.images.length})</Label>
               <div className="mt-2 space-y-3">
@@ -174,11 +174,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                     {formData.images.map((imageUrl, index) => (
                       <div key={index} className="relative group">
                         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={imageUrl}
-                            alt={`Image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={imageUrl} alt={`Image ${index + 1}`} className="w-full h-full object-cover" />
                         </div>
                         <Button
                           type="button"
@@ -193,7 +189,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                     ))}
                   </div>
                 )}
-                
+
                 {/* Add New Image */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <div className="flex gap-2">
@@ -216,9 +212,7 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
                       Add
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Add images by pasting URL links
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">Add images by pasting URL links</p>
                 </div>
               </div>
             </div>
@@ -239,4 +233,4 @@ const AddPlaceModal: React.FC<AddPlaceModalProps> = ({ isOpen, onClose, onAddPla
   );
 };
 
-export default AddPlaceModal; 
+export default AddPlaceModal;
