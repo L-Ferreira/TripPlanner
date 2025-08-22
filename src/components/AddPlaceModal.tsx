@@ -1,12 +1,13 @@
+import { AutoExpandingTextarea } from '@/components/ui/auto-expanding-textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTextareaHeights } from '../hooks/useTextareaHeights';
 
 interface AddPlaceModalProps {
   isOpen: boolean;
@@ -33,6 +34,14 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
+  const { getHeight, saveHeight } = useTextareaHeights();
+
+  const textareaKey = 'add-place-description';
+  const savedHeight = getHeight(textareaKey);
+
+  const handleSizeChange = (height: number) => {
+    saveHeight(textareaKey, height);
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -120,13 +129,16 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
 
             <div>
               <Label htmlFor="description">{t('place.description')}</Label>
-              <Textarea
+              <AutoExpandingTextarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 placeholder={t('place.placeDescription')}
-                rows={3}
+                savedHeight={savedHeight}
+                onSizeChange={handleSizeChange}
+                minHeight={60}
+                maxHeight={500}
               />
             </div>
 
@@ -164,7 +176,6 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
                 onChange={handleChange}
                 placeholder={t('place.embedInstructions')}
               />
-              <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
             </div>
 
             <div>
@@ -227,7 +238,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
             <Button onClick={handleSubmit} className="flex-1">
               {t('place.addPlace')}
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className="flex-1">
               {t('common.cancel')}
             </Button>
           </div>

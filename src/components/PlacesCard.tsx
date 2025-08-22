@@ -4,6 +4,7 @@ import { Edit2, ExternalLink, MapPin, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TripDay } from '../hooks/useTripData';
 import ImageCarousel from './ImageCarousel';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface PlacesCardProps {
   day: TripDay;
@@ -65,7 +66,11 @@ const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceIma
                 <div
                   className={`${(place.images && place.images.length > 0) || place.googleMapsEmbedUrl ? 'border-b border-gray-50 pb-3 mb-3' : ''}`}
                 >
-                  {place.description && <p className="text-gray-600 text-sm mb-4 text-left">{place.description}</p>}
+                  {place.description && (
+                    <div className="mb-4 text-left">
+                      <MarkdownRenderer content={place.description} />
+                    </div>
+                  )}
 
                   {/* Links - conditional spacing based on content above */}
                   {(place.websiteUrl || place.googleMapsUrl) && (

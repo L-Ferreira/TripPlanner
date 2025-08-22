@@ -80,7 +80,7 @@ const TripPlanner = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [hasLocalChanges]);
+  }, [hasLocalChanges, t]);
 
   const {
     modals,

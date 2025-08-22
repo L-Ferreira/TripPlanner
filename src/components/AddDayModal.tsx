@@ -451,7 +451,6 @@ const AddDayModal = ({
                   onChange={handleChange}
                   placeholder={t('place.embedInstructions')}
                 />
-                <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
               </div>
 
               {/* Only show accommodation section if creating new accommodation */}
@@ -557,7 +556,6 @@ const AddDayModal = ({
                         onChange={handleChange}
                         placeholder={t('place.googleMapsEmbedUrlPlaceholder')}
                       />
-                      <p className="text-xs text-gray-500 mt-1">{t('place.embedInstructions')}</p>
                     </div>
                   </div>
 
@@ -642,7 +640,7 @@ const AddDayModal = ({
                 {isSubmitting ? t('day.adding') : t('day.addDay')}
               </Button>
             )}
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="flex-1">
               {t('common.cancel')}
             </Button>
           </div>

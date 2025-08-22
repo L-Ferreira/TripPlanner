@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PortugalFlag, UKFlag } from './FlagIcons';
 import { GoogleDriveAuth } from './GoogleDriveAuth';
+import MarkdownRenderer from './MarkdownRenderer';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
@@ -138,7 +139,11 @@ export const TripHeader = ({
           </div>
 
           <div className="text-gray-700 mb-4">
-            {tripDestination && <p className="text-lg font-medium">{tripDestination}</p>}
+            {tripDestination && (
+              <div className="text-lg font-medium">
+                <MarkdownRenderer content={tripDestination} />
+              </div>
+            )}
             <p className="text-sm">
               {tripStartDate && tripEndDate
                 ? `${formatDate(tripStartDate)} - ${formatDate(tripEndDate)}`

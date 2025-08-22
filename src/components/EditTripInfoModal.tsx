@@ -130,12 +130,12 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
         </div>
 
         <div className="flex-shrink-0 p-6 pt-4">
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <div className="flex gap-2">
+            <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? t('common.saving') : t('common.saveChanges')}
+            </Button>
+            <Button variant="outline" onClick={onCancel} disabled={isSubmitting} className="flex-1">
+              {t('common.cancel')}
             </Button>
           </div>
         </div>

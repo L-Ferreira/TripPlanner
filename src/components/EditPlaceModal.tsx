@@ -1,12 +1,13 @@
+import { AutoExpandingTextarea } from '@/components/ui/auto-expanding-textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTextareaHeights } from '../hooks/useTextareaHeights';
 import { Place } from '../hooks/useTripData';
 
 interface EditPlaceModalProps {
@@ -30,6 +31,14 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
   const [newImageUrl, setNewImageUrl] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { getHeight, saveHeight } = useTextareaHeights();
+
+  const textareaKey = `edit-place-description-${place?.id || 'new'}`;
+  const savedHeight = getHeight(textareaKey);
+
+  const handleSizeChange = (height: number) => {
+    saveHeight(textareaKey, height);
+  };
 
   useEffect(() => {
     if (place) {
@@ -153,13 +162,16 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
 
             <div>
               <Label htmlFor="description">{t('place.description')}</Label>
-              <Textarea
+              <AutoExpandingTextarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 placeholder={t('place.placeDescription')}
-                rows={3}
+                savedHeight={savedHeight}
+                onSizeChange={handleSizeChange}
+                minHeight={60}
+                maxHeight={500}
               />
             </div>
 
@@ -197,7 +209,6 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
                 onChange={handleChange}
                 placeholder={t('place.embedInstructions')}
               />
-              <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
             </div>
 
             <div>
@@ -260,7 +271,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
             <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? t('common.saving') : t('common.saveChanges')}
             </Button>
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="flex-1">
               {t('common.cancel')}
             </Button>
           </div>

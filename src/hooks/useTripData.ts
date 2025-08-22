@@ -257,7 +257,7 @@ export const useTripData = () => {
   const updateDayNotes = (dayId: string, notes: string) => {
     updateTripData({
       ...tripData,
-      days: tripData.days.map((day) => (day.id === dayId ? { ...day, notes: notes.trim() || undefined } : day)),
+      days: tripData.days.map((day) => (day.id === dayId ? { ...day, notes: notes || undefined } : day)),
     });
   };
 

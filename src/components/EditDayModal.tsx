@@ -174,7 +174,6 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
                 onChange={handleChange}
                 placeholder={t('place.embedInstructions')}
               />
-              <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
             </div>
           </form>
         </CardContent>
@@ -183,7 +182,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
             <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? t('common.saving') : t('common.saveChanges')}
             </Button>
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="flex-1">
               {t('common.cancel')}
             </Button>
           </div>

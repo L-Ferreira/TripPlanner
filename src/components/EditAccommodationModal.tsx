@@ -333,12 +333,12 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
         </CardContent>
 
         <div className="flex-shrink-0 p-6 pt-4">
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <div className="flex gap-2">
+            <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? t('common.saving') : t('common.saveChanges')}
+            </Button>
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="flex-1">
+              {t('common.cancel')}
             </Button>
           </div>
         </div>
