@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
@@ -150,7 +151,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle>
@@ -193,18 +194,33 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
               </div>
             </div>
 
-            {/* Description and Stay Details */}
+            {/* Description */}
+            <div>
+              <Label htmlFor="description">
+                {t('place.description')} ({t('common.optional')})
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder={t('accommodation.accommodationDescriptionPlaceholder')}
+                rows={3}
+              />
+            </div>
+
+            {/* Room Type and Nights */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="description">
-                  {t('place.description')} ({t('common.optional')})
+                <Label htmlFor="roomType">
+                  {t('accommodation.roomType')} ({t('common.optional')})
                 </Label>
                 <Input
-                  id="description"
-                  name="description"
-                  value={formData.description}
+                  id="roomType"
+                  name="roomType"
+                  value={formData.roomType}
                   onChange={handleChange}
-                  placeholder={t('accommodation.accommodationDescriptionPlaceholder')}
+                  placeholder={t('accommodation.roomTypeExample')}
                 />
               </div>
 
@@ -224,20 +240,6 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   <p className="text-red-500 text-sm mt-1">{t('accommodation.nightsRequired')}</p>
                 )}
               </div>
-            </div>
-
-            {/* Room Type */}
-            <div>
-              <Label htmlFor="roomType">
-                {t('accommodation.roomType')} ({t('common.optional')})
-              </Label>
-              <Input
-                id="roomType"
-                name="roomType"
-                value={formData.roomType}
-                onChange={handleChange}
-                placeholder={t('accommodation.roomTypeExample')}
-              />
             </div>
 
             {/* Location */}

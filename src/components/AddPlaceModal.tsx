@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
@@ -59,7 +60,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
     }
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -94,7 +95,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
+      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle>{t('place.addPlace')}</CardTitle>
@@ -119,12 +120,13 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
 
             <div>
               <Label htmlFor="description">{t('place.description')}</Label>
-              <Input
+              <Textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 placeholder={t('place.placeDescription')}
+                rows={3}
               />
             </div>
 

@@ -13,6 +13,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
 
 interface AddDayModalProps {
   isOpen: boolean;
@@ -488,16 +489,29 @@ const AddDayModal = ({
                     </div>
                   </div>
 
-                  {/* Description and Stay Details */}
+                  {/* Description */}
+                  <div className="mb-6">
+                    <Label htmlFor="accommodationDescription">{t('place.description')}</Label>
+                    <Textarea
+                      id="accommodationDescription"
+                      name="accommodationDescription"
+                      value={formData.accommodationDescription}
+                      onChange={handleChange}
+                      placeholder={t('accommodation.accommodationDescriptionPlaceholder')}
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Room Type and Nights */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationDescription">{t('place.description')}</Label>
+                      <Label htmlFor="accommodationRoomType">{t('day.roomTypeOptional')}</Label>
                       <Input
-                        id="accommodationDescription"
-                        name="accommodationDescription"
-                        value={formData.accommodationDescription}
+                        id="accommodationRoomType"
+                        name="accommodationRoomType"
+                        value={formData.accommodationRoomType}
                         onChange={handleChange}
-                        placeholder={t('accommodation.accommodationDescriptionPlaceholder')}
+                        placeholder={t('accommodation.roomTypeExample')}
                       />
                     </div>
 
@@ -517,18 +531,6 @@ const AddDayModal = ({
                         <p className="text-red-500 text-sm mt-1">{errors.accommodationNights}</p>
                       )}
                     </div>
-                  </div>
-
-                  {/* Room Type */}
-                  <div className="mb-6">
-                    <Label htmlFor="accommodationRoomType">{t('day.roomTypeOptional')}</Label>
-                    <Input
-                      id="accommodationRoomType"
-                      name="accommodationRoomType"
-                      value={formData.accommodationRoomType}
-                      onChange={handleChange}
-                      placeholder={t('accommodation.roomTypeExample')}
-                    />
                   </div>
 
                   {/* Location */}
