@@ -19,7 +19,7 @@ const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceIma
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <MapPin size={20} />
-            Places to Visit
+            Locais a Visitar
           </CardTitle>
           <Button
             variant="ghost"

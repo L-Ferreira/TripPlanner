@@ -33,7 +33,7 @@ export const TripHeader = ({
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('pt-PT', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -50,7 +50,7 @@ export const TripHeader = ({
       try {
         await onImportData(file);
       } catch (error) {
-        alert('Failed to import file: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        alert('Falha ao importar ficheiro: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       }
       // Reset file input
       if (fileInputRef.current) {
@@ -94,10 +94,10 @@ export const TripHeader = ({
         {/* Trip Info Card */}
         <div className="bg-white rounded-lg shadow-md border border-gray-300 p-6">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{tripTitle || 'Untitled Trip'}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{tripTitle || 'Viagem Sem Título'}</h1>
             <Button onClick={onEditTrip} variant="outline" size="sm" className="flex items-center gap-2">
               <Edit2 size={16} />
-              Edit Trip
+              Editar Viagem
             </Button>
           </div>
 
@@ -106,7 +106,7 @@ export const TripHeader = ({
             <p className="text-sm">
               {tripStartDate && tripEndDate
                 ? `${formatDate(tripStartDate)} - ${formatDate(tripEndDate)}`
-                : 'No dates set'}
+                : 'Sem datas definidas'}
             </p>
           </div>
 
@@ -116,22 +116,22 @@ export const TripHeader = ({
             className="w-full flex items-center justify-center gap-2 mb-4"
           >
             <Plus size={16} />
-            Add Day
+            Adicionar Dia
           </Button>
 
           {/* Data Management Buttons */}
           <div className="flex gap-2">
             <Button onClick={onExportData} variant="outline" size="sm" className="flex-1">
               <Download size={16} />
-              Export
+              Exportar
             </Button>
             <Button onClick={handleImportClick} variant="outline" size="sm" className="flex-1">
               <Upload size={16} />
-              Import
+              Importar
             </Button>
             <Button onClick={onResetData} variant="outline" size="sm" className="flex-1">
               <RotateCcw size={16} />
-              Reset
+              Repor
             </Button>
           </div>
 

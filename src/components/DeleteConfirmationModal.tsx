@@ -36,10 +36,10 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }:
           <p className="text-gray-600 mb-6">{message}</p>
           <div className="flex gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancel
+              Cancelar
             </Button>
             <Button variant="destructive" onClick={handleConfirm} className="flex-1">
-              Delete
+              Eliminar
             </Button>
           </div>
         </CardContent>

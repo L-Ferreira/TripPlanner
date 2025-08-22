@@ -43,7 +43,7 @@ const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) =>
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Amenities</CardTitle>
+        <CardTitle className="text-lg">Comodidades</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {amenityCategories.map((category) => (
@@ -68,10 +68,10 @@ const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) =>
 
         {/* Other amenities section */}
         <div>
-          <h4 className="font-medium text-sm text-gray-800 mb-3">Custom Amenities</h4>
+          <h4 className="font-medium text-sm text-gray-800 mb-3">Comodidades Personalizadas</h4>
           <div className="flex gap-2 mb-3">
             <Input
-              placeholder="Add custom amenity"
+              placeholder="Adicionar comodidade personalizada"
               value={newAmenity}
               onChange={(e) => setNewAmenity(e.target.value)}
               onKeyDown={(e) => {
@@ -82,7 +82,13 @@ const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) =>
               }}
               className="flex-1"
             />
-            <Button type="button" variant="outline" size="sm" onClick={handleAddOtherAmenity}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddOtherAmenity}
+              className="flex items-center justify-center"
+            >
               <Plus size={16} />
             </Button>
           </div>

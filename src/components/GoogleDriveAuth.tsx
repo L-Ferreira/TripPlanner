@@ -14,7 +14,7 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">How Sync Works</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Como Funciona a Sincronização</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded">
             <X className="h-4 w-4" />
           </button>
@@ -22,34 +22,34 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 
         <div className="space-y-3 text-sm text-gray-700">
           <div>
-            <strong className="text-gray-900">Session-Based Authentication:</strong> Your Google Drive connection will
-            stay active for about 1 hour. You&apos;ll need to reconnect when the session expires.
+            <strong className="text-gray-900">Autenticação Baseada em Sessão:</strong> A sua ligação ao Google Drive
+            permanecerá ativa durante cerca de 1 hora. Terá de se religar quando a sessão expirar.
           </div>
           <div>
-            <strong className="text-gray-900">Sync Now:</strong> Downloads remote data, merges with local changes, and
-            uploads the result. Your work is preserved.
+            <strong className="text-gray-900">Sincronizar Agora:</strong> Transfere dados remotos, combina com
+            alterações locais e carrega o resultado. O seu trabalho é preservado.
           </div>
           <div>
-            <strong className="text-gray-900">Force Upload:</strong> Uploads your current data regardless of remote
-            changes.
+            <strong className="text-gray-900">Forçar Carregamento:</strong> Carrega os seus dados atuais
+            independentemente das alterações remotas.
           </div>
           <div>
-            <strong className="text-gray-900">Force Download:</strong> Downloads remote data and replaces your local
-            data.
+            <strong className="text-gray-900">Forçar Transferência:</strong> Transfere dados remotos e substitui os seus
+            dados locais.
           </div>
           <div>
-            <strong className="text-gray-900">Force Re-upload:</strong> Deletes the remote file and creates a fresh
-            copy.
+            <strong className="text-gray-900">Forçar Re-carregamento:</strong> Elimina o ficheiro remoto e cria uma
+            cópia nova.
           </div>
           <div>
-            <strong className="text-gray-900">Auto-sync:</strong> Runs every 5 minutes when enabled. Will stop working
-            when your session expires (~1 hour).
+            <strong className="text-gray-900">Auto-sincronização:</strong> Executa a cada 5 minutos quando ativada.
+            Deixará de funcionar quando a sua sessão expirar (~1 hora).
           </div>
         </div>
 
         <div className="mt-6 flex justify-end">
           <Button onClick={onClose} size="sm">
-            Got it
+            Entendi
           </Button>
         </div>
       </div>
@@ -121,43 +121,43 @@ export const GoogleDriveAuth = () => {
   // Helper function to get sync status message
   const getSyncStatusMessage = () => {
     if (isSyncing) {
-      return 'Syncing...';
+      return 'A sincronizar...';
     }
 
     if (syncError) {
-      return 'Sync failed';
+      return 'Sincronização falhada';
     }
 
     if (hasLocalChanges) {
-      return 'Local changes pending';
+      return 'Alterações locais pendentes';
     }
 
     if (lastSyncTime) {
       const timeDiff = Date.now() - lastSyncTime.getTime();
       const minutes = Math.floor(timeDiff / 60000);
       if (minutes < 1) {
-        return 'Just synced';
+        return 'Acabou de sincronizar';
       } else if (minutes < 60) {
-        return `Synced ${minutes}m ago`;
+        return `Sincronizado há ${minutes}m`;
       } else {
-        return `Synced ${Math.floor(minutes / 60)}h ago`;
+        return `Sincronizado há ${Math.floor(minutes / 60)}h`;
       }
     }
 
-    return 'Never synced';
+    return 'Nunca sincronizado';
   };
 
   // Helper function to format countdown
   const formatCountdown = (seconds: number) => {
-    if (seconds <= 0) return 'Syncing soon...';
+    if (seconds <= 0) return 'A sincronizar em breve...';
 
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
 
     if (mins > 0) {
-      return `Next sync in ${mins}m ${secs}s`;
+      return `Próxima sincronização em ${mins}m ${secs}s`;
     } else {
-      return `Next sync in ${secs}s`;
+      return `Próxima sincronização em ${secs}s`;
     }
   };
 
@@ -165,7 +165,7 @@ export const GoogleDriveAuth = () => {
     return (
       <div className="flex items-center space-x-2 text-gray-600">
         <RefreshCw className="h-4 w-4 animate-spin" />
-        <span className="text-sm">Checking authentication...</span>
+        <span className="text-sm">A verificar autenticação...</span>
       </div>
     );
   }
@@ -175,12 +175,12 @@ export const GoogleDriveAuth = () => {
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
           <CloudOff className="h-5 w-5 text-gray-400" />
-          <span className="text-sm text-gray-600">Not connected to Google Drive</span>
+          <span className="text-sm text-gray-600">Não ligado ao Google Drive</span>
         </div>
 
-        <Button onClick={handleLogin} disabled={isLoading} className="w-full">
-          <Cloud className="h-4 w-4 mr-2" />
-          Connect to Google Drive
+        <Button onClick={handleLogin} disabled={isLoading} className="w-full flex items-center justify-center gap-2">
+          <Cloud className="h-4 w-4" />
+          Ligar ao Google Drive
         </Button>
 
         {error && (
@@ -189,7 +189,7 @@ export const GoogleDriveAuth = () => {
             <div className="flex-1">
               <p className="text-sm text-red-800">{error}</p>
               <button onClick={clearError} className="text-red-600 hover:text-red-800 text-sm mt-1">
-                Dismiss
+                Dispensar
               </button>
             </div>
           </div>
@@ -206,7 +206,7 @@ export const GoogleDriveAuth = () => {
           <div className="flex items-center space-x-2">
             <Cloud className="h-5 w-5 text-green-600" />
             <div className="flex flex-col">
-              <span className="text-sm text-green-600 font-medium">Connected to Google Drive</span>
+              <span className="text-sm text-green-600 font-medium">Ligado ao Google Drive</span>
               {user?.email && (
                 <span className="text-xs text-gray-600">{user.name ? `${user.name} (${user.email})` : user.email}</span>
               )}
@@ -216,7 +216,7 @@ export const GoogleDriveAuth = () => {
                 const tokenInfo = service.getTokenExpirationInfo();
 
                 if (hasRefreshToken) {
-                  return <span className="text-xs text-green-500">✓ Persistent connection enabled</span>;
+                  return <span className="text-xs text-green-500">✓ Ligação persistente ativada</span>;
                 } else if (tokenInfo) {
                   const expiresIn = Math.max(0, tokenInfo.expires_at - Date.now());
                   const hoursLeft = Math.floor(expiresIn / (1000 * 60 * 60));
@@ -225,12 +225,12 @@ export const GoogleDriveAuth = () => {
                   if (expiresIn > 0) {
                     return (
                       <span className="text-xs text-orange-500">
-                        ⚠ Session expires in {hoursLeft > 0 ? `${hoursLeft}h ` : ''}
+                        ⚠ Sessão expira em {hoursLeft > 0 ? `${hoursLeft}h ` : ''}
                         {minutesLeft}m
                       </span>
                     );
                   } else {
-                    return <span className="text-xs text-red-500">⚠ Session expired, please reconnect</span>;
+                    return <span className="text-xs text-red-500">⚠ Sessão expirada, por favor religar</span>;
                   }
                 }
                 return null;
@@ -241,12 +241,12 @@ export const GoogleDriveAuth = () => {
             <button
               onClick={() => setShowInfoModal(true)}
               className="p-1 rounded text-gray-500 hover:text-gray-700"
-              title="How sync works"
+              title="Como funciona a sincronização"
             >
               <Info className="h-4 w-4" />
             </button>
             <Button onClick={handleLogout} variant="outline" size="sm">
-              Disconnect
+              Desligar
             </Button>
           </div>
         </div>
@@ -254,11 +254,11 @@ export const GoogleDriveAuth = () => {
         {/* Sync Status */}
         <div className="bg-gray-50 rounded-lg p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Sync Status</span>
+            <span className="text-sm font-medium text-gray-700">Estado da Sincronização</span>
             <div className="flex items-center space-x-2">
               {isSyncing && <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />}
               <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-600">Auto-sync</span>
+                <span className="text-xs text-gray-600">Auto-sincronização</span>
                 <Switch checked={autoSyncEnabled} onCheckedChange={() => toggleAutoSync()} disabled={isSyncing} />
               </div>
             </div>
@@ -286,16 +286,21 @@ export const GoogleDriveAuth = () => {
           {hasLocalChanges && (
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-4 w-4 text-orange-600" />
-              <span className="text-xs text-orange-600">Local changes not synced</span>
+              <span className="text-xs text-orange-600">Alterações locais não sincronizadas</span>
             </div>
           )}
         </div>
 
         {/* Sync Controls */}
         <div className="grid grid-cols-2 gap-2">
-          <Button onClick={() => setShowSyncModal(true)} disabled={isSyncing} size="sm" className="col-span-2">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-            Sync Now
+          <Button
+            onClick={() => setShowSyncModal(true)}
+            disabled={isSyncing}
+            size="sm"
+            className="col-span-2 flex items-center justify-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            Sincronizar Agora
           </Button>
 
           <Button
@@ -303,14 +308,21 @@ export const GoogleDriveAuth = () => {
             disabled={isSyncing || !tripData}
             size="sm"
             variant="outline"
+            className="flex items-center justify-center gap-1"
           >
-            <Upload className="h-4 w-4 mr-1" />
-            Force Upload
+            <Upload className="h-4 w-4" />
+            Forçar Carregamento
           </Button>
 
-          <Button onClick={() => setShowDownloadModal(true)} disabled={isSyncing} size="sm" variant="outline">
-            <Download className="h-4 w-4 mr-1" />
-            Force Download
+          <Button
+            onClick={() => setShowDownloadModal(true)}
+            disabled={isSyncing}
+            size="sm"
+            variant="outline"
+            className="flex items-center justify-center gap-1"
+          >
+            <Download className="h-4 w-4" />
+            Forçar Transferência
           </Button>
         </div>
 
@@ -321,10 +333,10 @@ export const GoogleDriveAuth = () => {
             disabled={isSyncing || !tripData}
             size="sm"
             variant="outline"
-            className="flex-1"
+            className="flex-1 flex items-center justify-center gap-2"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Force Re-upload
+            <RefreshCw className="h-4 w-4" />
+            Forçar Re-carregamento
           </Button>
         </div>
 
@@ -339,10 +351,10 @@ export const GoogleDriveAuth = () => {
                   clearError();
                   clearSyncError();
                 }}
-                className="flex items-center text-red-600 hover:text-red-800 text-sm mt-1"
+                className="flex items-center gap-1 text-red-600 hover:text-red-800 text-sm mt-1"
               >
-                <X className="h-3 w-3 mr-1" />
-                Dismiss
+                <X className="h-3 w-3" />
+                Dispensar
               </button>
             </div>
           </div>
@@ -354,27 +366,27 @@ export const GoogleDriveAuth = () => {
         isOpen={showSyncModal}
         onClose={() => setShowSyncModal(false)}
         onConfirm={handleSync}
-        title="Sync Now"
-        message="This will download data from Google Drive, merge it with your local changes, and upload the result. Your work will be preserved."
-        confirmText="Sync Now"
+        title="Sincronizar Agora"
+        message="Isto irá transferir dados do Google Drive, combiná-los com as suas alterações locais e carregar o resultado. O seu trabalho será preservado."
+        confirmText="Sincronizar Agora"
       />
 
       <ConfirmationModal
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         onConfirm={handleForceUpload}
-        title="Force Upload"
-        message="This will upload your current trip data to Google Drive, overwriting any existing remote data."
-        confirmText="Force Upload"
+        title="Forçar Carregamento"
+        message="Isto irá carregar os seus dados de viagem atuais para o Google Drive, substituindo quaisquer dados remotos existentes."
+        confirmText="Forçar Carregamento"
       />
 
       <ConfirmationModal
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onConfirm={handleForceDownload}
-        title="Force Download"
-        message="This will download trip data from Google Drive and replace your current local data. Any unsaved local changes will be lost."
-        confirmText="Force Download"
+        title="Forçar Transferência"
+        message="Isto irá transferir dados de viagem do Google Drive e substituir os seus dados locais atuais. Quaisquer alterações locais não guardadas serão perdidas."
+        confirmText="Forçar Transferência"
         isDestructive={true}
       />
 
@@ -382,9 +394,9 @@ export const GoogleDriveAuth = () => {
         isOpen={showReuploadModal}
         onClose={() => setShowReuploadModal(false)}
         onConfirm={handleForceReupload}
-        title="Force Re-upload"
-        message="This will delete the existing file in Google Drive and create a fresh copy with your current data. Use this if the remote file is corrupted."
-        confirmText="Force Re-upload"
+        title="Forçar Re-carregamento"
+        message="Isto irá eliminar o ficheiro existente no Google Drive e criar uma cópia nova com os seus dados atuais. Use isto se o ficheiro remoto estiver corrompido."
+        confirmText="Forçar Re-carregamento"
         isDestructive={true}
       />
 

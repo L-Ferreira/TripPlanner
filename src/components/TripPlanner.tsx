@@ -67,8 +67,8 @@ const TripPlanner = () => {
       if (hasLocalChanges) {
         e.preventDefault();
         e.returnValue =
-          'You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?';
-        return 'You have unsaved changes that will be lost if you leave this page. Are you sure you want to continue?';
+          'Tem alterações não guardadas que serão perdidas se sair desta página. Tem a certeza de que quer continuar?';
+        return 'Tem alterações não guardadas que serão perdidas se sair desta página. Tem a certeza de que quer continuar?';
       }
     };
 
@@ -137,8 +137,8 @@ const TripPlanner = () => {
   const handleDeleteDay = (dayId: string) => {
     const day = tripData.days.find((d) => d.id === dayId);
     openDeleteModal(
-      'Delete Day',
-      `Are you sure you want to delete Day #${day?.dayNumber} (${day?.region})? This action cannot be undone.`,
+      'Eliminar Dia',
+      `Tem a certeza de que quer eliminar o Dia #${day?.dayNumber} (${day?.region})? Esta ação não pode ser desfeita.`,
       () => deleteDay(dayId)
     );
   };
@@ -147,16 +147,16 @@ const TripPlanner = () => {
     const day = tripData.days.find((d) => d.id === dayId);
     const place = day?.places.find((p) => p.id === placeId);
     openDeleteModal(
-      'Delete Place',
-      `Are you sure you want to delete "${place?.name}"? This action cannot be undone.`,
+      'Eliminar Local',
+      `Tem a certeza de que quer eliminar "${place?.name}"? Esta ação não pode ser desfeita.`,
       () => deletePlace(dayId, placeId)
     );
   };
 
   const handleShowResetModal = () => {
     openDeleteModal(
-      'Reset Trip Data',
-      'Are you sure you want to reset all trip data? This will delete all days, places, and accommodations and give you a clean slate to start planning a new trip. This action cannot be undone.',
+      'Repor Dados da Viagem',
+      'Tem a certeza de que quer repor todos os dados da viagem? Isto irá eliminar todos os dias, locais e alojamentos e dar-lhe uma base limpa para começar a planear uma nova viagem. Esta ação não pode ser desfeita.',
       () => resetData()
     );
   };
@@ -203,7 +203,7 @@ const TripPlanner = () => {
                       variant="outline"
                       className="hidden sm:block px-3 py-1 text-sm font-semibold border-gray-400"
                     >
-                      Day #{day.dayNumber}
+                      Dia #{day.dayNumber}
                     </Badge>
                     <Badge
                       variant="outline"
@@ -275,7 +275,7 @@ const TripPlanner = () => {
                         <CardTitle className="flex items-center justify-between text-gray-800">
                           <div className="flex items-center gap-2">
                             <MapPin size={20} />
-                            Route Map
+                            Mapa da Rota
                           </div>
                           {day.googleMapsUrl && (
                             <a
@@ -284,7 +284,7 @@ const TripPlanner = () => {
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
                             >
-                              Open in Maps
+                              Abrir no Maps
                             </a>
                           )}
                         </CardTitle>

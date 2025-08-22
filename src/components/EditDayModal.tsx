@@ -43,7 +43,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.region.trim()) {
-      newErrors.region = 'Region/Location is required';
+      newErrors.region = 'Região/Localização é obrigatória';
     }
 
     setErrors(newErrors);
@@ -100,7 +100,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
       <Card className="w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Edit Day {day.dayNumber}</CardTitle>
+            <CardTitle>Editar Dia {day.dayNumber}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -109,21 +109,21 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         <CardContent className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="region">Region/Location *</Label>
+              <Label htmlFor="region">Região/Localização *</Label>
               <Input
                 id="region"
                 name="region"
                 value={formData.region}
                 onChange={handleChange}
-                placeholder="e.g., Porto, Lisbon, Aveiro"
+                placeholder="ex: Porto, Lisboa, Aveiro"
                 className={errors.region ? 'border-red-500' : ''}
               />
-              {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
+              {errors.region && <p className="text-red-500 text-sm mt-1">Região é obrigatória</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="driveTime">Drive Time</Label>
+                <Label htmlFor="driveTime">Tempo de Condução</Label>
                 <Input
                   id="driveTime"
                   name="driveTime"
@@ -132,11 +132,11 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
                   onChange={handleChange}
                   placeholder="03:35"
                 />
-                <p className="text-xs text-gray-500 mt-1">Leave empty if no driving</p>
+                <p className="text-xs text-gray-500 mt-1">Deixar vazio se não houver condução</p>
               </div>
 
               <div>
-                <Label htmlFor="driveDistanceKm">Distance (km)</Label>
+                <Label htmlFor="driveDistanceKm">Distância (km)</Label>
                 <Input
                   id="driveDistanceKm"
                   name="driveDistanceKm"
@@ -150,28 +150,28 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
             </div>
 
             <div>
-              <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
+              <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
               <Input
                 id="googleMapsUrl"
                 name="googleMapsUrl"
                 value={formData.googleMapsUrl}
                 onChange={handleChange}
-                placeholder="Google Maps URL for the route"
+                placeholder="URL do Google Maps para a rota"
               />
-              <p className="text-sm text-gray-500 mt-1">URL to open the route in Google Maps</p>
+              <p className="text-sm text-gray-500 mt-1">URL para abrir a rota no Google Maps</p>
             </div>
 
             <div>
-              <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+              <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
               <Input
                 id="googleMapsEmbedUrl"
                 name="googleMapsEmbedUrl"
                 value={formData.googleMapsEmbedUrl}
                 onChange={handleChange}
-                placeholder="Paste iframe HTML or embed URL here"
+                placeholder="Colar HTML do iframe ou URL de incorporação aqui"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Paste the full iframe HTML from Google Maps → Share → Embed a map
+                Colar o HTML completo do iframe do Google Maps → Partilhar → Incorporar um mapa
               </p>
             </div>
           </form>
@@ -179,10 +179,10 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
             <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? 'A guardar...' : 'Guardar Alterações'}
             </Button>
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
+              Cancelar
             </Button>
           </div>
         </div>

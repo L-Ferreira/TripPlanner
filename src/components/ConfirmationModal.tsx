@@ -18,8 +18,8 @@ export const ConfirmationModal = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
   isDestructive = false,
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;

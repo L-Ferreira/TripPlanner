@@ -28,7 +28,7 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
   };
 
   if (images.length === 0) {
-    return <div className="text-gray-500 text-sm">No images</div>;
+    return <div className="text-gray-500 text-sm">Sem imagens</div>;
   }
 
   return (
@@ -88,13 +88,13 @@ const AccommodationUpdateConfirmationModal = ({
     }> = [];
 
     const fieldsToCheck = [
-      { key: 'name', label: 'Name' },
+      { key: 'name', label: 'Nome' },
       { key: 'websiteUrl', label: 'Website URL' },
       { key: 'googleMapsUrl', label: 'Google Maps URL' },
       { key: 'googleMapsEmbedUrl', label: 'Google Maps Embed URL' },
-      { key: 'description', label: 'Description' },
-      { key: 'numberOfNights', label: 'Number of Nights' },
-      { key: 'roomType', label: 'Room Type' },
+      { key: 'description', label: 'Descrição' },
+      { key: 'numberOfNights', label: 'Número de Noites' },
+      { key: 'roomType', label: 'Tipo de Quarto' },
     ];
 
     fieldsToCheck.forEach((field) => {
@@ -105,8 +105,8 @@ const AccommodationUpdateConfirmationModal = ({
         changes.push({
           field: field.key,
           label: field.label,
-          oldValue: oldValue || '(empty)',
-          newValue: newValue || '(empty)',
+          oldValue: oldValue || '(vazio)',
+          newValue: newValue || '(vazio)',
         });
       }
     });
@@ -117,7 +117,7 @@ const AccommodationUpdateConfirmationModal = ({
     if (JSON.stringify(oldImages) !== JSON.stringify(newImages)) {
       changes.push({
         field: 'images',
-        label: 'Images',
+        label: 'Imagens',
         oldValue: oldImages,
         newValue: newImages,
       });
@@ -135,7 +135,7 @@ const AccommodationUpdateConfirmationModal = ({
         const oldValue = oldAmenities[key as keyof typeof oldAmenities];
         const newValue = newAmenities[key as keyof typeof newAmenities];
         if (oldValue !== newValue) {
-          changedAmenities.push(`${label}: ${oldValue ? 'Yes' : 'No'} → ${newValue ? 'Yes' : 'No'}`);
+          changedAmenities.push(`${label}: ${oldValue ? 'Sim' : 'Não'} → ${newValue ? 'Sim' : 'Não'}`);
         }
       });
 
@@ -143,7 +143,7 @@ const AccommodationUpdateConfirmationModal = ({
       const oldOther = oldAmenities.other || [];
       const newOther = newAmenities.other || [];
       if (JSON.stringify(oldOther) !== JSON.stringify(newOther)) {
-        changedAmenities.push(`Other: [${oldOther.join(', ')}] → [${newOther.join(', ')}]`);
+        changedAmenities.push(`Outras: [${oldOther.join(', ')}] → [${newOther.join(', ')}]`);
       }
 
       return changedAmenities;
@@ -153,8 +153,8 @@ const AccommodationUpdateConfirmationModal = ({
     if (amenityChanges.length > 0) {
       changes.push({
         field: 'amenities',
-        label: 'Amenities',
-        oldValue: 'See detailed changes below',
+        label: 'Comodidades',
+        oldValue: 'Ver alterações detalhadas abaixo',
         newValue: amenityChanges.join('\n'),
       });
     }
@@ -166,7 +166,7 @@ const AccommodationUpdateConfirmationModal = ({
     if (field === 'images') {
       const images = value || [];
       if (images.length === 0) {
-        return <div className="text-gray-500 text-sm">No images</div>;
+        return <div className="text-gray-500 text-sm">Sem imagens</div>;
       }
 
       return <ImageCarousel images={images} title={`${images.length} image${images.length !== 1 ? 's' : ''}`} />;
@@ -185,17 +185,17 @@ const AccommodationUpdateConfirmationModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
-          <CardTitle className="text-xl">Update Accommodation</CardTitle>
+          <CardTitle className="text-xl">Atualizar Alojamento</CardTitle>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto">
           <div className="space-y-6">
             {/* Affected Days */}
             <div>
-              <h3 className="font-semibold mb-2">This change will affect the following days:</h3>
+              <h3 className="font-semibold mb-2">Esta alteração irá afetar os seguintes dias:</h3>
               <div className="flex flex-wrap gap-2 text-sm">
                 {sortedAffectedDays.map((day) => (
                   <span key={day.id} className="bg-gray-100 px-2 py-1 rounded">
-                    Day {day.dayNumber}: {day.region}
+                    Dia {day.dayNumber}: {day.region}
                   </span>
                 ))}
               </div>
@@ -204,18 +204,18 @@ const AccommodationUpdateConfirmationModal = ({
             {/* Changed Fields */}
             {changedFields.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-2">Changes to be made:</h3>
+                <h3 className="font-semibold mb-2">Alterações a serem feitas:</h3>
                 <div className="space-y-3">
                   {changedFields.map((change, index) => (
                     <div key={index} className="border rounded p-3 bg-gray-50">
                       <div className="font-medium text-sm">{change.label}:</div>
                       <div className="mt-2 space-y-3">
                         <div>
-                          <div className="text-red-600 text-xs font-medium mb-1">Old:</div>
+                          <div className="text-red-600 text-xs font-medium mb-1">Antigo:</div>
                           {renderFieldValue(change.field, change.oldValue)}
                         </div>
                         <div>
-                          <div className="text-green-600 text-xs font-medium mb-1">New:</div>
+                          <div className="text-green-600 text-xs font-medium mb-1">Novo:</div>
                           {renderFieldValue(change.field, change.newValue)}
                         </div>
                       </div>
@@ -227,8 +227,8 @@ const AccommodationUpdateConfirmationModal = ({
 
             <div className="bg-blue-50 p-4 rounded">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> This will update the accommodation details for all linked days. If you only want
-                to update the current day, you&apos;ll need to create a separate accommodation entry.
+                <strong>Nota:</strong> Isto irá atualizar os detalhes do alojamento para todos os dias ligados. Se
+                quiser apenas atualizar o dia atual, terá de criar uma entrada de alojamento separada.
               </p>
             </div>
           </div>
@@ -236,10 +236,10 @@ const AccommodationUpdateConfirmationModal = ({
         <div className="flex-shrink-0 p-6 pt-4 border-t">
           <div className="flex gap-2">
             <Button onClick={onConfirm} className="flex-1">
-              Confirm Update
+              Confirmar Atualização
             </Button>
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              Cancelar
             </Button>
           </div>
         </div>

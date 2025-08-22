@@ -37,11 +37,11 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Trip name is required';
+      newErrors.name = 'Nome da viagem é obrigatório';
     }
 
     if (!formData.startDate) {
-      newErrors.startDate = 'Start date is required';
+      newErrors.startDate = 'Data de início é obrigatória';
     }
 
     setErrors(newErrors);
@@ -84,36 +84,36 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-md mx-4 max-h-[90vh] flex flex-col">
         <div className="flex-shrink-0 p-6 pb-4">
-          <h2 className="text-xl font-bold mb-0">Edit Trip Information</h2>
+          <h2 className="text-xl font-bold mb-0">Editar Informação da Viagem</h2>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="tripName">Trip Name *</Label>
+              <Label htmlFor="tripName">Nome da Viagem *</Label>
               <Input
                 id="tripName"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                placeholder="Enter trip name"
+                placeholder="Introduzir nome da viagem"
                 className={errors.name ? 'border-red-500' : ''}
               />
               {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
-              <Label htmlFor="tripDescription">Description</Label>
+              <Label htmlFor="tripDescription">Descrição</Label>
               <Textarea
                 id="tripDescription"
                 value={formData.description}
                 onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleChange('description', e.target.value)}
-                placeholder="Enter trip description"
+                placeholder="Introduzir descrição da viagem"
                 rows={3}
               />
             </div>
 
             <div>
-              <Label htmlFor="startDate">Start Date *</Label>
+              <Label htmlFor="startDate">Data de Início *</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -123,7 +123,7 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
               />
               {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
               <p className="text-sm text-gray-500 mt-1">
-                End date will be automatically calculated based on your trip days
+                A data de fim será calculada automaticamente com base nos dias da sua viagem
               </p>
             </div>
           </form>
@@ -132,10 +132,10 @@ export const EditTripInfoModal = ({ isOpen, tripInfo, onSave, onCancel }: EditTr
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              Cancel
+              Cancelar
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? 'A guardar...' : 'Guardar Alterações'}
             </Button>
           </div>
         </div>

@@ -35,7 +35,7 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
             <Bed size={20} />
             <span>{day.accommodation.name}</span>
             <div className="text-sm text-gray-600 font-normal">
-              Night {day.nightNumber || 1} of {day.accommodation.numberOfNights || 1}
+              Noite {day.nightNumber || 1} de {day.accommodation.numberOfNights || 1}
             </div>
           </CardTitle>
           <Button
@@ -56,20 +56,20 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
           <div className="space-y-1 text-left">
             {day.accommodation.numberOfNights && (
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Nights:</span> {day.accommodation.numberOfNights} night
+                <span className="font-medium">Noites:</span> {day.accommodation.numberOfNights} noite
                 {day.accommodation.numberOfNights > 1 ? 's' : ''}
               </p>
             )}
 
             {day.accommodation.roomType && (
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Room type:</span> {day.accommodation.roomType}
+                <span className="font-medium">Tipo de quarto:</span> {day.accommodation.roomType}
               </p>
             )}
 
             {day.accommodation.description && (
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Description:</span> {day.accommodation.description}
+                <span className="font-medium">Descrição:</span> {day.accommodation.description}
               </p>
             )}
 
@@ -77,7 +77,7 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
             {hasAmenities() && (
               <div className="mt-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-sm text-gray-700">Amenities:</span>
+                  <span className="font-medium text-sm text-gray-700">Comodidades:</span>
                   {Object.entries(day.accommodation.amenities).map(([key, value]) => {
                     if (key === 'other') {
                       return (day.accommodation.amenities.other || []).map((amenity, index) => (

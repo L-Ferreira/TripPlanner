@@ -14,14 +14,14 @@ const DayNotesCard = ({ day, onUpdateNotes }: DayNotesCardProps) => {
       <CardHeader className="pb-0">
         <CardTitle className="flex items-center gap-2">
           <FileText size={20} />
-          Day Notes
+          Notas do Dia
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <Textarea
           value={day.notes || ''}
           onChange={(e) => onUpdateNotes(day.id, e.target.value)}
-          placeholder="Add notes for this day..."
+          placeholder="Adicionar notas para este dia..."
           className="min-h-[128px]"
         />
       </CardContent>

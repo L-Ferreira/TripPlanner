@@ -89,13 +89,13 @@ export const PWAInstallPrompt = () => {
           <Download className="w-4 h-4 text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-gray-900">Install Trip Planner</h3>
+          <h3 className="text-sm font-medium text-gray-900">Instalar Planeador de Viagens</h3>
           <p className="text-xs text-gray-600 mt-1">
-            Install this app on your device for quick access and offline use!
+            Instale esta aplicação no seu dispositivo para acesso rápido e uso offline!
           </p>
           <div className="flex space-x-2 mt-3">
             <Button onClick={handleInstallClick} size="sm" className="flex-1">
-              Install
+              Instalar
             </Button>
             <Button onClick={handleDismiss} variant="outline" size="sm" className="px-2">
               <X className="w-4 h-4" />
@@ -139,12 +139,13 @@ export const IOSInstallInstructions = () => {
           <Download className="w-4 h-4 text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-blue-900">Install on iOS</h3>
+          <h3 className="text-sm font-medium text-blue-900">Instalar no iOS</h3>
           <p className="text-xs text-blue-800 mt-1">
-            Tap the share button <span className="inline-block">📤</span> and select &quot;Add to Home Screen&quot;
+            Toque no botão partilhar <span className="inline-block">📤</span> e selecione &quot;Adicionar ao Ecrã
+            Principal&quot;
           </p>
           <Button onClick={handleDismiss} variant="outline" size="sm" className="mt-2 text-xs">
-            Got it
+            Entendi
           </Button>
         </div>
       </div>

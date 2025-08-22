@@ -93,17 +93,17 @@ const AddDayModal = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.region.trim()) {
-      newErrors.region = 'Region is required';
+      newErrors.region = 'Região é obrigatória';
     }
 
     if (!usingSameAccommodation && !formData.accommodationName.trim()) {
-      newErrors.accommodationName = 'Accommodation name is required';
+      newErrors.accommodationName = 'Nome do alojamento é obrigatório';
     }
 
     if (!usingSameAccommodation) {
       const nights = parseInt(formData.accommodationNights, 10);
       if (isNaN(nights) || nights < 1) {
-        newErrors.accommodationNights = 'Number of nights must be at least 1';
+        newErrors.accommodationNights = 'Número de noites deve ser pelo menos 1';
       }
     }
 
@@ -261,7 +261,7 @@ const AddDayModal = ({
     const targetDate = new Date(startDate);
     targetDate.setDate(startDate.getDate() + dayNumber - 1);
 
-    return targetDate.toLocaleDateString('en-US', {
+    return targetDate.toLocaleDateString('pt-PT', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -275,7 +275,7 @@ const AddDayModal = ({
       <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Add New Day</CardTitle>
+            <CardTitle>Adicionar Novo Dia</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -286,12 +286,13 @@ const AddDayModal = ({
           {step === 'accommodation-choice' && (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Accommodation for Day {newDayNumber}</h3>
+                <h3 className="text-lg font-semibold mb-2">Alojamento para o Dia {newDayNumber}</h3>
                 <p className="text-gray-600 mb-4">
-                  {previousDay?.accommodation?.name || 'Previous accommodation'} has{' '}
-                  {unusedNightsWarning?.unusedNights || 0} unused night
-                  {(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''}. Would you like to stay there or book a
-                  new accommodation?
+                  {previousDay?.accommodation?.name || 'Alojamento anterior'} tem{' '}
+                  {unusedNightsWarning?.unusedNights || 0} noite
+                  {(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''} não utilizada
+                  {(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''}. Gostaria de ficar lá ou reservar um novo
+                  alojamento?
                 </p>
               </div>
 
@@ -301,9 +302,9 @@ const AddDayModal = ({
                   onClick={() => handleAccommodationChoice(true)}
                   className="p-6 h-auto flex flex-col items-center justify-start text-center min-h-[120px] w-full"
                 >
-                  <div className="text-lg font-semibold mb-2">Stay at Same Place</div>
+                  <div className="text-lg font-semibold mb-2">Ficar no Mesmo Local</div>
                   <div className="text-sm text-gray-600 break-words whitespace-normal leading-relaxed max-w-full">
-                    Continue staying at {previousDay?.accommodation?.name || 'previous accommodation'}
+                    Continuar a ficar em {previousDay?.accommodation?.name || 'alojamento anterior'}
                   </div>
                 </Button>
 
@@ -312,9 +313,9 @@ const AddDayModal = ({
                   onClick={() => handleAccommodationChoice(false)}
                   className="p-6 h-auto flex flex-col items-center justify-start text-center min-h-[120px] w-full"
                 >
-                  <div className="text-lg font-semibold mb-2">Book New Accommodation</div>
+                  <div className="text-lg font-semibold mb-2">Reservar Novo Alojamento</div>
                   <div className="text-sm text-gray-600 break-words whitespace-normal leading-relaxed max-w-full">
-                    Find a new place to stay for Day {newDayNumber}
+                    Encontrar um novo local para ficar no Dia {newDayNumber}
                   </div>
                 </Button>
               </div>
@@ -328,12 +329,13 @@ const AddDayModal = ({
                 <div className="flex items-start">
                   <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3" />
                   <div>
-                    <h4 className="font-semibold text-yellow-800">Unused Accommodation Nights</h4>
+                    <h4 className="font-semibold text-yellow-800">Noites de Alojamento Não Utilizadas</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      {unusedNightsWarning?.accommodationName} has {unusedNightsWarning?.unusedNights} unused night
-                      {unusedNightsWarning?.unusedNights !== 1 ? 's' : ''}. You booked{' '}
-                      {unusedNightsWarning?.totalBookedNights} night
-                      {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''} but only used{' '}
+                      {unusedNightsWarning?.accommodationName} tem {unusedNightsWarning?.unusedNights} noite
+                      {unusedNightsWarning?.unusedNights !== 1 ? 's' : ''} não utilizada
+                      {unusedNightsWarning?.unusedNights !== 1 ? 's' : ''}. Reservou{' '}
+                      {unusedNightsWarning?.totalBookedNights} noite
+                      {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''} mas apenas usou{' '}
                       {unusedNightsWarning?.usedNights}.
                     </p>
                   </div>
@@ -342,7 +344,7 @@ const AddDayModal = ({
 
               <div className="text-center">
                 <p className="text-gray-600 mb-4">
-                  Would you like to adjust the previous accommodation&apos;s night count to match actual usage?
+                  Gostaria de ajustar o número de noites do alojamento anterior para corresponder ao uso real?
                 </p>
 
                 <div className="flex gap-4 justify-center">
@@ -351,7 +353,7 @@ const AddDayModal = ({
                     onClick={() => handleAdjustPreviousNights(true)}
                     className="flex-1 max-w-xs"
                   >
-                    Yes, Adjust to {unusedNightsWarning?.usedNights} Night
+                    Sim, Ajustar para {unusedNightsWarning?.usedNights} Noite
                     {unusedNightsWarning?.usedNights !== 1 ? 's' : ''}
                   </Button>
 
@@ -360,7 +362,7 @@ const AddDayModal = ({
                     onClick={() => handleAdjustPreviousNights(false)}
                     className="flex-1 max-w-xs"
                   >
-                    No, Keep as {unusedNightsWarning?.totalBookedNights} Night
+                    Não, Manter como {unusedNightsWarning?.totalBookedNights} Noite
                     {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''}
                   </Button>
                 </div>
@@ -374,20 +376,20 @@ const AddDayModal = ({
               {/* Basic Day Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="region">Region/Location *</Label>
+                  <Label htmlFor="region">Região/Localização *</Label>
                   <Input
                     id="region"
                     name="region"
                     value={formData.region}
                     onChange={handleChange}
-                    placeholder="e.g., Porto, Lisbon, Aveiro"
+                    placeholder="ex: Porto, Lisboa, Aveiro"
                     className={errors.region ? 'border-red-500' : ''}
                   />
                   {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="dateLabel">Date</Label>
+                  <Label htmlFor="dateLabel">Data</Label>
                   <Input
                     id="dateLabel"
                     value={calculateDayDate(newDayNumber)}
@@ -400,7 +402,7 @@ const AddDayModal = ({
               {/* Travel Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="driveTime">Drive Time</Label>
+                  <Label htmlFor="driveTime">Tempo de Condução</Label>
                   <Input
                     id="driveTime"
                     name="driveTime"
@@ -409,11 +411,11 @@ const AddDayModal = ({
                     onChange={handleChange}
                     placeholder="03:35"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Leave empty if no driving</p>
+                  <p className="text-xs text-gray-500 mt-1">Deixar vazio se não houver condução</p>
                 </div>
 
                 <div>
-                  <Label htmlFor="driveDistanceKm">Distance (km)</Label>
+                  <Label htmlFor="driveDistanceKm">Distância (km)</Label>
                   <Input
                     id="driveDistanceKm"
                     name="driveDistanceKm"
@@ -428,48 +430,46 @@ const AddDayModal = ({
 
               {/* Google Maps */}
               <div>
-                <Label htmlFor="googleMapsUrl">Google Maps URL (optional)</Label>
+                <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
                 <Input
                   id="googleMapsUrl"
                   name="googleMapsUrl"
                   value={formData.googleMapsUrl}
                   onChange={handleChange}
-                  placeholder="Google Maps URL for the route"
+                  placeholder="URL do Google Maps para a rota"
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  URL to open the route in Google Maps (will auto-generate if not provided)
-                </p>
+                <p className="text-sm text-gray-500 mt-1">URL para abrir a rota no Google Maps</p>
               </div>
 
               <div>
-                <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
                 <Input
                   id="googleMapsEmbedUrl"
                   name="googleMapsEmbedUrl"
                   value={formData.googleMapsEmbedUrl}
                   onChange={handleChange}
-                  placeholder="Paste iframe HTML or embed URL here"
+                  placeholder="Colar HTML do iframe ou URL de incorporação aqui"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Paste the full iframe HTML from Google Maps → Share → Embed a map
+                  Colar o HTML completo do iframe do Google Maps → Partilhar → Incorporar um mapa
                 </p>
               </div>
 
               {/* Only show accommodation section if creating new accommodation */}
               {!usingSameAccommodation && (
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Accommodation Information</h3>
+                  <h3 className="text-lg font-semibold mb-4">Informação do Alojamento</h3>
 
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationName">Hotel/Accommodation Name *</Label>
+                      <Label htmlFor="accommodationName">Nome do Hotel/Alojamento *</Label>
                       <Input
                         id="accommodationName"
                         name="accommodationName"
                         value={formData.accommodationName}
                         onChange={handleChange}
-                        placeholder="Hotel Name"
+                        placeholder="Nome do Hotel"
                         className={errors.accommodationName ? 'border-red-500' : ''}
                       />
                       {errors.accommodationName && (
@@ -499,12 +499,12 @@ const AddDayModal = ({
                         name="accommodationDescription"
                         value={formData.accommodationDescription}
                         onChange={handleChange}
-                        placeholder="Brief description of the accommodation"
+                        placeholder="Breve descrição do alojamento"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="accommodationNights">Number of Nights *</Label>
+                      <Label htmlFor="accommodationNights">Número de Noites *</Label>
                       <Input
                         id="accommodationNights"
                         name="accommodationNights"
@@ -523,20 +523,20 @@ const AddDayModal = ({
 
                   {/* Room Type */}
                   <div className="mb-6">
-                    <Label htmlFor="accommodationRoomType">Room Type (optional)</Label>
+                    <Label htmlFor="accommodationRoomType">Tipo de Quarto (opcional)</Label>
                     <Input
                       id="accommodationRoomType"
                       name="accommodationRoomType"
                       value={formData.accommodationRoomType}
                       onChange={handleChange}
-                      placeholder="e.g., Deluxe Room, Suite, Standard Room"
+                      placeholder="ex: Quarto Deluxe, Suite, Quarto Standard"
                     />
                   </div>
 
                   {/* Location */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationMapsUrl">Google Maps URL (optional)</Label>
+                      <Label htmlFor="accommodationMapsUrl">URL do Google Maps (opcional)</Label>
                       <Input
                         id="accommodationMapsUrl"
                         name="accommodationMapsUrl"
@@ -548,7 +548,7 @@ const AddDayModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="accommodationMapsEmbedUrl">Google Maps Embed URL (optional)</Label>
+                      <Label htmlFor="accommodationMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
                       <Input
                         id="accommodationMapsEmbedUrl"
                         name="accommodationMapsEmbedUrl"
@@ -558,7 +558,7 @@ const AddDayModal = ({
                         placeholder="https://www.google.com/maps/embed?..."
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Go to Google Maps → Share → Embed a map → Copy the iframe src URL
+                        Ir ao Google Maps → Partilhar → Incorporar um mapa → Copiar a URL src do iframe
                       </p>
                     </div>
                   </div>
@@ -594,7 +594,7 @@ const AddDayModal = ({
                         <div className="flex gap-2">
                           <Input
                             type="url"
-                            placeholder="Enter image URL"
+                            placeholder="Introduzir URL da imagem"
                             value={newImageUrl}
                             onChange={(e) => setNewImageUrl(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
@@ -639,11 +639,11 @@ const AddDayModal = ({
           <div className="flex gap-2">
             {step === 'main-form' && (
               <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
-                {isSubmitting ? 'Adding...' : 'Add Day'}
+                {isSubmitting ? 'A adicionar...' : 'Adicionar Dia'}
               </Button>
             )}
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
+              Cancelar
             </Button>
           </div>
         </div>

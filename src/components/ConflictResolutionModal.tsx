@@ -31,7 +31,7 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
   };
 
   if (images.length === 0) {
-    return <div className="text-gray-500 text-sm">No images</div>;
+    return <div className="text-gray-500 text-sm">Sem imagens</div>;
   }
 
   return (
@@ -92,19 +92,19 @@ const CombinedImagesDisplay = ({ images, onUpdate }: { images: string[]; onUpdat
 
   return (
     <div className="space-y-4">
-      <ImageCarousel images={images} title="Combined Images Preview" />
+      <ImageCarousel images={images} title="Pré-visualização das Imagens Combinadas" />
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Edit Image Order (JSON)</label>
+        <label className="text-sm font-medium text-gray-700">Editar Ordem das Imagens (JSON)</label>
         <textarea
           value={jsonValue}
           onChange={(e) => handleJsonChange(e.target.value)}
           className={`w-full h-32 p-2 border rounded-md font-mono text-sm ${
             isValidJson ? 'border-gray-300' : 'border-red-500'
           }`}
-          placeholder="Edit the JSON array to reorder images..."
+          placeholder="Editar o array JSON para reordenar imagens..."
         />
-        {!isValidJson && <p className="text-red-500 text-sm">Invalid JSON format</p>}
+        {!isValidJson && <p className="text-red-500 text-sm">Formato JSON inválido</p>}
       </div>
     </div>
   );
@@ -295,21 +295,21 @@ export const ConflictResolutionModal = ({
   const getConflictTypeLabel = (type: Conflict['type']) => {
     switch (type) {
       case 'tripInfo':
-        return 'Trip Information';
+        return 'Informação da Viagem';
       case 'day':
-        return 'Day Information';
+        return 'Informação do Dia';
       case 'accommodation':
-        return 'Accommodation';
+        return 'Alojamento';
       case 'place':
-        return 'Place';
+        return 'Local';
       case 'dayAdded':
-        return 'Day Added';
+        return 'Dia Adicionado';
       case 'dayDeleted':
-        return 'Day Deleted';
+        return 'Dia Eliminado';
       case 'placeAdded':
-        return 'Place Added';
+        return 'Local Adicionado';
       case 'placeDeleted':
-        return 'Place Deleted';
+        return 'Local Eliminado';
       default:
         return type;
     }
@@ -318,33 +318,33 @@ export const ConflictResolutionModal = ({
   const getFieldLabel = (field: string) => {
     switch (field) {
       case 'name':
-        return 'Name';
+        return 'Nome';
       case 'startDate':
-        return 'Start Date';
+        return 'Data de Início';
       case 'endDate':
-        return 'End Date';
+        return 'Data de Fim';
       case 'description':
-        return 'Description';
+        return 'Descrição';
       case 'region':
-        return 'Region';
+        return 'Região';
       case 'notes':
-        return 'Notes';
+        return 'Notas';
       case 'driveTimeHours':
-        return 'Drive Time (hours)';
+        return 'Tempo de Condução (horas)';
       case 'driveDistanceKm':
-        return 'Drive Distance (km)';
+        return 'Distância de Condução (km)';
       case 'websiteUrl':
         return 'Website URL';
       case 'googleMapsUrl':
         return 'Google Maps URL';
       case 'numberOfNights':
-        return 'Number of Nights';
+        return 'Número de Noites';
       case 'roomType':
-        return 'Room Type';
+        return 'Tipo de Quarto';
       case 'images':
-        return 'Images';
+        return 'Imagens';
       case 'existence':
-        return 'Existence';
+        return 'Existência';
       default:
         if (field.startsWith('amenities.')) {
           return field
@@ -365,18 +365,18 @@ export const ConflictResolutionModal = ({
     const value = isLocal ? conflict.localValue : conflict.remoteValue;
 
     if (conflict.type === 'dayAdded' || conflict.type === 'dayDeleted') {
-      return isLocal ? (conflict.localValue ? 'Exists' : 'Deleted') : conflict.remoteValue ? 'Exists' : 'Deleted';
+      return isLocal ? (conflict.localValue ? 'Existe' : 'Eliminado') : conflict.remoteValue ? 'Existe' : 'Eliminado';
     }
 
     if (conflict.type === 'placeAdded' || conflict.type === 'placeDeleted') {
-      return isLocal ? (conflict.localValue ? 'Exists' : 'Deleted') : conflict.remoteValue ? 'Exists' : 'Deleted';
+      return isLocal ? (conflict.localValue ? 'Existe' : 'Eliminado') : conflict.remoteValue ? 'Existe' : 'Eliminado';
     }
 
     // Handle images specially
     if (conflict.field === 'images') {
       const images = value || [];
       if (images.length === 0) {
-        return <div className="text-gray-500 text-sm">No images</div>;
+        return <div className="text-gray-500 text-sm">Sem imagens</div>;
       }
 
       return (
@@ -395,16 +395,16 @@ export const ConflictResolutionModal = ({
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Resolve Sync Conflicts</h2>
+            <h2 className="text-xl font-bold">Resolver Conflitos de Sincronização</h2>
             <div className="text-sm text-gray-600">
-              {conflicts.length - resolutions.size} of {conflicts.length} conflicts remaining
+              {conflicts.length - resolutions.size} de {conflicts.length} conflitos restantes
             </div>
           </div>
 
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-800">
-              We found {conflicts.length} conflict{conflicts.length !== 1 ? 's' : ''} between your local changes and the
-              remote data. Please review each conflict and choose which version to keep.
+              Encontrámos {conflicts.length} conflito{conflicts.length !== 1 ? 's' : ''} entre as suas alterações locais
+              e os dados remotos. Por favor, reveja cada conflito e escolha qual versão manter.
             </p>
           </div>
 
@@ -424,7 +424,7 @@ export const ConflictResolutionModal = ({
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-4">
-                      Field: <span className="font-medium">{getFieldLabel(conflict.field)}</span>
+                      Campo: <span className="font-medium">{getFieldLabel(conflict.field)}</span>
                     </p>
                   </div>
 
@@ -437,7 +437,7 @@ export const ConflictResolutionModal = ({
 
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => toggleCombineView(conflict.id)}>
-                          Back to Options
+                          Voltar às Opções
                         </Button>
                       </div>
                     </div>
@@ -445,7 +445,7 @@ export const ConflictResolutionModal = ({
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium">Local Version</label>
+                          <label className="block text-sm font-medium">Versão Local</label>
                           <div className="p-3 bg-green-50 border border-green-200 rounded min-h-[3rem]">
                             {renderConflictValue(conflict, true)}
                           </div>
@@ -455,12 +455,12 @@ export const ConflictResolutionModal = ({
                             onClick={() => updateResolution(conflict.id, 'local')}
                             className="w-full"
                           >
-                            Keep Local
+                            Manter Local
                           </Button>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium">Remote Version</label>
+                          <label className="block text-sm font-medium">Versão Remota</label>
                           <div className="p-3 bg-blue-50 border border-blue-200 rounded min-h-[3rem]">
                             {renderConflictValue(conflict, false)}
                           </div>
@@ -470,7 +470,7 @@ export const ConflictResolutionModal = ({
                             onClick={() => updateResolution(conflict.id, 'remote')}
                             className="w-full"
                           >
-                            Keep Remote
+                            Manter Remota
                           </Button>
                         </div>
                       </div>
@@ -505,11 +505,11 @@ export const ConflictResolutionModal = ({
 
                                 return (
                                   <div className="bg-gray-50 p-3 rounded space-y-2">
-                                    <div className="font-medium text-gray-700">Change Summary:</div>
+                                    <div className="font-medium text-gray-700">Resumo das Alterações:</div>
 
                                     {addedImages.length > 0 && (
                                       <div className="text-green-700 bg-green-50 p-2 rounded">
-                                        <strong>Added in remote ({addedImages.length}):</strong>
+                                        <strong>Adicionadas no remoto ({addedImages.length}):</strong>
                                         <div className="mt-1">
                                           {addedImages.map((img: string, idx: number) => {
                                             const filename = img.split('/').pop() || img;
@@ -525,7 +525,7 @@ export const ConflictResolutionModal = ({
 
                                     {deletedImages.length > 0 && (
                                       <div className="text-red-700 bg-red-50 p-2 rounded">
-                                        <strong>Deleted from remote ({deletedImages.length}):</strong>
+                                        <strong>Eliminadas do remoto ({deletedImages.length}):</strong>
                                         <div className="mt-1">
                                           {deletedImages.map((img: string, idx: number) => {
                                             const filename = img.split('/').pop() || img;
@@ -541,7 +541,7 @@ export const ConflictResolutionModal = ({
 
                                     {addedImages.length === 0 && deletedImages.length === 0 && (
                                       <div className="text-gray-600 bg-gray-50 p-2 rounded">
-                                        Images are different but no clear additions/deletions detected.
+                                        As imagens são diferentes mas não foram detetadas adições/eliminações claras.
                                       </div>
                                     )}
                                   </div>
@@ -552,7 +552,7 @@ export const ConflictResolutionModal = ({
 
                           {conflict.context?.missingImages && conflict.context.missingImages.length > 0 && (
                             <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
-                              <strong>Missing from remote:</strong>{' '}
+                              <strong>Em falta no remoto:</strong>{' '}
                               {conflict.context.missingImages
                                 .map((img: string) => {
                                   const filename = img.split('/').pop() || img;
@@ -566,14 +566,14 @@ export const ConflictResolutionModal = ({
 
                       {canEditManually(conflict) && (
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium">Manual Edit</label>
+                          <label className="block text-sm font-medium">Edição Manual</label>
                           <div className="flex gap-2">
                             <input
                               type="text"
                               value={manualValue || ''}
                               onChange={(e) => updateManualEdit(conflict.id, e.target.value)}
                               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Enter custom value..."
+                              placeholder="Introduzir valor personalizado..."
                             />
                             <Button
                               size="sm"
@@ -581,7 +581,7 @@ export const ConflictResolutionModal = ({
                               onClick={() => updateResolution(conflict.id, 'manual', manualValue)}
                               disabled={!manualValue}
                             >
-                              Use Manual
+                              Usar Manual
                             </Button>
                           </div>
                         </div>
@@ -608,14 +608,14 @@ export const ConflictResolutionModal = ({
 
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
             <Button variant="outline" onClick={onCancel}>
-              Cancel Sync
+              Cancelar Sincronização
             </Button>
             <Button
               onClick={applyResolutions}
               disabled={!allConflictsResolved}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              Apply Resolutions & Sync
+              Aplicar Resoluções e Sincronizar
             </Button>
           </div>
         </div>
