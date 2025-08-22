@@ -484,7 +484,7 @@ const AddDayModal = ({
                         type="url"
                         value={formData.accommodationWebsite}
                         onChange={handleChange}
-                        placeholder="https://hotel-website.com"
+                        placeholder={t('place.websiteUrlPlaceholder')}
                       />
                     </div>
                   </div>
@@ -543,7 +543,7 @@ const AddDayModal = ({
                         type="url"
                         value={formData.accommodationMapsUrl}
                         onChange={handleChange}
-                        placeholder="https://maps.google.com/..."
+                        placeholder={t('place.googleMapsUrlPlaceholder')}
                       />
                     </div>
 
@@ -555,7 +555,7 @@ const AddDayModal = ({
                         type="url"
                         value={formData.accommodationMapsEmbedUrl}
                         onChange={handleChange}
-                        placeholder="https://www.google.com/maps/embed?..."
+                        placeholder={t('place.googleMapsEmbedUrlPlaceholder')}
                       />
                       <p className="text-xs text-gray-500 mt-1">{t('place.embedInstructions')}</p>
                     </div>

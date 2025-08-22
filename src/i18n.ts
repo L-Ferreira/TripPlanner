@@ -18,14 +18,18 @@ i18n
         translation: ptTranslations,
       },
     },
+    lng: 'pt', // Force default to Portuguese
     fallbackLng: 'pt', // Default to Portuguese as per current implementation
     debug: false,
     interpolation: {
       escapeValue: false, // React already escapes values
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage', 'querystring', 'cookie', 'navigator'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
+      lookupQuerystring: 'lng',
+      lookupCookie: 'i18next',
     },
   });
 

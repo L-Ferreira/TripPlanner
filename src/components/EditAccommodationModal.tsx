@@ -189,7 +189,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   type="url"
                   value={formData.websiteUrl}
                   onChange={handleChange}
-                  placeholder="https://hotel-website.com"
+                  placeholder={t('place.websiteUrlPlaceholder')}
                 />
               </div>
             </div>
@@ -252,7 +252,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   type="url"
                   value={formData.googleMapsUrl}
                   onChange={handleChange}
-                  placeholder="https://maps.google.com/..."
+                  placeholder={t('place.googleMapsUrlPlaceholder')}
                 />
               </div>
 
@@ -264,7 +264,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   type="url"
                   value={formData.googleMapsEmbedUrl}
                   onChange={handleChange}
-                  placeholder="https://www.google.com/maps/embed?..."
+                  placeholder={t('place.googleMapsEmbedUrlPlaceholder')}
                 />
                 <p className="text-xs text-gray-500 mt-1">{t('place.embedInstructions')}</p>
               </div>

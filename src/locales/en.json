@@ -75,10 +75,12 @@
     "placeDescription": "Brief description of the place (optional)",
     "placeNameRequired": "Place name is required",
     "websiteUrl": "Website URL (optional)",
+    "websiteUrlPlaceholder": "https://example.com",
     "googleMapsUrl": "Google Maps URL (optional)",
-    "googleMapsUrlPlaceholder": "Google Maps URL for the route",
+    "googleMapsUrlPlaceholder": "https://maps.google.com/...",
     "googleMapsUrlDescription": "URL to open the route in Google Maps",
     "googleMapsEmbedUrl": "Google Maps Embed URL (optional)",
+    "googleMapsEmbedUrlPlaceholder": "https://www.google.com/maps/embed?...",
     "embedInstructions": "Go to Google Maps → Share → Embed a map → Copy the iframe src URL",
     "images": "Images"
   },

@@ -75,10 +75,12 @@
     "placeDescription": "Breve descrição do local (opcional)",
     "placeNameRequired": "Nome do local é obrigatório",
     "websiteUrl": "URL do Website (opcional)",
+    "websiteUrlPlaceholder": "https://exemplo.com",
     "googleMapsUrl": "URL do Google Maps (opcional)",
-    "googleMapsUrlPlaceholder": "URL do Google Maps para a rota",
+    "googleMapsUrlPlaceholder": "https://maps.google.com/...",
     "googleMapsUrlDescription": "URL para abrir a rota no Google Maps",
     "googleMapsEmbedUrl": "URL de Incorporação do Google Maps (opcional)",
+    "googleMapsEmbedUrlPlaceholder": "https://www.google.com/maps/embed?...",
     "embedInstructions": "Ir ao Google Maps → Partilhar → Incorporar um mapa → Copiar a URL src do iframe",
     "images": "Imagens"
   },

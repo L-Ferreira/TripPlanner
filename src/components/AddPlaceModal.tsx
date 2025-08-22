@@ -138,7 +138,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
                 type="url"
                 value={formData.websiteUrl}
                 onChange={handleChange}
-                placeholder="https://example.com"
+                placeholder={t('place.websiteUrlPlaceholder')}
               />
             </div>
 
@@ -150,7 +150,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
                 type="url"
                 value={formData.googleMapsUrl}
                 onChange={handleChange}
-                placeholder="https://maps.google.com/..."
+                placeholder={t('place.googleMapsUrlPlaceholder')}
               />
             </div>
 
