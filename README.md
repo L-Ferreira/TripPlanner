@@ -29,7 +29,7 @@ A modern, feature-rich trip planning application built with React, TypeScript, a
 - **Place Management** - Add and manage places to visit with descriptions and images
 - **Accommodation Tracking** - Manage hotel bookings with amenities and details
 - **Image Galleries** - Add photos to capture your trip memories
-- **Notes & Descriptions** - Add detailed notes for each day and place
+- **Notes & Descriptions** - Add detailed notes for each day and place with markdown support
 
 ### 🌐 **Internationalization**
 - **Multi-language Support** - English and Portuguese (Portugal)
@@ -176,9 +176,7 @@ VITE_GOOGLE_REDIRECT_URI=http://localhost:5174
 
 ## 📱 PWA Installation
 
-### PWA Features Enabled
-
-Your Trip Planner is now a Progressive Web App (PWA) with:
+### PWA Features
 
 ✅ **Offline Access** - App works without internet connection  
 ✅ **App Installation** - Can be installed on mobile and desktop  
@@ -206,7 +204,6 @@ Your Trip Planner is now a Progressive Web App (PWA) with:
 ### Offline Functionality
 
 The app works offline because:
-
 - **Local Storage**: Trip data is saved locally
 - **Service Worker**: Caches app files for offline access
 - **Smart Syncing**: Syncs changes when connection is restored
@@ -322,19 +319,6 @@ src/
 - **Google Drive API** - Cloud synchronization
 
 ## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Google Drive Integration
-VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
-VITE_GOOGLE_REDIRECT_URI=http://localhost:5174
-
-# For production
-# VITE_GOOGLE_REDIRECT_URI=https://your-domain.com
-```
 
 ### PWA Configuration
 
