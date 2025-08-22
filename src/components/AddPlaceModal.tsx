@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { extractEmbedUrl, generateGoogleMapsUrl } from '@/lib/utils';
+import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
 
@@ -13,7 +13,7 @@ interface AddPlaceModalProps {
     name: string;
     description: string;
     websiteUrl?: string;
-    googleMapsUrl: string;
+    googleMapsUrl?: string;
     googleMapsEmbedUrl?: string;
     images: string[];
   }) => void;
@@ -38,7 +38,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
         name: formData.name.trim(),
         description: formData.description.trim(),
         websiteUrl: formData.websiteUrl.trim() || undefined,
-        googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.name),
+        googleMapsUrl: formData.googleMapsUrl.trim() || undefined,
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl) || undefined,
         images: formData.images,
       });

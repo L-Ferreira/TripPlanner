@@ -28,12 +28,6 @@ export const extractEmbedUrl = (input: string): string => {
   return input;
 };
 
-// Generate Google Maps search URL from location name
-export const generateGoogleMapsUrl = (locationName: string): string => {
-  const encodedName = encodeURIComponent(locationName);
-  return `https://www.google.com/maps/search/${encodedName}`;
-};
-
 // Convert decimal hours to time format (HH:MM)
 export const decimalHoursToTimeString = (decimalHours: number): string => {
   if (decimalHours === 0) return '';

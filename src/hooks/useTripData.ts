@@ -16,7 +16,7 @@ export interface Place {
   name: string;
   description: string;
   websiteUrl?: string;
-  googleMapsUrl: string;
+  googleMapsUrl?: string;
   googleMapsEmbedUrl?: string;
   images: string[];
 }
@@ -27,15 +27,15 @@ export interface TripDay {
   region: string;
   driveTimeHours: number;
   driveDistanceKm: number;
-  googleMapsUrl: string;
-  googleMapsEmbedUrl: string;
+  googleMapsUrl?: string;
+  googleMapsEmbedUrl?: string;
   accommodationId?: string; // Links days with same accommodation
   nightNumber?: number; // Which night of the stay (1, 2, 3, etc.)
   notes?: string; // Day notes
   accommodation: {
     name: string;
     websiteUrl?: string;
-    googleMapsUrl: string;
+    googleMapsUrl?: string;
     googleMapsEmbedUrl?: string;
     description?: string;
     numberOfNights?: number;

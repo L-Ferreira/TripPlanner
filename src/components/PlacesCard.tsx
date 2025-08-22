@@ -114,7 +114,9 @@ const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceIma
                       <div
                         className={`${place.images && place.images.length > 0 ? 'lg:w-[40%]' : 'w-full'} bg-gray-100 rounded-lg overflow-hidden`}
                       >
-                        <div className="h-64 lg:h-80 max-h-[400px]">
+                        <div
+                          className={`${place.images && place.images.length > 0 ? 'h-64 lg:h-80 max-h-[400px]' : 'h-96 max-h-[500px]'}`}
+                        >
                           <iframe
                             src={place.googleMapsEmbedUrl}
                             width="100%"

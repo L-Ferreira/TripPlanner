@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { extractEmbedUrl, generateGoogleMapsUrl } from '@/lib/utils';
+import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { TripDay } from '../hooks/useTripData';
@@ -39,7 +39,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
       setFormData({
         name: accommodation.name,
         websiteUrl: accommodation.websiteUrl || '',
-        googleMapsUrl: accommodation.googleMapsUrl,
+        googleMapsUrl: accommodation.googleMapsUrl || '',
         googleMapsEmbedUrl: accommodation.googleMapsEmbedUrl || '',
         description: accommodation.description || '',
         numberOfNights: (accommodation.numberOfNights || 1).toString(),
@@ -88,7 +88,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
       onSave({
         name: formData.name.trim(),
         websiteUrl: formData.websiteUrl.trim() || undefined,
-        googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.name),
+        googleMapsUrl: formData.googleMapsUrl.trim() || undefined,
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl) || undefined,
         description: formData.description.trim() || undefined,
         numberOfNights: parseInt(formData.numberOfNights, 10),

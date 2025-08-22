@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { extractEmbedUrl, generateGoogleMapsUrl } from '@/lib/utils';
+import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useState } from 'react';
 import { Place } from '../hooks/useTripData';
@@ -34,7 +34,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         name: place.name,
         description: place.description,
         websiteUrl: place.websiteUrl || '',
-        googleMapsUrl: place.googleMapsUrl,
+        googleMapsUrl: place.googleMapsUrl || '',
         googleMapsEmbedUrl: place.googleMapsEmbedUrl || '',
         images: place.images || [],
       });
@@ -69,7 +69,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         name: formData.name.trim(),
         description: formData.description.trim(),
         websiteUrl: formData.websiteUrl.trim() || undefined,
-        googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.name),
+        googleMapsUrl: formData.googleMapsUrl.trim() || undefined,
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl) || undefined,
         images: formData.images,
       });

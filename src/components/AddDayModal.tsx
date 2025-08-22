@@ -1,7 +1,6 @@
 import {
   decimalHoursToTimeString,
   extractEmbedUrl,
-  generateGoogleMapsUrl,
   getDefaultAccommodationFormData,
   timeStringToDecimalHours,
 } from '@/lib/utils';
@@ -124,7 +123,7 @@ const AddDayModal = ({
         driveDistanceKm: previousDay.driveDistanceKm.toString(),
         accommodationName: previousDay.accommodation.name,
         accommodationWebsite: previousDay.accommodation.websiteUrl || '',
-        accommodationMapsUrl: previousDay.accommodation.googleMapsUrl,
+        accommodationMapsUrl: previousDay.accommodation.googleMapsUrl || '',
         accommodationMapsEmbedUrl: previousDay.accommodation.googleMapsEmbedUrl || '',
         accommodationDescription: previousDay.accommodation.description || '',
         accommodationNights: (previousDay.accommodation.numberOfNights || 1).toString(),
@@ -164,13 +163,13 @@ const AddDayModal = ({
         region: formData.region.trim(),
         driveTimeHours: decimalHours,
         driveDistanceKm: Number(formData.driveDistanceKm) || 0,
-        googleMapsUrl: formData.googleMapsUrl.trim() || generateGoogleMapsUrl(formData.region),
+        googleMapsUrl: formData.googleMapsUrl.trim() || undefined,
         googleMapsEmbedUrl: extractEmbedUrl(formData.googleMapsEmbedUrl),
         notes: undefined,
         accommodation: {
           name: formData.accommodationName,
           websiteUrl: formData.accommodationWebsite.trim() || undefined,
-          googleMapsUrl: formData.accommodationMapsUrl.trim() || generateGoogleMapsUrl(formData.accommodationName),
+          googleMapsUrl: formData.accommodationMapsUrl.trim() || undefined,
           googleMapsEmbedUrl: extractEmbedUrl(formData.accommodationMapsEmbedUrl) || undefined,
           description: formData.accommodationDescription.trim() || undefined,
           numberOfNights: parseInt(formData.accommodationNights, 10),

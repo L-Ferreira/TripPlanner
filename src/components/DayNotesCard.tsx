@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { FileText } from 'lucide-react';
 import { TripDay } from '../hooks/useTripData';
 
@@ -17,11 +18,11 @@ const DayNotesCard = ({ day, onUpdateNotes }: DayNotesCardProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <textarea
+        <Textarea
           value={day.notes || ''}
           onChange={(e) => onUpdateNotes(day.id, e.target.value)}
           placeholder="Add notes for this day..."
-          className="w-full h-32 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="min-h-[128px]"
         />
       </CardContent>
     </Card>

@@ -191,7 +191,7 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     setState((prev) => {
       const newData = {
         ...prev.tripData,
-        days: prev.tripData.days.map((day) => (day.id === dayId ? { ...day, notes: notes.trim() || undefined } : day)),
+        days: prev.tripData.days.map((day) => (day.id === dayId ? { ...day, notes: notes || undefined } : day)),
       };
 
       localStorage.setItem('tripData', JSON.stringify(newData));
