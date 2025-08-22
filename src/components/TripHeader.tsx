@@ -1,7 +1,10 @@
 import { Download, Edit2, Plus, RotateCcw, Upload } from 'lucide-react';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PortugalFlag, UKFlag } from './FlagIcons';
 import { GoogleDriveAuth } from './GoogleDriveAuth';
 import { Button } from './ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface TripHeaderProps {
   tripTitle: string;
@@ -26,6 +29,7 @@ export const TripHeader = ({
   onImportData,
   onResetData,
 }: TripHeaderProps) => {
+  const { t, i18n } = useTranslation();
   const [showFloatingButton, setShowFloatingButton] = useState(false);
   const addDayButtonRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +37,7 @@ export const TripHeader = ({
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-PT', {
+    return date.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'pt-PT', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -50,7 +54,7 @@ export const TripHeader = ({
       try {
         await onImportData(file);
       } catch (error) {
-        alert('Falha ao importar ficheiro: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+        alert(t('import.importFailed'));
       }
       // Reset file input
       if (fileInputRef.current) {
@@ -94,11 +98,43 @@ export const TripHeader = ({
         {/* Trip Info Card */}
         <div className="bg-white rounded-lg shadow-md border border-gray-300 p-6">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{tripTitle || 'Viagem Sem Título'}</h1>
-            <Button onClick={onEditTrip} variant="outline" size="sm" className="flex items-center gap-2">
-              <Edit2 size={16} />
-              Editar Viagem
-            </Button>
+            <h1 className="text-2xl font-bold text-gray-900">{tripTitle || t('trip.untitled')}</h1>
+            <div className="flex items-center gap-2">
+              <Button onClick={onEditTrip} variant="outline" size="sm" className="flex items-center gap-2">
+                <Edit2 size={16} />
+                <span className="hidden sm:inline">{t('trip.editTrip')}</span>
+              </Button>
+
+              {/* Language Selector */}
+              <Select value={i18n.language} onValueChange={(value) => i18n.changeLanguage(value)}>
+                <SelectTrigger className="h-8 rounded-md px-3 text-xs border border-gray-300 bg-background shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-auto min-w-[40px] sm:min-w-[120px] [&>svg]:hidden sm:[&>svg]:block">
+                  <SelectValue>
+                    <span className="flex items-center gap-2">
+                      <span className="flex items-center justify-center">
+                        {i18n.language === 'pt' ? <PortugalFlag size={16} /> : <UKFlag size={16} />}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {i18n.language === 'pt' ? t('language.portuguese') : t('language.english')}
+                      </span>
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">
+                    <span className="flex items-center gap-2">
+                      <PortugalFlag size={16} />
+                      <span>{t('language.portuguese')}</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="en">
+                    <span className="flex items-center gap-2">
+                      <UKFlag size={16} />
+                      <span>{t('language.english')}</span>
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="text-gray-700 mb-4">
@@ -106,7 +142,7 @@ export const TripHeader = ({
             <p className="text-sm">
               {tripStartDate && tripEndDate
                 ? `${formatDate(tripStartDate)} - ${formatDate(tripEndDate)}`
-                : 'Sem datas definidas'}
+                : t('trip.noDatesDefined')}
             </p>
           </div>
 
@@ -116,22 +152,22 @@ export const TripHeader = ({
             className="w-full flex items-center justify-center gap-2 mb-4"
           >
             <Plus size={16} />
-            Adicionar Dia
+            {t('trip.addDay')}
           </Button>
 
           {/* Data Management Buttons */}
           <div className="flex gap-2">
             <Button onClick={onExportData} variant="outline" size="sm" className="flex-1">
               <Download size={16} />
-              Exportar
+              <span className="hidden sm:inline">{t('trip.export')}</span>
             </Button>
             <Button onClick={handleImportClick} variant="outline" size="sm" className="flex-1">
               <Upload size={16} />
-              Importar
+              <span className="hidden sm:inline">{t('trip.import')}</span>
             </Button>
             <Button onClick={onResetData} variant="outline" size="sm" className="flex-1">
               <RotateCcw size={16} />
-              Repor
+              <span className="hidden sm:inline">{t('trip.reset')}</span>
             </Button>
           </div>
 

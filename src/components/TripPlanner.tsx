@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, decimalHoursToHoursMinutes } from '@/lib/utils';
 import { Car, Edit2, MapPin, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Fragment } from 'react/jsx-runtime';
 import { useSyncContext } from '../contexts/SyncContext';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
@@ -23,6 +24,8 @@ import PlacesCard from './PlacesCard';
 import { TripHeader } from './TripHeader';
 
 const TripPlanner = () => {
+  const { t } = useTranslation();
+
   // Get all data and actions from the centralized sync context
   const {
     tripData,
@@ -66,9 +69,9 @@ const TripPlanner = () => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasLocalChanges) {
         e.preventDefault();
-        e.returnValue =
-          'Tem alterações não guardadas que serão perdidas se sair desta página. Tem a certeza de que quer continuar?';
-        return 'Tem alterações não guardadas que serão perdidas se sair desta página. Tem a certeza de que quer continuar?';
+        const message = t('confirmations.unsavedChanges');
+        e.returnValue = message;
+        return message;
       }
     };
 
@@ -137,8 +140,8 @@ const TripPlanner = () => {
   const handleDeleteDay = (dayId: string) => {
     const day = tripData.days.find((d) => d.id === dayId);
     openDeleteModal(
-      'Eliminar Dia',
-      `Tem a certeza de que quer eliminar o Dia #${day?.dayNumber} (${day?.region})? Esta ação não pode ser desfeita.`,
+      t('day.deleteDay'),
+      t('confirmations.deleteDayConfirm', { dayNumber: day?.dayNumber, region: day?.region }),
       () => deleteDay(dayId)
     );
   };
@@ -146,19 +149,13 @@ const TripPlanner = () => {
   const handleDeletePlace = (dayId: string, placeId: string) => {
     const day = tripData.days.find((d) => d.id === dayId);
     const place = day?.places.find((p) => p.id === placeId);
-    openDeleteModal(
-      'Eliminar Local',
-      `Tem a certeza de que quer eliminar "${place?.name}"? Esta ação não pode ser desfeita.`,
-      () => deletePlace(dayId, placeId)
+    openDeleteModal(t('place.deletePlace'), t('confirmations.deletePlaceConfirm', { placeName: place?.name }), () =>
+      deletePlace(dayId, placeId)
     );
   };
 
   const handleShowResetModal = () => {
-    openDeleteModal(
-      'Repor Dados da Viagem',
-      'Tem a certeza de que quer repor todos os dados da viagem? Isto irá eliminar todos os dias, locais e alojamentos e dar-lhe uma base limpa para começar a planear uma nova viagem. Esta ação não pode ser desfeita.',
-      () => resetData()
-    );
+    openDeleteModal(t('trip.resetTripData'), t('confirmations.resetTripDataConfirm'), () => resetData());
   };
 
   const handleEditTripInfo = (updatedInfo: Partial<TripInfo>) => {
@@ -203,7 +200,7 @@ const TripPlanner = () => {
                       variant="outline"
                       className="hidden sm:block px-3 py-1 text-sm font-semibold border-gray-400"
                     >
-                      Dia #{day.dayNumber}
+                      {t('day.day')} #{day.dayNumber}
                     </Badge>
                     <Badge
                       variant="outline"
@@ -226,7 +223,7 @@ const TripPlanner = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mr-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mr-3">
                     <div
                       role="button"
                       tabIndex={0}
@@ -275,7 +272,7 @@ const TripPlanner = () => {
                         <CardTitle className="flex items-center justify-between text-gray-800">
                           <div className="flex items-center gap-2">
                             <MapPin size={20} />
-                            Mapa da Rota
+                            {t('maps.routeMap')}
                           </div>
                           {day.googleMapsUrl && (
                             <a
@@ -284,7 +281,7 @@ const TripPlanner = () => {
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
                             >
-                              Abrir no Maps
+                              {t('maps.openInMaps')}
                             </a>
                           )}
                         </CardTitle>

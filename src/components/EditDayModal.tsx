@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { decimalHoursToTimeString, extractEmbedUrl, timeStringToDecimalHours } from '@/lib/utils';
 import { X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TripDay } from '../hooks/useTripData';
 
 interface EditDayModalProps {
@@ -15,6 +16,7 @@ interface EditDayModalProps {
 }
 
 const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     region: '',
     driveTime: '',
@@ -43,7 +45,7 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.region.trim()) {
-      newErrors.region = 'Região/Localização é obrigatória';
+      newErrors.region = t('day.regionRequired');
     }
 
     setErrors(newErrors);
@@ -100,7 +102,9 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
       <Card className="w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Editar Dia {day.dayNumber}</CardTitle>
+            <CardTitle>
+              {t('day.editDay')} {day.dayNumber}
+            </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -109,21 +113,21 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
         <CardContent className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="region">Região/Localização *</Label>
+              <Label htmlFor="region">{t('day.region')} *</Label>
               <Input
                 id="region"
                 name="region"
                 value={formData.region}
                 onChange={handleChange}
-                placeholder="ex: Porto, Lisboa, Aveiro"
+                placeholder={t('day.exampleRegions')}
                 className={errors.region ? 'border-red-500' : ''}
               />
-              {errors.region && <p className="text-red-500 text-sm mt-1">Região é obrigatória</p>}
+              {errors.region && <p className="text-red-500 text-sm mt-1">{t('day.regionRequired')}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="driveTime">Tempo de Condução</Label>
+                <Label htmlFor="driveTime">{t('day.driveTime')}</Label>
                 <Input
                   id="driveTime"
                   name="driveTime"
@@ -132,11 +136,11 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
                   onChange={handleChange}
                   placeholder="03:35"
                 />
-                <p className="text-xs text-gray-500 mt-1">Deixar vazio se não houver condução</p>
+                <p className="text-xs text-gray-500 mt-1">{t('day.leaveEmptyIfNoDriving')}</p>
               </div>
 
               <div>
-                <Label htmlFor="driveDistanceKm">Distância (km)</Label>
+                <Label htmlFor="driveDistanceKm">{t('day.driveDistance')} (km)</Label>
                 <Input
                   id="driveDistanceKm"
                   name="driveDistanceKm"
@@ -150,39 +154,37 @@ const EditDayModal = ({ isOpen, onClose, onSave, day }: EditDayModalProps) => {
             </div>
 
             <div>
-              <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
+              <Label htmlFor="googleMapsUrl">{t('place.googleMapsUrl')}</Label>
               <Input
                 id="googleMapsUrl"
                 name="googleMapsUrl"
                 value={formData.googleMapsUrl}
                 onChange={handleChange}
-                placeholder="URL do Google Maps para a rota"
+                placeholder={t('place.googleMapsUrlPlaceholder')}
               />
-              <p className="text-sm text-gray-500 mt-1">URL para abrir a rota no Google Maps</p>
+              <p className="text-sm text-gray-500 mt-1">{t('place.googleMapsUrlDescription')}</p>
             </div>
 
             <div>
-              <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
+              <Label htmlFor="googleMapsEmbedUrl">{t('place.googleMapsEmbedUrl')}</Label>
               <Input
                 id="googleMapsEmbedUrl"
                 name="googleMapsEmbedUrl"
                 value={formData.googleMapsEmbedUrl}
                 onChange={handleChange}
-                placeholder="Colar HTML do iframe ou URL de incorporação aqui"
+                placeholder={t('place.embedInstructions')}
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Colar o HTML completo do iframe do Google Maps → Partilhar → Incorporar um mapa
-              </p>
+              <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
             </div>
           </form>
         </CardContent>
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
             <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? 'A guardar...' : 'Guardar Alterações'}
+              {isSubmitting ? t('common.saving') : t('common.saveChanges')}
             </Button>
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
           </div>
         </div>

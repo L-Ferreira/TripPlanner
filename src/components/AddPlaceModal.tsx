@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AddPlaceModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface AddPlaceModalProps {
 }
 
 const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -95,7 +97,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
       <Card className="w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Adicionar Novo Local</CardTitle>
+            <CardTitle>{t('place.addPlace')}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -104,30 +106,30 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
         <CardContent className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Nome do Local *</Label>
+              <Label htmlFor="name">{t('place.placeName')} *</Label>
               <Input
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 required
-                placeholder="Introduzir nome do local"
+                placeholder={t('place.enterPlaceName')}
               />
             </div>
 
             <div>
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">{t('place.description')}</Label>
               <Input
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Breve descrição do local (opcional)"
+                placeholder={t('place.placeDescription')}
               />
             </div>
 
             <div>
-              <Label htmlFor="websiteUrl">URL do Website (opcional)</Label>
+              <Label htmlFor="websiteUrl">{t('place.websiteUrl')}</Label>
               <Input
                 id="websiteUrl"
                 name="websiteUrl"
@@ -139,7 +141,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
             </div>
 
             <div>
-              <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
+              <Label htmlFor="googleMapsUrl">{t('place.googleMapsUrl')}</Label>
               <Input
                 id="googleMapsUrl"
                 name="googleMapsUrl"
@@ -151,22 +153,22 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
             </div>
 
             <div>
-              <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
+              <Label htmlFor="googleMapsEmbedUrl">{t('place.googleMapsEmbedUrl')}</Label>
               <Input
                 id="googleMapsEmbedUrl"
                 name="googleMapsEmbedUrl"
                 type="url"
                 value={formData.googleMapsEmbedUrl}
                 onChange={handleChange}
-                placeholder="Colar HTML do iframe ou URL de incorporação aqui"
+                placeholder={t('place.embedInstructions')}
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Colar o HTML completo do iframe do Google Maps → Partilhar → Incorporar um mapa
-              </p>
+              <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Imagens ({formData.images.length})</Label>
+              <Label className="text-sm font-medium">
+                {t('place.images')} ({formData.images.length})
+              </Label>
               <div className="mt-2 space-y-3">
                 {/* Current Images */}
                 {formData.images.length > 0 && (
@@ -195,7 +197,7 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
                   <div className="flex gap-2">
                     <Input
                       type="url"
-                      placeholder="Introduzir URL da imagem"
+                      placeholder={t('images.enterImageUrl')}
                       value={newImageUrl}
                       onChange={(e) => setNewImageUrl(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -209,10 +211,10 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
                       className="flex items-center gap-1"
                     >
                       <Plus size={14} />
-                      Adicionar
+                      {t('common.add')}
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Adicionar imagens colando links de URL</p>
+                  <p className="text-sm text-gray-500 mt-1">{t('images.addImagesByPastingUrls')}</p>
                 </div>
               </div>
             </div>
@@ -221,10 +223,10 @@ const AddPlaceModal = ({ isOpen, onClose, onAddPlace }: AddPlaceModalProps) => {
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
             <Button onClick={handleSubmit} className="flex-1">
-              Adicionar Local
+              {t('place.addPlace')}
             </Button>
             <Button variant="outline" onClick={onClose}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
           </div>
         </div>

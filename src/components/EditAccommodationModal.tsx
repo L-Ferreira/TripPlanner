@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TripDay } from '../hooks/useTripData';
 import { AmenitiesData, getDefaultAmenities } from '../lib/amenities';
 import AmenitiesChecklist from './AmenitiesChecklist';
@@ -18,6 +19,7 @@ interface EditAccommodationModalProps {
 }
 
 const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNumber }: EditAccommodationModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: accommodation?.name || '',
     websiteUrl: accommodation?.websiteUrl || '',
@@ -55,12 +57,12 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Nome do alojamento é obrigatório';
+      newErrors.name = t('accommodation.accommodationNameRequired');
     }
 
     const nights = parseInt(formData.numberOfNights, 10);
     if (isNaN(nights) || nights < 1) {
-      newErrors.numberOfNights = 'Número de noites deve ser pelo menos 1';
+      newErrors.numberOfNights = t('accommodation.nightsRequired');
     }
 
     setErrors(newErrors);
@@ -151,7 +153,9 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
       <Card className="w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Editar Alojamento - Dia {dayNumber}</CardTitle>
+            <CardTitle>
+              {t('accommodation.editAccommodation')} - {t('day.day')} {dayNumber}
+            </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -162,20 +166,22 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Nome do Alojamento *</Label>
+                <Label htmlFor="name">{t('accommodation.accommodationName')} *</Label>
                 <Input
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Nome do Hotel"
+                  placeholder={t('accommodation.enterHotelName')}
                   className={errors.name ? 'border-red-500' : ''}
                 />
-                {errors.name && <p className="text-red-500 text-sm mt-1">Nome do alojamento é obrigatório</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{t('accommodation.accommodationNameRequired')}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="websiteUrl">URL do Website (opcional)</Label>
+                <Label htmlFor="websiteUrl">{t('place.websiteUrl')}</Label>
                 <Input
                   id="websiteUrl"
                   name="websiteUrl"
@@ -190,18 +196,20 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
             {/* Description and Stay Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="description">Descrição (opcional)</Label>
+                <Label htmlFor="description">
+                  {t('place.description')} ({t('common.optional')})
+                </Label>
                 <Input
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Breve descrição do alojamento"
+                  placeholder={t('accommodation.accommodationDescriptionPlaceholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="numberOfNights">Número de Noites *</Label>
+                <Label htmlFor="numberOfNights">{t('accommodation.nights')} *</Label>
                 <Input
                   id="numberOfNights"
                   name="numberOfNights"
@@ -213,27 +221,29 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   className={errors.numberOfNights ? 'border-red-500' : ''}
                 />
                 {errors.numberOfNights && (
-                  <p className="text-red-500 text-sm mt-1">Número de noites deve ser pelo menos 1</p>
+                  <p className="text-red-500 text-sm mt-1">{t('accommodation.nightsRequired')}</p>
                 )}
               </div>
             </div>
 
             {/* Room Type */}
             <div>
-              <Label htmlFor="roomType">Tipo de Quarto (opcional)</Label>
+              <Label htmlFor="roomType">
+                {t('accommodation.roomType')} ({t('common.optional')})
+              </Label>
               <Input
                 id="roomType"
                 name="roomType"
                 value={formData.roomType}
                 onChange={handleChange}
-                placeholder="ex: Quarto Deluxe, Suite, Quarto Standard"
+                placeholder={t('accommodation.roomTypeExample')}
               />
             </div>
 
             {/* Location */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
+                <Label htmlFor="googleMapsUrl">{t('place.googleMapsUrl')}</Label>
                 <Input
                   id="googleMapsUrl"
                   name="googleMapsUrl"
@@ -245,7 +255,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
               </div>
 
               <div>
-                <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
+                <Label htmlFor="googleMapsEmbedUrl">{t('place.googleMapsEmbedUrl')}</Label>
                 <Input
                   id="googleMapsEmbedUrl"
                   name="googleMapsEmbedUrl"
@@ -254,15 +264,15 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   onChange={handleChange}
                   placeholder="https://www.google.com/maps/embed?..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Ir ao Google Maps → Partilhar → Incorporar um mapa → Copiar a URL src do iframe
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{t('place.embedInstructions')}</p>
               </div>
             </div>
 
             {/* Images */}
             <div>
-              <Label className="text-sm font-medium">Imagens ({formData.images.length})</Label>
+              <Label className="text-sm font-medium">
+                {t('place.images')} ({formData.images.length})
+              </Label>
               <div className="mt-2 space-y-3">
                 {/* Current Images */}
                 {formData.images.length > 0 && (
@@ -291,7 +301,7 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                   <div className="flex gap-2">
                     <Input
                       type="url"
-                      placeholder="Introduzir URL da imagem"
+                      placeholder={t('images.enterImageUrl')}
                       value={newImageUrl}
                       onChange={(e) => setNewImageUrl(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
@@ -305,10 +315,12 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
                       className="flex items-center gap-1"
                     >
                       <Plus size={14} />
-                      Adicionar
+                      {t('common.add')}
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{formData.images.length} imagem(ns) adicionada(s)</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {formData.images.length} {t('images.addImage')}(s)
+                  </p>
                 </div>
               </div>
             </div>
@@ -321,10 +333,10 @@ const EditAccommodationModal = ({ isOpen, onClose, onSave, accommodation, dayNum
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? 'A guardar...' : 'Guardar Alterações'}
+              {isSubmitting ? t('common.saving') : t('common.saveChanges')}
             </Button>
           </div>
         </div>

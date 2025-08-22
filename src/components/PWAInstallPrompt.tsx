@@ -1,5 +1,6 @@
 import { Download, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,6 +9,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const PWAInstallPrompt = () => {
+  const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -89,13 +91,11 @@ export const PWAInstallPrompt = () => {
           <Download className="w-4 h-4 text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-gray-900">Instalar Planeador de Viagens</h3>
-          <p className="text-xs text-gray-600 mt-1">
-            Instale esta aplicação no seu dispositivo para acesso rápido e uso offline!
-          </p>
+          <h3 className="text-sm font-medium text-gray-900">{t('pwa.installTitle')}</h3>
+          <p className="text-xs text-gray-600 mt-1">{t('pwa.installDescription')}</p>
           <div className="flex space-x-2 mt-3">
             <Button onClick={handleInstallClick} size="sm" className="flex-1">
-              Instalar
+              {t('pwa.install')}
             </Button>
             <Button onClick={handleDismiss} variant="outline" size="sm" className="px-2">
               <X className="w-4 h-4" />
@@ -109,6 +109,7 @@ export const PWAInstallPrompt = () => {
 
 // iOS Safari install instructions component
 export const IOSInstallInstructions = () => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -139,13 +140,10 @@ export const IOSInstallInstructions = () => {
           <Download className="w-4 h-4 text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-blue-900">Instalar no iOS</h3>
-          <p className="text-xs text-blue-800 mt-1">
-            Toque no botão partilhar <span className="inline-block">📤</span> e selecione &quot;Adicionar ao Ecrã
-            Principal&quot;
-          </p>
+          <h3 className="text-sm font-medium text-blue-900">{t('pwa.iosInstallTitle')}</h3>
+          <p className="text-xs text-blue-800 mt-1">{t('pwa.iosInstallDescription')}</p>
           <Button onClick={handleDismiss} variant="outline" size="sm" className="mt-2 text-xs">
-            Entendi
+            {t('pwa.understood')}
           </Button>
         </div>
       </div>

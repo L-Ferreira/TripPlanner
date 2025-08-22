@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface DeleteConfirmationModalProps {
 }
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }: DeleteConfirmationModalProps) => {
+  const { t } = useTranslation();
+
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -36,10 +39,10 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }:
           <p className="text-gray-600 mb-6">{message}</p>
           <div className="flex gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button variant="destructive" onClick={handleConfirm} className="flex-1">
-              Eliminar
+              {t('common.delete')}
             </Button>
           </div>
         </CardContent>

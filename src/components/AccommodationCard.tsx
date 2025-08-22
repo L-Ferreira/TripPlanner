@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bed, Edit2, ExternalLink, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TripDay } from '../hooks/useTripData';
-import { amenityLabels } from '../lib/amenities';
+import { useAmenityLabels } from '../lib/amenities';
 import ImageCarousel from './ImageCarousel';
 
 interface AccommodationCardProps {
@@ -11,6 +12,9 @@ interface AccommodationCardProps {
 }
 
 const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps) => {
+  const { t } = useTranslation();
+  const amenityLabels = useAmenityLabels();
+
   // Helper function to check if there are any amenities to display
   const hasAmenities = () => {
     if (!day.accommodation.amenities) return false;
@@ -35,7 +39,10 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
             <Bed size={20} />
             <span>{day.accommodation.name}</span>
             <div className="text-sm text-gray-600 font-normal">
-              Noite {day.nightNumber || 1} de {day.accommodation.numberOfNights || 1}
+              {t('accommodation.nightOf', {
+                current: day.nightNumber || 1,
+                total: day.accommodation.numberOfNights || 1,
+              })}
             </div>
           </CardTitle>
           <Button
@@ -56,20 +63,21 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
           <div className="space-y-1 text-left">
             {day.accommodation.numberOfNights && (
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Noites:</span> {day.accommodation.numberOfNights} noite
+                <span className="font-medium">{t('accommodation.nights')}:</span> {day.accommodation.numberOfNights}{' '}
+                {t('accommodation.night')}
                 {day.accommodation.numberOfNights > 1 ? 's' : ''}
               </p>
             )}
 
             {day.accommodation.roomType && (
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Tipo de quarto:</span> {day.accommodation.roomType}
+                <span className="font-medium">{t('accommodation.roomType')}:</span> {day.accommodation.roomType}
               </p>
             )}
 
             {day.accommodation.description && (
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Descrição:</span> {day.accommodation.description}
+                <span className="font-medium">{t('place.description')}:</span> {day.accommodation.description}
               </p>
             )}
 
@@ -77,7 +85,7 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
             {hasAmenities() && (
               <div className="mt-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-sm text-gray-700">Comodidades:</span>
+                  <span className="font-medium text-sm text-gray-700">{t('accommodation.amenities')}:</span>
                   {Object.entries(day.accommodation.amenities).map(([key, value]) => {
                     if (key === 'other') {
                       return (day.accommodation.amenities.other || []).map((amenity, index) => (
@@ -96,7 +104,7 @@ const AccommodationCard = ({ day, onEditAccommodation }: AccommodationCardProps)
                           key={key}
                           className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
                         >
-                          {amenityLabels[key] || key}
+                          {(amenityLabels as any)[key] || key}
                         </span>
                       );
                     }

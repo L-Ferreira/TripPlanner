@@ -1,4 +1,5 @@
 import { AlertTriangle, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 
 interface ConfirmationModalProps {
@@ -18,10 +19,12 @@ export const ConfirmationModal = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  confirmText,
+  cancelText,
   isDestructive = false,
 }: ConfirmationModalProps) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -41,7 +44,7 @@ export const ConfirmationModal = ({
 
         <div className="flex space-x-3 justify-end">
           <Button onClick={onClose} variant="outline">
-            {cancelText}
+            {cancelText || t('common.cancel')}
           </Button>
           <Button
             onClick={() => {
@@ -50,7 +53,7 @@ export const ConfirmationModal = ({
             }}
             variant={isDestructive ? 'destructive' : 'default'}
           >
-            {confirmText}
+            {confirmText || t('common.confirm')}
           </Button>
         </div>
       </div>

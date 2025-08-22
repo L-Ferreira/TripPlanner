@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { extractEmbedUrl } from '@/lib/utils';
 import { Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Place } from '../hooks/useTripData';
 
 interface EditPlaceModalProps {
@@ -15,6 +16,7 @@ interface EditPlaceModalProps {
 }
 
 const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: place?.name || '',
     description: place?.description || '',
@@ -46,7 +48,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Nome do local é obrigatório';
+      newErrors.name = t('place.placeNameRequired');
     }
 
     setErrors(newErrors);
@@ -127,7 +129,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
       <Card className="w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Editar Local</CardTitle>
+            <CardTitle>{t('place.editPlace')}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -136,31 +138,31 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         <CardContent className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Nome do Local *</Label>
+              <Label htmlFor="name">{t('place.placeName')} *</Label>
               <Input
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Introduzir nome do local"
+                placeholder={t('place.enterPlaceName')}
                 className={errors.name ? 'border-red-500' : ''}
               />
-              {errors.name && <p className="text-red-500 text-sm mt-1">Nome do local é obrigatório</p>}
+              {errors.name && <p className="text-red-500 text-sm mt-1">{t('place.placeNameRequired')}</p>}
             </div>
 
             <div>
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">{t('place.description')}</Label>
               <Input
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Breve descrição do local (opcional)"
+                placeholder={t('place.placeDescription')}
               />
             </div>
 
             <div>
-              <Label htmlFor="websiteUrl">URL do Website (opcional)</Label>
+              <Label htmlFor="websiteUrl">{t('place.websiteUrl')}</Label>
               <Input
                 id="websiteUrl"
                 name="websiteUrl"
@@ -172,7 +174,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
             </div>
 
             <div>
-              <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
+              <Label htmlFor="googleMapsUrl">{t('place.googleMapsUrl')}</Label>
               <Input
                 id="googleMapsUrl"
                 name="googleMapsUrl"
@@ -184,22 +186,22 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
             </div>
 
             <div>
-              <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
+              <Label htmlFor="googleMapsEmbedUrl">{t('place.googleMapsEmbedUrl')}</Label>
               <Input
                 id="googleMapsEmbedUrl"
                 name="googleMapsEmbedUrl"
                 type="url"
                 value={formData.googleMapsEmbedUrl}
                 onChange={handleChange}
-                placeholder="Colar HTML do iframe ou URL de incorporação aqui"
+                placeholder={t('place.embedInstructions')}
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Colar o HTML completo do iframe do Google Maps → Partilhar → Incorporar um mapa
-              </p>
+              <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Imagens ({formData.images.length})</Label>
+              <Label className="text-sm font-medium">
+                {t('place.images')} ({formData.images.length})
+              </Label>
               <div className="mt-2 space-y-3">
                 {/* Current Images */}
                 {formData.images.length > 0 && (
@@ -228,7 +230,7 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
                   <div className="flex gap-2">
                     <Input
                       type="url"
-                      placeholder="Introduzir URL da imagem"
+                      placeholder={t('images.enterImageUrl')}
                       value={newImageUrl}
                       onChange={(e) => setNewImageUrl(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -242,10 +244,10 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
                       className="flex items-center gap-1"
                     >
                       <Plus size={14} />
-                      Adicionar
+                      {t('common.add')}
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Adicionar imagens colando links de URL</p>
+                  <p className="text-sm text-gray-500 mt-1">{t('images.addImagesByPastingUrls')}</p>
                 </div>
               </div>
             </div>
@@ -254,10 +256,10 @@ const EditPlaceModal = ({ isOpen, onClose, onSave, place }: EditPlaceModalProps)
         <div className="flex-shrink-0 p-6 pt-4">
           <div className="flex gap-2">
             <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? 'A guardar...' : 'Guardar Alterações'}
+              {isSubmitting ? t('common.saving') : t('common.saveChanges')}
             </Button>
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
           </div>
         </div>

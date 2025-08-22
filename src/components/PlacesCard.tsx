@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit2, ExternalLink, MapPin, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TripDay } from '../hooks/useTripData';
 import ImageCarousel from './ImageCarousel';
 
@@ -13,13 +14,15 @@ interface PlacesCardProps {
 }
 
 const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceImage }: PlacesCardProps) => {
+  const { t } = useTranslation();
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className={`${day.places.length > 0 ? 'pb-0' : ''}`}>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <MapPin size={20} />
-            Locais a Visitar
+            {t('place.placesToVisit')}
           </CardTitle>
           <Button
             variant="ghost"
@@ -75,7 +78,7 @@ const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceIma
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm transition-colors"
                         >
                           <ExternalLink size={14} />
-                          Website
+                          {t('place.website')}
                         </a>
                       )}
                       {place.googleMapsUrl && (
@@ -86,7 +89,7 @@ const PlacesCard = ({ day, onAddPlace, onEditPlace, onDeletePlace, onAddPlaceIma
                           className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm transition-colors"
                         >
                           <MapPin size={14} />
-                          Maps
+                          {t('place.maps')}
                         </a>
                       )}
                     </div>

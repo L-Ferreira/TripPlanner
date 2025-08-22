@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, X } from 'lucide-react';
 import { useState } from 'react';
-import { AmenitiesData, amenityCategories } from '../lib/amenities';
+import { useTranslation } from 'react-i18next';
+import { AmenitiesData, useAmenityCategories } from '../lib/amenities';
 
 interface AmenitiesChecklistProps {
   amenities: AmenitiesData;
@@ -14,6 +15,8 @@ interface AmenitiesChecklistProps {
 
 const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) => {
   const [newAmenity, setNewAmenity] = useState('');
+  const { t } = useTranslation();
+  const amenityCategories = useAmenityCategories();
 
   const handleCheckboxChange = (key: keyof Omit<AmenitiesData, 'other'>) => {
     onChange({
@@ -43,7 +46,7 @@ const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) =>
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Comodidades</CardTitle>
+        <CardTitle className="text-lg">{t('amenities.amenities')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {amenityCategories.map((category) => (
@@ -68,10 +71,10 @@ const AmenitiesChecklist = ({ amenities, onChange }: AmenitiesChecklistProps) =>
 
         {/* Other amenities section */}
         <div>
-          <h4 className="font-medium text-sm text-gray-800 mb-3">Comodidades Personalizadas</h4>
+          <h4 className="font-medium text-sm text-gray-800 mb-3">{t('amenities.customAmenities')}</h4>
           <div className="flex gap-2 mb-3">
             <Input
-              placeholder="Adicionar comodidade personalizada"
+              placeholder={t('amenities.addCustomAmenity')}
               value={newAmenity}
               onChange={(e) => setNewAmenity(e.target.value)}
               onKeyDown={(e) => {

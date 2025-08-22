@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { ChangeEvent, CSSProperties, TouchEvent, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ImageCarouselProps {
   images: string[];
@@ -11,6 +12,7 @@ interface ImageCarouselProps {
 }
 
 const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProps) => {
+  const { t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -142,7 +144,7 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
               <div className="text-center">
-                <div className="text-sm mb-2">Sem imagens</div>
+                <div className="text-sm mb-2">{t('images.noImages')}</div>
                 <Button
                   variant="outline"
                   size="sm"
@@ -150,7 +152,7 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
                   className="flex items-center gap-1"
                 >
                   <Plus size={14} />
-                  Adicionar Imagem
+                  {t('images.addImage')}
                 </Button>
               </div>
             </div>
@@ -161,18 +163,18 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
         {showAddForm && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 rounded-lg">
             <div className="bg-white p-4 rounded-lg w-full max-w-sm">
-              <h3 className="text-sm font-medium mb-3">Adicionar Imagem</h3>
+              <h3 className="text-sm font-medium mb-3">{t('images.addImageTitle')}</h3>
               <div className="space-y-3">
                 <Input
                   type="url"
-                  placeholder="Introduzir URL da imagem"
+                  placeholder={t('images.enterImageUrl')}
                   value={newImageUrl}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setNewImageUrl(e.target.value)}
                   autoFocus
                 />
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handleAddImage} className="flex-1">
-                    Adicionar
+                    {t('common.add')}
                   </Button>
                   <Button
                     size="sm"
@@ -182,7 +184,7 @@ const ImageCarousel = ({ images, onAddImage, className = '' }: ImageCarouselProp
                       setNewImageUrl('');
                     }}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                 </div>
               </div>

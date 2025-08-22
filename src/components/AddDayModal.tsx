@@ -6,6 +6,7 @@ import {
 } from '@/lib/utils';
 import { AlertTriangle, Plus, Trash2, X } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TripData, TripDay } from '../hooks/useTripData';
 import AmenitiesChecklist from './AmenitiesChecklist';
 import { Button } from './ui/button';
@@ -42,6 +43,7 @@ const AddDayModal = ({
   checkUnusedNights,
   adjustPreviousAccommodationNights,
 }: AddDayModalProps) => {
+  const { t, i18n } = useTranslation();
   const [step, setStep] = useState<'accommodation-choice' | 'main-form'>('accommodation-choice');
   const [usingSameAccommodation, setUsingSameAccommodation] = useState(false);
   const [unusedNightsWarning, setUnusedNightsWarning] = useState<any>(null);
@@ -93,17 +95,17 @@ const AddDayModal = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.region.trim()) {
-      newErrors.region = 'Região é obrigatória';
+      newErrors.region = t('day.regionRequired');
     }
 
     if (!usingSameAccommodation && !formData.accommodationName.trim()) {
-      newErrors.accommodationName = 'Nome do alojamento é obrigatório';
+      newErrors.accommodationName = t('accommodation.accommodationNameRequired');
     }
 
     if (!usingSameAccommodation) {
       const nights = parseInt(formData.accommodationNights, 10);
       if (isNaN(nights) || nights < 1) {
-        newErrors.accommodationNights = 'Número de noites deve ser pelo menos 1';
+        newErrors.accommodationNights = t('accommodation.nightsRequired');
       }
     }
 
@@ -261,7 +263,7 @@ const AddDayModal = ({
     const targetDate = new Date(startDate);
     targetDate.setDate(startDate.getDate() + dayNumber - 1);
 
-    return targetDate.toLocaleDateString('pt-PT', {
+    return targetDate.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'pt-PT', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -275,7 +277,7 @@ const AddDayModal = ({
       <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Adicionar Novo Dia</CardTitle>
+            <CardTitle>{t('day.addDay')}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
@@ -286,13 +288,14 @@ const AddDayModal = ({
           {step === 'accommodation-choice' && (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Alojamento para o Dia {newDayNumber}</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  {t('accommodation.accommodationForDay')} {newDayNumber}
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  {previousDay?.accommodation?.name || 'Alojamento anterior'} tem{' '}
-                  {unusedNightsWarning?.unusedNights || 0} noite
-                  {(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''} não utilizada
-                  {(unusedNightsWarning?.unusedNights || 0) !== 1 ? 's' : ''}. Gostaria de ficar lá ou reservar um novo
-                  alojamento?
+                  {t('day.unusedNightsWarning', {
+                    accommodationName: previousDay?.accommodation?.name || t('accommodation.previousAccommodation'),
+                    nights: unusedNightsWarning?.unusedNights || 0,
+                  })}
                 </p>
               </div>
 
@@ -302,9 +305,10 @@ const AddDayModal = ({
                   onClick={() => handleAccommodationChoice(true)}
                   className="p-6 h-auto flex flex-col items-center justify-start text-center min-h-[120px] w-full"
                 >
-                  <div className="text-lg font-semibold mb-2">Ficar no Mesmo Local</div>
+                  <div className="text-lg font-semibold mb-2">{t('accommodation.stayAtSamePlace')}</div>
                   <div className="text-sm text-gray-600 break-words whitespace-normal leading-relaxed max-w-full">
-                    Continuar a ficar em {previousDay?.accommodation?.name || 'alojamento anterior'}
+                    {t('accommodation.continueStayingAt')}{' '}
+                    {previousDay?.accommodation?.name || t('accommodation.previousAccommodation')}
                   </div>
                 </Button>
 
@@ -313,9 +317,9 @@ const AddDayModal = ({
                   onClick={() => handleAccommodationChoice(false)}
                   className="p-6 h-auto flex flex-col items-center justify-start text-center min-h-[120px] w-full"
                 >
-                  <div className="text-lg font-semibold mb-2">Reservar Novo Alojamento</div>
+                  <div className="text-lg font-semibold mb-2">{t('accommodation.bookNewAccommodation')}</div>
                   <div className="text-sm text-gray-600 break-words whitespace-normal leading-relaxed max-w-full">
-                    Encontrar um novo local para ficar no Dia {newDayNumber}
+                    {t('accommodation.findNewPlaceForDay')} {newDayNumber}
                   </div>
                 </Button>
               </div>
@@ -329,23 +333,21 @@ const AddDayModal = ({
                 <div className="flex items-start">
                   <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3" />
                   <div>
-                    <h4 className="font-semibold text-yellow-800">Noites de Alojamento Não Utilizadas</h4>
+                    <h4 className="font-semibold text-yellow-800">{t('day.unusedAccommodationNights')}</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      {unusedNightsWarning?.accommodationName} tem {unusedNightsWarning?.unusedNights} noite
-                      {unusedNightsWarning?.unusedNights !== 1 ? 's' : ''} não utilizada
-                      {unusedNightsWarning?.unusedNights !== 1 ? 's' : ''}. Reservou{' '}
-                      {unusedNightsWarning?.totalBookedNights} noite
-                      {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''} mas apenas usou{' '}
-                      {unusedNightsWarning?.usedNights}.
+                      {t('sync.unusedNightsDetails', {
+                        accommodationName: unusedNightsWarning?.accommodationName,
+                        unusedNights: unusedNightsWarning?.unusedNights,
+                        totalBookedNights: unusedNightsWarning?.totalBookedNights,
+                        usedNights: unusedNightsWarning?.usedNights,
+                      })}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="text-center">
-                <p className="text-gray-600 mb-4">
-                  Gostaria de ajustar o número de noites do alojamento anterior para corresponder ao uso real?
-                </p>
+                <p className="text-gray-600 mb-4">{t('sync.adjustAccommodationNights')}</p>
 
                 <div className="flex gap-4 justify-center">
                   <Button
@@ -353,8 +355,7 @@ const AddDayModal = ({
                     onClick={() => handleAdjustPreviousNights(true)}
                     className="flex-1 max-w-xs"
                   >
-                    Sim, Ajustar para {unusedNightsWarning?.usedNights} Noite
-                    {unusedNightsWarning?.usedNights !== 1 ? 's' : ''}
+                    {t('day.yesAdjustTo', { nights: unusedNightsWarning?.usedNights })}
                   </Button>
 
                   <Button
@@ -362,8 +363,7 @@ const AddDayModal = ({
                     onClick={() => handleAdjustPreviousNights(false)}
                     className="flex-1 max-w-xs"
                   >
-                    Não, Manter como {unusedNightsWarning?.totalBookedNights} Noite
-                    {unusedNightsWarning?.totalBookedNights !== 1 ? 's' : ''}
+                    {t('day.noKeepAs', { nights: unusedNightsWarning?.totalBookedNights })}
                   </Button>
                 </div>
               </div>
@@ -376,20 +376,20 @@ const AddDayModal = ({
               {/* Basic Day Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="region">Região/Localização *</Label>
+                  <Label htmlFor="region">{t('day.region')} *</Label>
                   <Input
                     id="region"
                     name="region"
                     value={formData.region}
                     onChange={handleChange}
-                    placeholder="ex: Porto, Lisboa, Aveiro"
+                    placeholder={t('day.exampleRegions')}
                     className={errors.region ? 'border-red-500' : ''}
                   />
                   {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="dateLabel">Data</Label>
+                  <Label htmlFor="dateLabel">{t('common.date')}</Label>
                   <Input
                     id="dateLabel"
                     value={calculateDayDate(newDayNumber)}
@@ -402,7 +402,7 @@ const AddDayModal = ({
               {/* Travel Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="driveTime">Tempo de Condução</Label>
+                  <Label htmlFor="driveTime">{t('day.driveTime')}</Label>
                   <Input
                     id="driveTime"
                     name="driveTime"
@@ -411,11 +411,11 @@ const AddDayModal = ({
                     onChange={handleChange}
                     placeholder="03:35"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Deixar vazio se não houver condução</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('day.leaveEmptyIfNoDriving')}</p>
                 </div>
 
                 <div>
-                  <Label htmlFor="driveDistanceKm">Distância (km)</Label>
+                  <Label htmlFor="driveDistanceKm">{t('day.driveDistance')} (km)</Label>
                   <Input
                     id="driveDistanceKm"
                     name="driveDistanceKm"
@@ -430,46 +430,44 @@ const AddDayModal = ({
 
               {/* Google Maps */}
               <div>
-                <Label htmlFor="googleMapsUrl">URL do Google Maps (opcional)</Label>
+                <Label htmlFor="googleMapsUrl">{t('place.googleMapsUrl')}</Label>
                 <Input
                   id="googleMapsUrl"
                   name="googleMapsUrl"
                   value={formData.googleMapsUrl}
                   onChange={handleChange}
-                  placeholder="URL do Google Maps para a rota"
+                  placeholder={t('place.googleMapsUrlPlaceholder')}
                 />
-                <p className="text-sm text-gray-500 mt-1">URL para abrir a rota no Google Maps</p>
+                <p className="text-sm text-gray-500 mt-1">{t('place.googleMapsUrlDescription')}</p>
               </div>
 
               <div>
-                <Label htmlFor="googleMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
+                <Label htmlFor="googleMapsEmbedUrl">{t('place.googleMapsEmbedUrl')}</Label>
                 <Input
                   id="googleMapsEmbedUrl"
                   name="googleMapsEmbedUrl"
                   value={formData.googleMapsEmbedUrl}
                   onChange={handleChange}
-                  placeholder="Colar HTML do iframe ou URL de incorporação aqui"
+                  placeholder={t('place.embedInstructions')}
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Colar o HTML completo do iframe do Google Maps → Partilhar → Incorporar um mapa
-                </p>
+                <p className="text-sm text-gray-500 mt-1">{t('place.embedInstructions')}</p>
               </div>
 
               {/* Only show accommodation section if creating new accommodation */}
               {!usingSameAccommodation && (
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Informação do Alojamento</h3>
+                  <h3 className="text-lg font-semibold mb-4">{t('sync.accommodationInformation')}</h3>
 
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationName">Nome do Hotel/Alojamento *</Label>
+                      <Label htmlFor="accommodationName">{t('accommodation.accommodationName')} *</Label>
                       <Input
                         id="accommodationName"
                         name="accommodationName"
                         value={formData.accommodationName}
                         onChange={handleChange}
-                        placeholder="Nome do Hotel"
+                        placeholder={t('accommodation.enterHotelName')}
                         className={errors.accommodationName ? 'border-red-500' : ''}
                       />
                       {errors.accommodationName && (
@@ -478,7 +476,7 @@ const AddDayModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="accommodationWebsite">Website URL (optional)</Label>
+                      <Label htmlFor="accommodationWebsite">{t('place.websiteUrl')}</Label>
                       <Input
                         id="accommodationWebsite"
                         name="accommodationWebsite"
@@ -493,18 +491,18 @@ const AddDayModal = ({
                   {/* Description and Stay Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationDescription">Description</Label>
+                      <Label htmlFor="accommodationDescription">{t('place.description')}</Label>
                       <Input
                         id="accommodationDescription"
                         name="accommodationDescription"
                         value={formData.accommodationDescription}
                         onChange={handleChange}
-                        placeholder="Breve descrição do alojamento"
+                        placeholder={t('accommodation.accommodationDescriptionPlaceholder')}
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="accommodationNights">Número de Noites *</Label>
+                      <Label htmlFor="accommodationNights">{t('accommodation.nights')} *</Label>
                       <Input
                         id="accommodationNights"
                         name="accommodationNights"
@@ -523,20 +521,20 @@ const AddDayModal = ({
 
                   {/* Room Type */}
                   <div className="mb-6">
-                    <Label htmlFor="accommodationRoomType">Tipo de Quarto (opcional)</Label>
+                    <Label htmlFor="accommodationRoomType">{t('day.roomTypeOptional')}</Label>
                     <Input
                       id="accommodationRoomType"
                       name="accommodationRoomType"
                       value={formData.accommodationRoomType}
                       onChange={handleChange}
-                      placeholder="ex: Quarto Deluxe, Suite, Quarto Standard"
+                      placeholder={t('accommodation.roomTypeExample')}
                     />
                   </div>
 
                   {/* Location */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <Label htmlFor="accommodationMapsUrl">URL do Google Maps (opcional)</Label>
+                      <Label htmlFor="accommodationMapsUrl">{t('place.googleMapsUrl')}</Label>
                       <Input
                         id="accommodationMapsUrl"
                         name="accommodationMapsUrl"
@@ -548,7 +546,7 @@ const AddDayModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="accommodationMapsEmbedUrl">URL de Incorporação do Google Maps (opcional)</Label>
+                      <Label htmlFor="accommodationMapsEmbedUrl">{t('place.googleMapsEmbedUrl')}</Label>
                       <Input
                         id="accommodationMapsEmbedUrl"
                         name="accommodationMapsEmbedUrl"
@@ -557,15 +555,15 @@ const AddDayModal = ({
                         onChange={handleChange}
                         placeholder="https://www.google.com/maps/embed?..."
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Ir ao Google Maps → Partilhar → Incorporar um mapa → Copiar a URL src do iframe
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">{t('place.embedInstructions')}</p>
                     </div>
                   </div>
 
                   {/* Images */}
                   <div className="mb-6">
-                    <Label className="text-sm font-medium">Images ({formData.accommodationImages.length})</Label>
+                    <Label className="text-sm font-medium">
+                      {t('place.images')} ({formData.accommodationImages.length})
+                    </Label>
                     <div className="mt-2 space-y-3">
                       {/* Current Images */}
                       {formData.accommodationImages.length > 0 && (
@@ -594,7 +592,7 @@ const AddDayModal = ({
                         <div className="flex gap-2">
                           <Input
                             type="url"
-                            placeholder="Introduzir URL da imagem"
+                            placeholder={t('images.enterImageUrl')}
                             value={newImageUrl}
                             onChange={(e) => setNewImageUrl(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
@@ -608,11 +606,11 @@ const AddDayModal = ({
                             className="flex items-center gap-1"
                           >
                             <Plus size={14} />
-                            Add
+                            {t('common.add')}
                           </Button>
                         </div>
                         <p className="text-sm text-gray-500 mt-1">
-                          {formData.accommodationImages.length} image(s) added
+                          {t('images.addImage')} ({formData.accommodationImages.length})
                         </p>
                       </div>
                     </div>
@@ -639,11 +637,11 @@ const AddDayModal = ({
           <div className="flex gap-2">
             {step === 'main-form' && (
               <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
-                {isSubmitting ? 'A adicionar...' : 'Adicionar Dia'}
+                {isSubmitting ? t('day.adding') : t('day.addDay')}
               </Button>
             )}
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
           </div>
         </div>
