@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TripData } from '../hooks/useTripData';
 import { Conflict, formatConflictValue } from '../utils/conflictDetection';
+import MarkdownRenderer from './MarkdownRenderer';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 
@@ -402,6 +403,14 @@ export const ConflictResolutionModal = ({
       );
     }
 
+    // Handle markdown fields (description, notes)
+    if (conflict.field === 'description' || conflict.field === 'notes') {
+      if (!value || value === '') {
+        return <div className="text-gray-500 text-sm">{t('common.empty')}</div>;
+      }
+      return <MarkdownRenderer content={String(value)} />;
+    }
+
     const formattedValue = formatConflictValue(value, conflict.field);
     return formattedValue;
   };
@@ -593,13 +602,22 @@ export const ConflictResolutionModal = ({
                         <div className="space-y-2">
                           <label className="block text-sm font-medium">{t('conflicts.manualEdit')}</label>
                           <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={manualValue || ''}
-                              onChange={(e) => updateManualEdit(conflict.id, e.target.value)}
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder={t('conflicts.enterCustomValue')}
-                            />
+                            {conflict.field === 'description' || conflict.field === 'notes' ? (
+                              <textarea
+                                value={manualValue || ''}
+                                onChange={(e) => updateManualEdit(conflict.id, e.target.value)}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] resize-y"
+                                placeholder={t('conflicts.enterCustomValue')}
+                              />
+                            ) : (
+                              <input
+                                type="text"
+                                value={manualValue || ''}
+                                onChange={(e) => updateManualEdit(conflict.id, e.target.value)}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder={t('conflicts.enterCustomValue')}
+                              />
+                            )}
                             <Button
                               size="sm"
                               variant={resolution?.resolution === 'manual' ? 'default' : 'outline'}
@@ -615,13 +633,27 @@ export const ConflictResolutionModal = ({
                       {resolution && (
                         <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
                           <strong>{t('conflicts.resolution')}:</strong>{' '}
-                          {resolution.resolution === 'local'
-                            ? t('conflicts.keepLocalVersion')
-                            : resolution.resolution === 'remote'
-                              ? t('conflicts.keepRemoteVersion')
-                              : resolution.resolution === 'combine'
-                                ? t('conflicts.combineImagesText')
-                                : `${t('conflicts.useManualValue')}: "${resolution.manualValue}"`}
+                          {resolution.resolution === 'local' ? (
+                            t('conflicts.keepLocalVersion')
+                          ) : resolution.resolution === 'remote' ? (
+                            t('conflicts.keepRemoteVersion')
+                          ) : resolution.resolution === 'combine' ? (
+                            t('conflicts.combineImagesText')
+                          ) : (
+                            <div className="mt-2">
+                              <div className="text-gray-600 mb-1">{t('conflicts.useManualValue')}:</div>
+                              {(conflict.field === 'description' || conflict.field === 'notes') &&
+                              resolution.manualValue ? (
+                                <div className="border rounded p-2 bg-white">
+                                  <MarkdownRenderer content={String(resolution.manualValue)} />
+                                </div>
+                              ) : (
+                                <div className="font-mono text-xs bg-white border rounded p-2">
+                                  &quot;{resolution.manualValue || ''}&quot;
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
                     </>
