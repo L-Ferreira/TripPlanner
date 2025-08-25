@@ -1,7 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn, decimalHoursToHoursMinutes } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Car, Edit2, MapPin, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -164,15 +164,35 @@ const TripPlanner = () => {
   };
 
   // Helper function to format drive time display
-  const formatDriveTime = (decimalHours: number): string => {
-    const { hours, minutes } = decimalHoursToHoursMinutes(decimalHours);
-    if (hours === 0) {
+  const formatDriveTime = (hours: number) => {
+    const wholeHours = Math.floor(hours);
+    const minutes = Math.round((hours - wholeHours) * 60);
+
+    if (wholeHours === 0) {
       return `${minutes}min`;
     } else if (minutes === 0) {
-      return `${hours}h`;
+      return `${wholeHours}h`;
     } else {
-      return `${hours}h ${minutes}min`;
+      return `${wholeHours}h ${minutes}min`;
     }
+  };
+
+  // Function to calculate the actual date for a day based on trip start date and day number
+  const getDayDate = (dayNumber: number) => {
+    if (!tripData.tripInfo.startDate) return null;
+
+    const startDate = new Date(tripData.tripInfo.startDate);
+    const dayDate = new Date(startDate);
+    dayDate.setDate(startDate.getDate() + dayNumber - 1); // dayNumber is 1-based
+
+    return dayDate;
+  };
+
+  // Function to format date as DD/MM
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}/${month}`;
   };
 
   return (
@@ -194,19 +214,21 @@ const TripPlanner = () => {
           <Fragment key={day.id}>
             <AccordionItem key={day.id} value={day.id} className="border border-gray-300 rounded-lg bg-white shadow-md">
               <AccordionTrigger className="text-left px-6 py-4 hover:bg-gray-50 data-[state=open]:rounded-t-lg data-[state=closed]:rounded-lg">
-                <div className="flex items-center gap-4 w-full">
-                  <div className="flex items-center gap-4 flex-1">
+                <div className="flex items-center gap-2 sm:gap-4 w-full">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1">
                     <Badge
                       variant="outline"
                       className="hidden sm:block px-3 py-1 text-sm font-semibold border-gray-400"
                     >
-                      {t('day.day')} #{day.dayNumber}
+                      {getDayDate(day.dayNumber)
+                        ? formatDate(getDayDate(day.dayNumber)!)
+                        : `${t('day.day')} #${day.dayNumber}`}
                     </Badge>
                     <Badge
                       variant="outline"
-                      className="block sm:hidden px-3 py-1 text-sm font-semibold border-gray-400"
+                      className="block sm:hidden px-1 py-1 text-xs font-semibold border-gray-400"
                     >
-                      #{day.dayNumber}
+                      {getDayDate(day.dayNumber) ? formatDate(getDayDate(day.dayNumber)!) : `#${day.dayNumber}`}
                     </Badge>
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                       <div className="flex items-center gap-2 text-sm text-gray-700">
@@ -343,6 +365,7 @@ const TripPlanner = () => {
         onClose={closeAllModals}
         onSave={handleUpdateDay}
         day={modals.editDay.day}
+        tripStartDate={tripData.tripInfo.startDate}
       />
 
       <EditAccommodationModal
@@ -392,6 +415,7 @@ const TripPlanner = () => {
         currentDay={accommodationUpdateModal.currentDay}
         onConfirm={handleConfirmAccommodationUpdate}
         onClose={closeAccommodationUpdateModal}
+        tripStartDate={tripData.tripInfo.startDate}
       />
     </div>
   );

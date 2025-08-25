@@ -14,6 +14,7 @@ interface AccommodationUpdateConfirmationModalProps {
   currentDay: TripDay;
   oldAccommodation: TripDay['accommodation'];
   newAccommodation: TripDay['accommodation'];
+  tripStartDate?: string;
 }
 
 // Simple image carousel for the confirmation modal
@@ -77,9 +78,28 @@ const AccommodationUpdateConfirmationModal = ({
   currentDay,
   oldAccommodation,
   newAccommodation,
+  tripStartDate,
 }: AccommodationUpdateConfirmationModalProps) => {
   const { t } = useTranslation();
   const extendedAmenityLabels = useExtendedAmenityLabels();
+
+  // Function to calculate the actual date for a day based on trip start date and day number
+  const getDayDate = (dayNumber: number) => {
+    if (!tripStartDate) return null;
+
+    const startDate = new Date(tripStartDate);
+    const dayDate = new Date(startDate);
+    dayDate.setDate(startDate.getDate() + dayNumber - 1); // dayNumber is 1-based
+
+    return dayDate;
+  };
+
+  // Function to format date as DD/MM
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}/${month}`;
+  };
 
   if (!isOpen) return null;
 
@@ -202,7 +222,8 @@ const AccommodationUpdateConfirmationModal = ({
               <div className="flex flex-wrap gap-2 text-sm">
                 {sortedAffectedDays.map((day) => (
                   <span key={day.id} className="bg-gray-100 px-2 py-1 rounded">
-                    {t('day.day')} {day.dayNumber}: {day.region}
+                    {t('day.day')} {day.dayNumber}
+                    {getDayDate(day.dayNumber) && ` (${formatDate(getDayDate(day.dayNumber)!)})`}: {day.region}
                   </span>
                 ))}
               </div>
