@@ -63,7 +63,7 @@ const ImageCarousel = ({ images, title }: { images: string[]; title: string }) =
               <ChevronRight className="h-4 w-4" />
             </Button>
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-              {currentIndex + 1} of {images.length}
+              {currentIndex + 1} {t('common.of')} {images.length}
             </div>
           </>
         )}
